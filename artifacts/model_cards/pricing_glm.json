@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "pricing_glm",
-  "card_version": 2,
+  "card_version": 4,
   "name": "Motor TPL claim frequency GLM",
   "language": "Python",
   "source_files": [
@@ -79,14 +79,14 @@
   ],
   "stages": {
     "discover": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-07T16:16:22.169590+00:00",
       "summary": "PRC-MTPL-03 Motor TPL claim frequency GLM | owner: Personal Lines Pricing | type: Poisson GLM with log link and log(exposure) offset (motor TPL claim frequency) | risk tier: high\nLast validation: 2024-11 | documentation: outdated | 2 doc/code contradiction(s)\nScan: Python, 64 LOC, libraries numpy, pandas, statsmodels; 2 inputs, 3 outputs\nGaps (4):\n- Documentation contradicts code: README states exposure is capped at one year and claim counts at four, but the code applies no such caps; it uses Exposure and ClaimNb as-is (only BonusMalus is clipped, at 150).\n- Documentation contradicts code: README says VehPower is a rating factor and the model uses it, but the README states no clipping; the code clips VehPower at 9, which the documentation does not mention.\n- Documentation last updated 2024-09 (26 months ago; limit 24).\n- Validation overdue: last validated 2024-11 (24 months ago; high tier requires every 12 months).\nLLM: claude-haiku-5-5, 5073 tokens, $0.0105"
     },
     "document": {
-      "status": "not_started",
-      "completed_at": null,
-      "summary": null
+      "status": "awaiting_review",
+      "completed_at": "2026-11-07T23:44:08.123391+00:00",
+      "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/pricing_glm.md\nSection confidence: Purpose and intended use high, Data medium, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n12 variables, 8 transformations, 4 assumptions, 6 limitations, 8 unknowns\nCoverage vs fitted model: 8/9 variables\nGaps (2):\n- Model uses variables not documented: LogDensity.\n- Documented as inputs but not in the fitted model: Density.\nLLM: claude-sonnet-5-5, 12584 tokens, $0.1200"
     },
     "redevelop": {
       "status": "not_started",
@@ -109,6 +109,16 @@
       "card_version": 2,
       "timestamp": "2026-11-07T16:16:22.169605+00:00",
       "note": "discover: completed, awaiting review"
+    },
+    {
+      "card_version": 3,
+      "timestamp": "2026-11-07T23:43:29.906825+00:00",
+      "note": "discover: gate approved"
+    },
+    {
+      "card_version": 4,
+      "timestamp": "2026-11-07T23:44:08.123416+00:00",
+      "note": "document: completed, awaiting review"
     }
   ],
   "discovery": {
@@ -217,6 +227,394 @@
       "cost_usd": 0.010537,
       "cached": false
     },
+    "reviewer_feedback_used": null
+  },
+  "documentation": {
+    "sections": {
+      "purpose_and_use": {
+        "text": "Model PRC-MTPL-03, owned by Personal Lines Pricing, estimates expected claim frequency per policy-year for motor third-party liability (TPL). It is used as the frequency component of the technical premium. Inventory risk tier is high. The README says the public freMTPL2 dataset is used as a stand-in for policy-level data, so the documented fit is not on bank data.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Purpose  : Expected claim frequency per policy-year, used as the frequency component of the",
+            "source": "models/pricing_glm/pricing_glm.py"
+          },
+          {
+            "quote": "(public freMTPL2 dataset as a stand-in)",
+            "source": "models/pricing_glm/README.md"
+          }
+        ],
+        "flag": null
+      },
+      "data": {
+        "text": "Inputs are pre-split parquet files fremtpl2_train.parquet and fremtpl2_test.parquet read from data/processed (overridable by argv). The code does not create the split, so the split method and the upstream preparation are not documented. The target is ClaimNb (claim count), modelled with Exposure as offset. Reference outputs show 542,392 training policies (286,600 exposure-years, 21,171 claims) and 135,599 test policies (71,743 exposure-years, 5,234 claims), about an 80/20 split by record count. The code applies no cap to Exposure or ClaimNb and uses them as-is, contradicting the README claim that exposure is capped at one year and claim counts at four. No filtering of rows is performed. The code applies np.log(Density), which would fail or give -inf for non-positive Density; no check exists.",
+        "confidence": "medium",
+        "evidence": [
+          {
+            "quote": "train = pd.read_parquet(data_dir / \"fremtpl2_train.parquet\")",
+            "source": "models/pricing_glm/pricing_glm.py"
+          },
+          {
+            "quote": "out = pd.DataFrame({\"ClaimNb\": df[\"ClaimNb\"], \"Exposure\": df[\"Exposure\"]})",
+            "source": "models/pricing_glm/pricing_glm.py"
+          },
+          {
+            "quote": "Exposure is capped at one year and claim counts at four.",
+            "source": "models/pricing_glm/README.md"
+          },
+          {
+            "quote": "\"n\": 542392,",
+            "source": "artifacts/reference/pricing_glm/metrics.json"
+          },
+          {
+            "quote": "\"n\": 135599,",
+            "source": "artifacts/reference/pricing_glm/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "methodology": {
+        "text": "Poisson GLM with log link (statsmodels default for the Poisson family) and offset log(Exposure), fitted by statsmodels GLM .fit() (default IRLS, no regularisation). Formula: ClaimNb ~ C(VehPower) + C(VehAge) + C(DrivAge, Treatment('31-40')) + BonusMalus + LogDensity + C(Area) + C(VehBrand) + C(VehGas) + C(Region). Variables are fixed in the formula; no automated variable selection is present and no selection rationale is documented. Continuous inputs are BonusMalus (linear, clipped at 150) and LogDensity (linear). VehPower is clipped at 9 and treated as categorical; VehAge and DrivAge are binned into bands and treated as categorical (DrivAge base level 31-40). No scaling or standardisation is applied. Expected claims for a policy are predicted with its own exposure as offset.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "fit = smf.glm(formula, data=tr, family=sm.families.Poisson(),",
+            "source": "models/pricing_glm/pricing_glm.py"
+          },
+          {
+            "quote": "offset=np.log(tr[\"Exposure\"])).fit()",
+            "source": "models/pricing_glm/pricing_glm.py"
+          },
+          {
+            "quote": "formula = (\"ClaimNb ~ C(VehPower) + C(VehAge) + C(DrivAge, Treatment('31-40')) + BonusMalus\"",
+            "source": "models/pricing_glm/pricing_glm.py"
+          }
+        ],
+        "flag": null
+      },
+      "implementation": {
+        "text": "Python script using numpy, pandas and statsmodels (version 0.14.4 recorded in the reference output). Run with: python models/pricing_glm/pricing_glm.py [data_dir] [out_dir]; defaults are data/processed and artifacts/reference/pricing_glm. SEED = 42 is defined and written to metrics.json, but it is never passed to any random function; the IRLS fit is deterministic, so the seed has no effect on results. Outputs: coefficients.csv (term, estimate, std_error), predictions_test.csv.gz (IDpol, ClaimNb, Exposure, expected_claims for the test set), and metrics.json (formula, AIC, train/test metrics). The script prints test deviance and observed/predicted claims. No tests, logging or input validation are present.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Usage    : python models/pricing_glm/pricing_glm.py [data_dir] [out_dir]",
+            "source": "models/pricing_glm/pricing_glm.py"
+          },
+          {
+            "quote": "SEED = 42",
+            "source": "models/pricing_glm/pricing_glm.py"
+          },
+          {
+            "quote": "\"statsmodels_version\": \"0.14.4\",",
+            "source": "artifacts/reference/pricing_glm/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "performance": {
+        "text": "Reference outputs give: training mean Poisson deviance 0.2421, test 0.2386; AIC 172,097 (training fit). Calibration on training is exact (21,171 observed vs 21,171 predicted claims, expected for a Poisson GLM with intercept). On test, 5,234 claims were observed vs 5,306.9 predicted, i.e. the model over-predicts by about 1.4%. Only these aggregate metrics exist; there is no lift, Gini, double-lift, segment-level or stability analysis, and no benchmark or acceptance thresholds are given. Test deviance below training deviance is unusual and is noted without explanation.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "\"mean_poisson_deviance\": 0.238614231992223",
+            "source": "artifacts/reference/pricing_glm/metrics.json"
+          },
+          {
+            "quote": "\"mean_poisson_deviance\": 0.24212080571505518",
+            "source": "artifacts/reference/pricing_glm/metrics.json"
+          },
+          {
+            "quote": "\"predicted_claims\": 5306.899002569732,",
+            "source": "artifacts/reference/pricing_glm/metrics.json"
+          },
+          {
+            "quote": "\"aic\": 172097.16030154537,",
+            "source": "artifacts/reference/pricing_glm/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "monitoring_and_governance": {
+        "text": "Owner is Personal Lines Pricing. The README records last validation as 2024-11 (annual pricing review). The inventory flags that validation is overdue for a high-tier model (12-month cycle required, 24 months elapsed) and that the README (last updated 2024-09) exceeds the 24-month documentation age limit. The README is also inconsistent with the code (exposure/claim caps; undocumented VehPower clipping at 9). No validation report, change log, ongoing monitoring (drift, calibration, A/E tracking), thresholds or approval records are in the material provided.",
+        "confidence": "medium",
+        "evidence": [
+          {
+            "quote": "Owner: Personal Lines Pricing. Last validation: 2024-11 (annual pricing review).",
+            "source": "models/pricing_glm/README.md"
+          },
+          {
+            "quote": "*Last updated: 2024-09 by Personal Lines Pricing.*",
+            "source": "models/pricing_glm/README.md"
+          }
+        ],
+        "flag": null
+      }
+    },
+    "variables": [
+      {
+        "name": "ClaimNb",
+        "role": "target",
+        "description": "Number of claims per policy; the Poisson response.",
+        "transformation": "None; used as-is (no cap, contrary to README).",
+        "evidence": "out = pd.DataFrame({\"ClaimNb\": df[\"ClaimNb\"], \"Exposure\": df[\"Exposure\"]})",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "Exposure",
+        "role": "offset",
+        "description": "Policy exposure in years; enters as log(Exposure) offset.",
+        "transformation": "np.log applied; no cap.",
+        "evidence": "offset=np.log(tr[\"Exposure\"])).fit()",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "VehPower",
+        "role": "input",
+        "description": "Vehicle power; categorical rating factor.",
+        "transformation": "Clipped at 9, cast to int then string, treated as categorical (levels 4 base through 9; coefficients for 5-9).",
+        "evidence": "out[\"VehPower\"] = df[\"VehPower\"].clip(upper=9).astype(int).astype(str)",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "VehAge",
+        "role": "input",
+        "description": "Vehicle age in years; banded categorical rating factor.",
+        "transformation": "pd.cut with bins [-1,0,5,10,15,inf] giving bands 0, 1-5, 6-10, 11-15, 16+; base level 0.",
+        "evidence": "out[\"VehAge\"] = pd.cut(df[\"VehAge\"], [-1, 0, 5, 10, 15, np.inf],",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "DrivAge",
+        "role": "input",
+        "description": "Driver age in years; banded categorical rating factor.",
+        "transformation": "pd.cut with bins [17,20,25,30,40,50,70,inf] giving 18-20 ... 71+; base level 31-40 via Treatment.",
+        "evidence": "out[\"DrivAge\"] = pd.cut(df[\"DrivAge\"], [17, 20, 25, 30, 40, 50, 70, np.inf],",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "BonusMalus",
+        "role": "input",
+        "description": "Bonus-malus level; continuous linear predictor.",
+        "transformation": "Clipped at 150; entered linearly.",
+        "evidence": "out[\"BonusMalus\"] = df[\"BonusMalus\"].clip(upper=150)",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "Density",
+        "role": "input",
+        "description": "Population density; enters as LogDensity.",
+        "transformation": "Natural log, named LogDensity; entered linearly.",
+        "evidence": "out[\"LogDensity\"] = np.log(df[\"Density\"])",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "Area",
+        "role": "input",
+        "description": "Area category; categorical rating factor (levels A base, B-F).",
+        "transformation": "Cast to string, categorical.",
+        "evidence": "for col in [\"Area\", \"VehBrand\", \"VehGas\", \"Region\"]:",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "VehBrand",
+        "role": "input",
+        "description": "Vehicle brand; categorical rating factor.",
+        "transformation": "Cast to string, categorical.",
+        "evidence": "for col in [\"Area\", \"VehBrand\", \"VehGas\", \"Region\"]:",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "VehGas",
+        "role": "input",
+        "description": "Fuel type; categorical rating factor (Regular vs base).",
+        "transformation": "Cast to string, categorical.",
+        "evidence": "for col in [\"Area\", \"VehBrand\", \"VehGas\", \"Region\"]:",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "Region",
+        "role": "input",
+        "description": "Region; categorical rating factor.",
+        "transformation": "Cast to string, categorical.",
+        "evidence": "for col in [\"Area\", \"VehBrand\", \"VehGas\", \"Region\"]:",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "name": "IDpol",
+        "role": "identifier",
+        "description": "Policy identifier, carried into the test predictions file only; not a model input.",
+        "transformation": "None.",
+        "evidence": "pd.DataFrame({\"IDpol\": test[\"IDpol\"].values, \"ClaimNb\": te[\"ClaimNb\"].values,",
+        "source": "models/pricing_glm/pricing_glm.py"
+      }
+    ],
+    "transformations": [
+      {
+        "step": "Load data",
+        "description": "Read pre-split train and test parquet files from data_dir (default data/processed).",
+        "evidence": "test = pd.read_parquet(data_dir / \"fremtpl2_test.parquet\")",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "step": "Clip VehPower",
+        "description": "Cap VehPower at 9 and convert to categorical string.",
+        "evidence": "out[\"VehPower\"] = df[\"VehPower\"].clip(upper=9).astype(int).astype(str)",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "step": "Band VehAge",
+        "description": "Cut into bands 0, 1-5, 6-10, 11-15, 16+ using edges -1,0,5,10,15,inf (right-closed).",
+        "evidence": "out[\"VehAge\"] = pd.cut(df[\"VehAge\"], [-1, 0, 5, 10, 15, np.inf],",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "step": "Band DrivAge",
+        "description": "Cut into 18-20, 21-25, 26-30, 31-40, 41-50, 51-70, 71+ using edges 17,20,25,30,40,50,70,inf (right-closed).",
+        "evidence": "out[\"DrivAge\"] = pd.cut(df[\"DrivAge\"], [17, 20, 25, 30, 40, 50, 70, np.inf],",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "step": "Cap BonusMalus",
+        "description": "Clip BonusMalus at 150.",
+        "evidence": "out[\"BonusMalus\"] = df[\"BonusMalus\"].clip(upper=150)",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "step": "Log density",
+        "description": "Compute natural log of Density as LogDensity.",
+        "evidence": "out[\"LogDensity\"] = np.log(df[\"Density\"])",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "step": "Cast categoricals",
+        "description": "Convert Area, VehBrand, VehGas, Region to strings for categorical treatment.",
+        "evidence": "out[col] = df[col].astype(str)",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "step": "Fit and predict",
+        "description": "Fit Poisson GLM on training data with log(Exposure) offset; predict expected claims on train and test using each row's own exposure.",
+        "evidence": "pred_test = fit.predict(te, offset=np.log(te[\"Exposure\"]))",
+        "source": "models/pricing_glm/pricing_glm.py"
+      }
+    ],
+    "assumptions": [
+      {
+        "text": "Claim counts follow a Poisson distribution with mean proportional to exposure (log link, log-exposure offset); no overdispersion adjustment is made.",
+        "confidence": "high",
+        "evidence": "fit = smf.glm(formula, data=tr, family=sm.families.Poisson(),",
+        "source": "models/pricing_glm/pricing_glm.py",
+        "grounded": true
+      },
+      {
+        "text": "Log-linear, additive effects of rating factors; BonusMalus and LogDensity act linearly on the log scale, with no interactions.",
+        "confidence": "medium",
+        "evidence": "\"ClaimNb ~ C(VehPower) + C(VehAge) + C(DrivAge, Treatment('31-40')) + BonusMalus\"",
+        "source": "models/pricing_glm/pricing_glm.py",
+        "grounded": true
+      },
+      {
+        "text": "The public freMTPL2 data is an adequate stand-in for the bank's own policy portfolio.",
+        "confidence": "medium",
+        "evidence": "(public freMTPL2 dataset as a stand-in)",
+        "source": "models/pricing_glm/README.md",
+        "grounded": true
+      },
+      {
+        "text": "BonusMalus above 150 and VehPower above 9 behave like the cap values.",
+        "confidence": "medium",
+        "evidence": "out[\"BonusMalus\"] = df[\"BonusMalus\"].clip(upper=150)",
+        "source": "models/pricing_glm/pricing_glm.py",
+        "grounded": true
+      }
+    ],
+    "limitations": [
+      {
+        "text": "README contradicts the code: it claims exposure capped at one year and claim counts at four, but the code applies no such caps. Extreme exposures or counts would pass into the fit unchanged.",
+        "confidence": "high",
+        "evidence": "Exposure is capped at one year and claim counts at four.",
+        "source": "models/pricing_glm/README.md",
+        "grounded": true
+      },
+      {
+        "text": "VehPower clipping at 9 is undocumented in the README.",
+        "confidence": "high",
+        "evidence": "out[\"VehPower\"] = df[\"VehPower\"].clip(upper=9).astype(int).astype(str)",
+        "source": "models/pricing_glm/pricing_glm.py",
+        "grounded": true
+      },
+      {
+        "text": "Test set over-predicts claims by about 1.4% (5,306.9 predicted vs 5,234 observed); no assessment of whether this is acceptable.",
+        "confidence": "high",
+        "evidence": "\"predicted_claims\": 5306.899002569732,",
+        "source": "artifacts/reference/pricing_glm/metrics.json",
+        "grounded": true
+      },
+      {
+        "text": "Validation overdue for a high-risk-tier model and documentation older than the 24-month limit.",
+        "confidence": "medium",
+        "evidence": "Owner: Personal Lines Pricing. Last validation: 2024-11 (annual pricing review).",
+        "source": "models/pricing_glm/README.md",
+        "grounded": true
+      },
+      {
+        "text": "Region and some Area/VehBrand coefficients have large standard errors relative to estimates (e.g. Region standard errors around 0.12-0.22), indicating weak precision for those factors.",
+        "confidence": "medium",
+        "evidence": "C(Region)[T.Aquitaine],0.1281251478,0.124568211",
+        "source": "artifacts/reference/pricing_glm/coefficients.csv",
+        "grounded": true
+      },
+      {
+        "text": "Frequency only: severity is not modelled here. SEED is declared but unused, and the code has no input validation (e.g. non-positive Density or unseen categorical levels at prediction).",
+        "confidence": "medium",
+        "evidence": "SEED = 42",
+        "source": "models/pricing_glm/pricing_glm.py",
+        "grounded": true
+      }
+    ],
+    "unknowns": [
+      "How the train/test split was produced (method, seed, stratification) and the upstream data preparation steps for data/processed.",
+      "Source, period and coverage of the actual bank portfolio data, and whether the model is applied to anything other than the freMTPL2 stand-in.",
+      "Rationale for variable selection, band cut-points, VehPower cap of 9 and BonusMalus cap of 150.",
+      "How the frequency output is combined with severity and loadings in the technical premium.",
+      "Acceptance thresholds or benchmarks for deviance and calibration; reason test deviance is below training deviance.",
+      "Validation findings and scope of the 2024-11 review, and any open issues.",
+      "Monitoring arrangements (A/E, drift, refit triggers) and model change history.",
+      "Treatment of unseen categorical levels, missing values and non-positive Density in production."
+    ],
+    "rejected": [],
+    "llm": {
+      "model": "claude-sonnet-5-5",
+      "calls": 1,
+      "input_tokens": 5726,
+      "output_tokens": 6858,
+      "cost_usd": 0.120048,
+      "cached": false
+    },
+    "coverage": {
+      "available": true,
+      "model_terms": 9,
+      "documented": 8,
+      "missing": [
+        "LogDensity"
+      ],
+      "extra": [
+        "Density"
+      ]
+    },
+    "gaps": [
+      "Model uses variables not documented: LogDensity.",
+      "Documented as inputs but not in the fitted model: Density."
+    ],
+    "generated_at": "2026-11-07T23:44:08.099238+00:00",
+    "sources": [
+      "models/pricing_glm/pricing_glm.py",
+      "models/pricing_glm/README.md",
+      "artifacts/reference/pricing_glm/metrics.json",
+      "artifacts/reference/pricing_glm/coefficients.csv"
+    ],
+    "status": "pending Gate 2",
+    "doc_path": "/home/ubuntu/repos/EXL-Hackathon/docs/models/pricing_glm.md",
     "reviewer_feedback_used": null
   }
 }

@@ -1,1 +1,5 @@
 {"timestamp": "2026-11-07T16:32:02.516386+00:00", "model_id": "credit_scorecard", "stage": "discover", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 2}
+{"timestamp": "2026-11-07T23:40:07.550049+00:00", "model_id": "fraud_gbm", "stage": "discover", "decision": "reject", "reviewer": "ap", "reason": "For checking", "card_version": 2}
+{"timestamp": "2026-11-07T23:40:30.413215+00:00", "model_id": "pricing_glm", "stage": "discover", "decision": "approve", "reviewer": "ap", "reason": "For checking", "card_version": 2}
+{"timestamp": "2026-11-07T23:40:51.115987+00:00", "model_id": "sas_behaviour_scorecard", "stage": "discover", "decision": "reject", "reviewer": "ap", "reason": "For checking", "card_version": 2}
+{"timestamp": "2026-11-07T23:42:00.286383+00:00", "model_id": "credit_scorecard", "stage": "document", "decision": "reject", "reviewer": "ap", "reason": "For checking", "card_version": 4}

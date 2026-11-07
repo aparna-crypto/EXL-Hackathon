@@ -144,3 +144,19 @@ unknowns. The other three models are waiting at Gate 1, so Stage 3 has not run f
 **Verification:** `make test` 55 passed (8 new); ruff clean.
 
 **Token cost so far:** 2 Sonnet calls, 28,291 tokens, $0.276. Session `stages-0-3`: $0.423 of $7.00.
+
+**Review round 2 (reviewer `ap`, 2026-11-07 23:40-23:42 UTC)**
+- Gate 1: `pricing_glm` approved; `fraud_gbm` and `sas_behaviour_scorecard` rejected with reason "For checking".
+- Gate 2: `credit_scorecard` documentation rejected with reason "For checking".
+- `make run-all` then re-ran each rejected stage with the reason in the prompt, and ran Document for
+  `pricing_glm`: fraud and SAS inventory re-run (Haiku, $0.0065 and $0.0075) and back at Gate 1; scorecard
+  documentation regenerated (Sonnet, $0.1545, 9,061 output tokens) and back at Gate 2; pricing documented
+  (Sonnet, $0.1200) and at Gate 2.
+- `pricing_glm` coverage: 8/9 model terms; the agent listed the raw input `Density`, while the fitted term is
+  the derived `LogDensity`. The log transform is documented, so this is a naming mismatch the coverage check
+  cannot resolve, and it is left as a flagged gap for the reviewer.
+
+**Verification:** `make test` 55 passed; ruff clean.
+
+**Token cost Stage 3 to date:** 6 calls, $0.565. Session `stages-0-3`: 20 calls, 126,814 tokens, $0.711 of $7.00.
+

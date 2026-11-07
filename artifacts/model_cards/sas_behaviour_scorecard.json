@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "sas_behaviour_scorecard",
-  "card_version": 2,
+  "card_version": 3,
   "name": "Credit Card Behavioural Score (BHV-CC-01)",
   "language": "SAS",
   "source_files": [
@@ -35,29 +35,27 @@
         "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
       },
       "purpose": {
-        "evidence": "Purpose : Monthly behavioural PD for existing credit card accounts, used for",
+        "evidence": "Monthly behavioural PD for existing credit card accounts, used for",
         "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
       },
       "model_type": {
-        "evidence": "model bad_flag = util_band mob_band payment_ratio bureau_score num_searches_6m",
+        "evidence": "proc logistic data=work.base_binned descending outmodel=model.bhv_cc_01_fit;",
         "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
       },
       "risk_tier": {
         "evidence": "used for limit management and collections prioritisation.",
         "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
-        "rationale": "Scores drive limit management and collections prioritisation for existing card customers, which is material business use with direct customer impact, but the material contains no evidence of mandatory human review of outputs, so high tier cannot be confirmed as the scores are not stated to directly set final credit decisions, pricing or capital."
+        "rationale": "Scores drive limit management and collections prioritisation for existing card accounts, which are indirect customer impact with human-reviewed outputs rather than direct automated credit decisions, pricing or capital."
       }
     },
     "unknowns": [
-      "Last validation date of the model is not stated in the material.",
+      "Model validation date and validation outcome are not stated in the material.",
       "No separate model documentation file was provided; documentation date is unknown.",
-      "Whether outputs are subject to mandatory human review is not stated, which bears on the risk tier.",
-      "Whether limit-management and collections decisions are automated or overridden by analysts is not stated.",
-      "Model owner individual or contact and approval status are not stated.",
-      "Data currency and refresh schedule beyond the fixed performance month 202312 are not stated.",
-      "Performance monitoring, backtesting and model approval/governance records are not stated.",
-      "Size of the account population scored and the exposure amounts affected are not stated.",
-      "The header note states the source library and tables do not exist and the program was never run; whether a production version runs elsewhere is not stated."
+      "Whether limit-management and collections outputs are subject to mandatory human review or overrides is not stated, so the medium tier rests on the stated use cases alone.",
+      "Number of accounts or exposure size affected is not stated.",
+      "Whether the model is approved, its version, and the production deployment/owner of the limit-management engine are not stated.",
+      "Model performance metrics (e.g. Gini, calibration) and monitoring arrangements are not stated.",
+      "Whether the SAS program has been run in production is not stated; the header says it is a synthetic example that is never run, and the CRDW library and its tables are stated not to exist."
     ],
     "assessed_as_of": "2026-11-07"
   },
@@ -69,8 +67,8 @@
   "stages": {
     "discover": {
       "status": "awaiting_review",
-      "completed_at": "2026-11-07T16:16:28.738990+00:00",
-      "summary": "BHV-CC-01 Credit Card Behavioural Score (BHV-CC-01) | owner: Cards Risk Analytics | type: Behavioural PD scorecard (logistic regression with stepwise variable selection) | risk tier: medium\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: SAS, 35 LOC, libraries PROC EXPORT, PROC FORMAT, PROC LOGISTIC; 3 inputs, 3 outputs\nGaps (3):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- Not executable here (no runtime for SAS): outputs cannot be reproduced; document only.\nLLM: claude-haiku-5-5, 3727 tokens, $0.0080"
+      "completed_at": "2026-11-07T23:44:16.801264+00:00",
+      "summary": "BHV-CC-01 Credit Card Behavioural Score (BHV-CC-01) | owner: Cards Risk Analytics | type: Behavioural PD scorecard (logistic regression with stepwise variable selection) | risk tier: medium\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: SAS, 35 LOC, libraries PROC EXPORT, PROC FORMAT, PROC LOGISTIC; 3 inputs, 3 outputs\nGaps (3):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- Not executable here (no runtime for SAS): outputs cannot be reproduced; document only.\nLLM: claude-haiku-5-5, 3662 tokens, $0.0075"
     },
     "document": {
       "status": "not_started",
@@ -98,10 +96,15 @@
       "card_version": 2,
       "timestamp": "2026-11-07T16:16:28.739007+00:00",
       "note": "discover: completed, awaiting review"
+    },
+    {
+      "card_version": 3,
+      "timestamp": "2026-11-07T23:44:16.801286+00:00",
+      "note": "discover: completed, awaiting review"
     }
   ],
   "discovery": {
-    "scanned_at": "2026-11-07T16:16:23.671500+00:00",
+    "scanned_at": "2026-11-07T23:44:11.246495+00:00",
     "languages": [
       "SAS"
     ],
@@ -179,11 +182,11 @@
     "llm": {
       "model": "claude-haiku-5-5",
       "calls": 1,
-      "input_tokens": 2666,
-      "output_tokens": 1061,
-      "cost_usd": 0.007971,
+      "input_tokens": 2702,
+      "output_tokens": 960,
+      "cost_usd": 0.007502,
       "cached": false
     },
-    "reviewer_feedback_used": null
+    "reviewer_feedback_used": "- reject by ap: For checking"
   }
 }

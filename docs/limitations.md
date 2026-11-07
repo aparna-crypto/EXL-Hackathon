@@ -30,3 +30,5 @@
   labelled as such by the agent.
 - **JSON retry re-sends the same token budget.** If a reply is cut off at `max_tokens`, the single retry
   is likely to be cut off too; the budget is set with headroom instead (D28).
+- The Stage 3 coverage check matches variable names literally. A documented raw input whose fitted term is a
+  derived column (pricing `Density` vs `LogDensity`) is reported as both missing and extra.

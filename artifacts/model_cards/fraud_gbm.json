@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "fraud_gbm",
-  "card_version": 2,
+  "card_version": 3,
   "name": "fraud_gbm",
   "language": "Python",
   "source_files": [
@@ -9,8 +9,8 @@
   ],
   "inventory": {
     "owner": null,
-    "purpose": "Card transaction fraud detection model using gradient boosting on anonymised card transactions.",
-    "model_type": "Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for card fraud",
+    "purpose": "Card transaction fraud detection using gradient boosting on anonymised card transactions.",
+    "model_type": "Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for fraud probability",
     "risk_tier": null,
     "data_sources": [
       "data/processed/creditcard_test.parquet",
@@ -39,14 +39,13 @@
       }
     },
     "unknowns": [
-      "Model owner / responsible team (header states no owner is kept)",
-      "Business use of the fraud predictions and whether outputs are acted on automatically or reviewed by humans (needed for risk tier)",
-      "Number of customers or transaction volume affected in production",
-      "Last validation date and validation outcome (header states no validation record is kept)",
-      "Separate model documentation file and its date (no doc files in the scan)",
-      "Whether a production deployment or champion/challenger status exists",
-      "Source and governance of the input data files data/processed/creditcard_train.parquet and creditcard_test.parquet (provenance of the 'anonymised' data is not stated)",
-      "Approval, monitoring and change-control arrangements"
+      "Owning team or person (header states no owner is kept with the code)",
+      "Business purpose beyond the one-line description; how fraud_p scores are used in operations and whether human review applies",
+      "Last validation date and validation record",
+      "Separate documentation file and its date (none present in the material)",
+      "Risk tier basis: customer impact, decision authority, exposure or volume of transactions affected",
+      "Whether the training data and predictions reflect production use or a reference/test run only",
+      "Decision threshold or policy applied to p_fraud, if any"
     ],
     "assessed_as_of": "2026-11-07"
   },
@@ -59,8 +58,8 @@
   "stages": {
     "discover": {
       "status": "awaiting_review",
-      "completed_at": "2026-11-07T16:16:13.745647+00:00",
-      "summary": "FRD-CARD-07 fraud_gbm | owner: unknown | type: Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for card fraud | risk tier: unknown\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: Python, 52 LOC, libraries numpy, pandas, sklearn; 2 inputs, 2 outputs\nGaps (4):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- No owner recorded.\n- No risk tier recorded.\nLLM: claude-haiku-5-5, 3502 tokens, $0.0067"
+      "completed_at": "2026-11-07T23:43:24.897935+00:00",
+      "summary": "FRD-CARD-07 fraud_gbm | owner: unknown | type: Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for fraud probability | risk tier: unknown\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: Python, 52 LOC, libraries numpy, pandas, sklearn; 2 inputs, 2 outputs\nGaps (4):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- No owner recorded.\n- No risk tier recorded.\nLLM: claude-haiku-5-5, 3475 tokens, $0.0065"
     },
     "document": {
       "status": "not_started",
@@ -88,10 +87,15 @@
       "card_version": 2,
       "timestamp": "2026-11-07T16:16:13.745669+00:00",
       "note": "discover: completed, awaiting review"
+    },
+    {
+      "card_version": 3,
+      "timestamp": "2026-11-07T23:43:24.897962+00:00",
+      "note": "discover: completed, awaiting review"
     }
   ],
   "discovery": {
-    "scanned_at": "2026-11-07T16:16:08.658528+00:00",
+    "scanned_at": "2026-11-07T23:43:19.921039+00:00",
     "languages": [
       "Python"
     ],
@@ -161,11 +165,11 @@
     "llm": {
       "model": "claude-haiku-5-5",
       "calls": 1,
-      "input_tokens": 2695,
-      "output_tokens": 807,
-      "cost_usd": 0.00673,
+      "input_tokens": 2731,
+      "output_tokens": 744,
+      "cost_usd": 0.006451,
       "cached": false
     },
-    "reviewer_feedback_used": null
+    "reviewer_feedback_used": "- reject by ap: For checking"
   }
 }
