@@ -9,7 +9,8 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
@@ -86,6 +87,26 @@ elif page == "Gate review":
                 if rejected:
                     st.markdown("**Agent answers rejected by the evidence check**")
                     st.dataframe(pd.DataFrame(rejected), use_container_width=True, hide_index=True)
+            if stage == "document" and card.get("documentation"):
+                doc = card["documentation"]
+                st.markdown("**Section confidence after the evidence check**")
+                st.dataframe(pd.DataFrame([
+                    {"section": k, "confidence": v["confidence"], "flag": v["flag"],
+                     "quotes": len(v["evidence"])} for k, v in doc["sections"].items()]),
+                    use_container_width=True, hide_index=True)
+                cov = doc["coverage"]
+                st.caption("Coverage vs fitted model: " + (
+                    f"{cov['documented']}/{cov['model_terms']} variables documented; missing: "
+                    f"{', '.join(cov['missing']) or 'none'}" if cov["available"] else cov["note"]))
+                if doc["rejected"]:
+                    st.markdown("**Agent claims dropped by the evidence check**")
+                    st.dataframe(pd.DataFrame(doc["rejected"]), use_container_width=True,
+                                 hide_index=True)
+                doc_file = Path(doc["doc_path"])
+                doc_file = doc_file if doc_file.is_absolute() else ROOT / doc_file
+                if doc_file.exists():
+                    with st.expander("Draft documentation", expanded=True):
+                        st.markdown(doc_file.read_text())
             with st.expander("Model card JSON"):
                 st.json(card)
             with st.form("gate"):

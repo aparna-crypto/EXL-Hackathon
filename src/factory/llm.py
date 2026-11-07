@@ -24,6 +24,10 @@ class BudgetExceeded(RuntimeError):
     pass
 
 
+class LLMError(RuntimeError):
+    """The provider rejected or failed a call (bad request, network, auth)."""
+
+
 @dataclass
 class LLMResult:
     text: str
@@ -171,9 +175,12 @@ class LLMClient:
         else:
             self._check_budget(model, system, prompt, max_tokens)
             t0 = time.perf_counter()
-            text, in_tok, out_tok = self.backend.call(
-                model, system, prompt, max_tokens, self.cfg["temperature"],
-                **({"thinking": thinking} if thinking else {}))
+            try:
+                text, in_tok, out_tok = self.backend.call(
+                    model, system, prompt, max_tokens, self.cfg["temperature"],
+                    **({"thinking": thinking} if thinking else {}))
+            except Exception as e:
+                raise LLMError(f"{agent} call to {model} failed: {e}") from e
             duration = round(time.perf_counter() - t0, 3)
             result = LLMResult(text, agent, model, in_tok, out_tok,
                                round(self.cost(model, in_tok, out_tok), 6), False, duration)

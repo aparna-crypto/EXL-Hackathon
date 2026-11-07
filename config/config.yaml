@@ -11,6 +11,7 @@ paths:
   llm_cache: artifacts/llm_cache      # cached LLM responses, reruns cost 0 tokens
   llm_ledger: artifacts/audit/llm_ledger.jsonl
   inventory: artifacts/inventory      # Stage 2 inventory table + dependency map
+  model_docs: docs/models             # Stage 3 generated documentation (<model>.md)
 
 llm:
   provider: anthropic                 # anthropic | fake   (env: LLM_PROVIDER)
@@ -29,10 +30,12 @@ llm:
     healthcheck: claude-haiku-5-5
   # Extended thinking per agent. The claude-*-5-5 models think adaptively by default, and
   # thinking tokens count against max_tokens. Extraction agents turn it off (cheaper, and the
-  # JSON answer is not cut short). Agents not listed use the model default.
+  # JSON answer is not cut short). Haiku accepts `disabled`; Sonnet rejects it and needs
+  # `between_tools` (no thinking before the reply). Agents not listed use the model default.
   thinking:
     scanner: disabled
     inventory: disabled
+    documentation: between_tools
     monitor: disabled
     healthcheck: disabled
   # Used only after `max_retries_before_escalation` failed attempts on the agent's normal model.
@@ -75,6 +78,13 @@ discover:
     medium: material business use with mandatory human review of outputs, or indirect customer
           impact (e.g. alerts reviewed by analysts, limit management with overrides).
     low: internal analysis or reporting with no direct customer or financial impact.
+
+document:
+  max_chars_per_file: 15000
+  # The first live scorecard reply used ~8k output tokens and hit an 8000 cap; 16000 leaves room.
+  max_tokens: 16000
+  # Saved outputs of the legacy run that the agent may quote (no row-level predictions).
+  reference_files: [metrics.json, coefficients.csv]
 
 gates:
   # Every pipeline stage ends in a human gate, in this order.

@@ -117,3 +117,30 @@ doesn't apply. No answer was rejected by the evidence check.
 
 **Token cost for Stage 2:** 12 inventory calls, 63,520 tokens, about $0.146 (of which $0.108 was the failed
 first run). Session `stages-0-3` total: $0.1464 of $7.00.
+
+## Stage 3: Document (2026-11-07, in progress)
+
+**What was built**
+- `factory.agents.documentation`: one Sonnet call per model. Input: code, documentation files, reference
+  outputs (`metrics.json`, `coefficients.csv`; no row-level predictions), the Gate 1-approved inventory and any
+  Gate 2 reviewer feedback. Output: six sections (purpose, data, methodology, implementation, performance,
+  monitoring/governance) with confidence and quotes, plus variables, transformations, assumptions,
+  limitations and unknowns. Evidence policy in D26.
+- `factory.document`: stage function, coverage check of documented variables against the fitted model (D27),
+  gap list, and Markdown rendering to `docs/models/<model>.md` with SS1/23 principle tags (D25).
+- UI: the Gate 2 review shows section confidence, coverage, dropped claims and the rendered draft.
+- `LLMError`: provider errors now fail the stage cleanly instead of crashing `make run-all` (D29).
+
+**Result so far:** `credit_scorecard` documented and waiting at Gate 2. All sections high confidence except
+monitoring/governance (medium); 14/14 model variables documented; 7 transformations; 0 claims dropped; 12
+unknowns. The other three models are waiting at Gate 1, so Stage 3 has not run for them.
+
+**Failures and fixes**
+- Sonnet rejected `thinking: disabled` (400, "send between_tools instead"); config changed (D28). The CLI
+  crashed on that error, which led to `LLMError` (D29).
+- The first scorecard reply hit the 8000-token cap; the retry succeeded at 7,939 tokens. `max_tokens` raised to
+  16000. The truncated reply was removed from the cache.
+
+**Verification:** `make test` 55 passed (8 new); ruff clean.
+
+**Token cost so far:** 2 Sonnet calls, 28,291 tokens, $0.276. Session `stages-0-3`: $0.423 of $7.00.

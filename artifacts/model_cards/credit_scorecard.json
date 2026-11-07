@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "credit_scorecard",
-  "card_version": 2,
+  "card_version": 4,
   "name": "Retail Application Scorecard (RCS-APP-02)",
   "language": "R",
   "source_files": [
@@ -75,14 +75,14 @@
   ],
   "stages": {
     "discover": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-07T16:16:06.470080+00:00",
       "summary": "RCS-APP-02 Retail Application Scorecard (RCS-APP-02) | owner: Retail Credit Risk Modelling | type: Application PD scorecard: weight-of-evidence binning with logistic regression, scaled to points | risk tier: high\nLast validation: 2021-03-15 | documentation: outdated | 3 doc/code contradiction(s)\nScan: R, 102 LOC, libraries jsonlite; 2 inputs, 4 outputs\nGaps (5):\n- Documentation contradicts code: Methodology note describes four coarse-classed characteristics with 4 bins each (checking account, duration, credit history, savings); code uses all candidate variables with 5 quantile bins for numeric variables and IV >= 0.02 selection.\n- Documentation contradicts code: Methodology note states scores scaled to 500 points at odds 20:1 with 25 points to double odds; code uses base score 600 at odds 50:1 and PDO 20.\n- Documentation contradicts code: Methodology note says validation was March 2021 by internal team; header says last validated 2021-03-15 (consistent), but note says model uses coarse-classed dummy bins while code uses WoE-transformed variables in logistic regression, not dummy-coded bins.\n- Documentation last updated 2019-06 (89 months ago; limit 24).\n- Validation overdue: last validated 2021-03-15 (68 months ago; high tier requires every 12 months).\nLLM: claude-haiku-5-5, 6685 tokens, $0.0128"
     },
     "document": {
-      "status": "not_started",
-      "completed_at": null,
-      "summary": null
+      "status": "awaiting_review",
+      "completed_at": "2026-11-07T16:35:49.316987+00:00",
+      "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/credit_scorecard.md\nSection confidence: Purpose and intended use high, Data high, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n20 variables, 7 transformations, 5 assumptions, 6 limitations, 12 unknowns\nCoverage vs fitted model: 14/14 variables\nGaps (0):\nLLM: claude-sonnet-5-5, 28291 tokens, $0.2761"
     },
     "redevelop": {
       "status": "not_started",
@@ -105,6 +105,16 @@
       "card_version": 2,
       "timestamp": "2026-11-07T16:16:06.470103+00:00",
       "note": "discover: completed, awaiting review"
+    },
+    {
+      "card_version": 3,
+      "timestamp": "2026-11-07T16:34:02.563461+00:00",
+      "note": "discover: gate approved"
+    },
+    {
+      "card_version": 4,
+      "timestamp": "2026-11-07T16:35:49.317000+00:00",
+      "note": "document: completed, awaiting review"
     }
   ],
   "discovery": {
@@ -226,6 +236,468 @@
       "cost_usd": 0.012781,
       "cached": false
     },
+    "reviewer_feedback_used": null
+  },
+  "documentation": {
+    "sections": {
+      "purpose_and_use": {
+        "text": "Application PD scorecard (RCS-APP-02) estimating 12-month probability of default for unsecured personal loan applications. It is a high-tier model owned by Retail Credit Risk Modelling. The code header states the data is the public UCI German Credit set, used as a stand-in for the bank's application data, so the files provided do not show the model running on real bank data. Output is a PD and a points score per application.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Purpose    : Probability of default (12m) for unsecured personal loan applications",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "Owner      : Retail Credit Risk Modelling",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "public UCI German Credit,",
+            "source": "models/credit_scorecard/scorecard.R"
+          }
+        ],
+        "flag": null
+      },
+      "data": {
+        "text": "Reads data/processed/german_credit_train.csv and german_credit_test.csv (public UCI German Credit, stand-in for bank data). Target is 'bad' (1 = default). Reference metrics show train n=700 and test n=300, each with a bad rate of 0.30, consistent with a 70/30 split of 1,000 records. How the split was made (method, seed, stratification) is not in the provided code; the split is done upstream. Excluded from candidates: id, the target, and protected attributes personal_status_sex, sex, age_group, foreign_worker. All other columns are candidate predictors. Observation window, default definition and the 12-month outcome window are not documented.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "EXCLUDED    <- c(\"id\", TARGET, \"personal_status_sex\", \"sex\", \"age_group\", \"foreign_worker\")",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "\"n\": 700,",
+            "source": "artifacts/reference/credit_scorecard/metrics.json"
+          },
+          {
+            "quote": "\"n\": 300,",
+            "source": "artifacts/reference/credit_scorecard/metrics.json"
+          },
+          {
+            "quote": "Logistic regression of bad (1 = default)",
+            "source": "models/credit_scorecard/scorecard.R"
+          }
+        ],
+        "flag": null
+      },
+      "methodology": {
+        "text": "Weight-of-evidence binning followed by logistic regression, scaled to points. (1) Numeric variables with more than 10 distinct values are cut into 5 quantile bins (type 7, breaks from training data, outer breaks -Inf/Inf); other variables are categorical with one bin per level. (2) WoE per bin = ln(((n_good+0.5)/total_good)/((n_bad+0.5)/total_bad)), with the same 0.5 smoothing in IV. (3) Variables with IV >= 0.02 are retained; protected attributes are excluded from the candidate set. (4) Logistic regression (glm, binomial) of bad on the WoE-transformed selected variables. (5) Score = offset + factor * ln(odds_good), with PDO 20, base score 600 at good:bad odds 50:1, so factor = 20/ln2 and offset = 600 - factor*ln(50). 14 variables were selected in the reference run. CODE VS DOCUMENTATION: the 2019 methodology note describes four characteristics, 4 bins each, dummy-coded logistic regression, and scaling to 500 points at 20:1 odds with 25 PDO. The code does not match any of this, so the note is outdated and the code is taken as authoritative.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Variables with IV >= 0.02 are kept. Protected attributes are never candidates.",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "Score = offset + factor * ln(odds_good), PDO 20, 600 points at good:bad odds 50:1.",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "fit <- glm(train[[TARGET]] ~ ., data = X_train, family = binomial())",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "The model is a logistic regression on dummy-coded bins. Scores are scaled to 500 points",
+            "source": "models/credit_scorecard/methodology_note_2019.txt"
+          }
+        ],
+        "flag": null
+      },
+      "implementation": {
+        "text": "Single R script (reference run on R 4.1.2) using only the jsonlite package; AUC, KS and Gini are hand-coded. set.seed(42) is set, although no step in the script uses random numbers. Run with: Rscript models/credit_scorecard/scorecard.R [data_dir] [out_dir], defaulting to data/processed and artifacts/reference/credit_scorecard. Outputs: bins.csv (bin-level WoE and IV), coefficients.csv (estimates and standard errors), predictions_test.csv (id, bad, pd, score), and metrics.json (parameters, selected variables, breaks and metrics). No scoring-only or production deployment code is provided.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Usage: Rscript models/credit_scorecard/scorecard.R [data_dir] [out_dir]",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "suppressPackageStartupMessages(library(jsonlite))",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "\"r_version\": \"4.1.2\",",
+            "source": "artifacts/reference/credit_scorecard/metrics.json"
+          },
+          {
+            "quote": "set.seed(42)",
+            "source": "models/credit_scorecard/scorecard.R"
+          }
+        ],
+        "flag": null
+      },
+      "performance": {
+        "text": "Reference outputs: train AUC 0.8171, Gini 0.6341, KS 0.4952 (n=700); test AUC 0.8010, Gini 0.6019, KS 0.5063 (n=300). Bad rate is 0.30 in both samples. The small train-to-test AUC drop (about 0.016) gives no sign of material overfitting on this sample. The reference outputs do not include calibration, stability (PSI), out-of-time, segment-level or fairness testing, and the test set is a hold-out, not out-of-time data. Reported figures are from the code's own calculation, not from independent validation.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "\"auc\": 0.800952380952381,",
+            "source": "artifacts/reference/credit_scorecard/metrics.json"
+          },
+          {
+            "quote": "\"gini\": 0.601904761904762,",
+            "source": "artifacts/reference/credit_scorecard/metrics.json"
+          },
+          {
+            "quote": "\"ks\": 0.506349206349206",
+            "source": "artifacts/reference/credit_scorecard/metrics.json"
+          },
+          {
+            "quote": "\"auc\": 0.817060252672498,",
+            "source": "artifacts/reference/credit_scorecard/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "monitoring_and_governance": {
+        "text": "Owner is Retail Credit Risk Modelling. Developed 2019; last validated 2021-03-15. The inventory classifies the model as high risk tier, which requires validation every 12 months, so validation is about 68 months overdue. Documentation is flagged as outdated: the methodology note dates from June 2019 (about 89 months old against a 24-month limit) and contradicts the code on variables, binning, model form and score scaling. No monitoring, PSI, back-testing, recalibration or change log is present in the material provided.",
+        "confidence": "medium",
+        "evidence": [
+          {
+            "quote": "Developed  : 2019   Last validated: 2021-03-15",
+            "source": "models/credit_scorecard/scorecard.R"
+          },
+          {
+            "quote": "Last independent validation: March 2021 (internal model validation team).",
+            "source": "models/credit_scorecard/methodology_note_2019.txt"
+          },
+          {
+            "quote": "RCS-APP-02 Retail Application Scorecard - Methodology note (version 1.0, June 2019)",
+            "source": "models/credit_scorecard/methodology_note_2019.txt"
+          }
+        ],
+        "flag": null
+      }
+    },
+    "variables": [
+      {
+        "name": "bad",
+        "role": "target",
+        "description": "Default indicator (1 = default / bad, 0 = good).",
+        "transformation": "None; used as response in WoE/IV calculation and the logistic regression.",
+        "evidence": "TARGET      <- \"bad\"",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "name": "id",
+        "role": "identifier",
+        "description": "Record identifier; excluded from modelling and carried to predictions_test.csv.",
+        "transformation": "None.",
+        "evidence": "EXCLUDED    <- c(\"id\", TARGET,",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "name": "personal_status_sex",
+        "role": "protected",
+        "description": "Protected attribute, excluded from candidates.",
+        "transformation": "None; excluded.",
+        "evidence": "\"personal_status_sex\", \"sex\", \"age_group\", \"foreign_worker\")",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "name": "sex",
+        "role": "protected",
+        "description": "Protected attribute, excluded from candidates.",
+        "transformation": "None; excluded.",
+        "evidence": "\"personal_status_sex\", \"sex\", \"age_group\", \"foreign_worker\")",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "name": "age_group",
+        "role": "protected",
+        "description": "Protected attribute (a banded age field), excluded from candidates. The continuous 'age' variable is nevertheless a selected model input.",
+        "transformation": "None; excluded.",
+        "evidence": "\"personal_status_sex\", \"sex\", \"age_group\", \"foreign_worker\")",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "name": "foreign_worker",
+        "role": "protected",
+        "description": "Protected attribute, excluded from candidates.",
+        "transformation": "None; excluded.",
+        "evidence": "\"personal_status_sex\", \"sex\", \"age_group\", \"foreign_worker\")",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "name": "checking_status",
+        "role": "input",
+        "description": "Selected predictor (checking account status; meaning inferred from name, no data dictionary provided).",
+        "transformation": "Categorical bins -> WoE (woe_checking_status).",
+        "evidence": "\"woe_checking_status\",-0.76448489500557",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "duration",
+        "role": "input",
+        "description": "Selected predictor (loan duration, inferred from name).",
+        "transformation": "5 quantile bins with breaks -Inf, 12, 15, 24, 30, Inf -> WoE.",
+        "evidence": "\"duration\": [\"-Inf\", 12, 15, 24, 30, \"Inf\"]",
+        "source": "artifacts/reference/credit_scorecard/metrics.json"
+      },
+      {
+        "name": "credit_history",
+        "role": "input",
+        "description": "Selected predictor (credit history, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_credit_history\",-0.676549952777233",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "purpose",
+        "role": "input",
+        "description": "Selected predictor (loan purpose, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_purpose\",-0.93456864374198",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "credit_amount",
+        "role": "input",
+        "description": "Selected predictor (credit amount, inferred from name).",
+        "transformation": "5 quantile bins with breaks -Inf, 1248.2, 1919, 2788.8, 4738, Inf -> WoE.",
+        "evidence": "\"credit_amount\": [\"-Inf\", 1248.2, 1919, 2788.8, 4738, \"Inf\"]",
+        "source": "artifacts/reference/credit_scorecard/metrics.json"
+      },
+      {
+        "name": "savings",
+        "role": "input",
+        "description": "Selected predictor (savings, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_savings\",-0.915290660146758",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "employment_since",
+        "role": "input",
+        "description": "Selected predictor (employment tenure, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_employment_since\",-0.82688340512829",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "installment_rate",
+        "role": "input",
+        "description": "Selected predictor (installment rate, inferred from name).",
+        "transformation": "Treated as categorical if 10 or fewer distinct values; WoE per level.",
+        "evidence": "\"woe_installment_rate\",-1.73359584191254",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "other_debtors",
+        "role": "input",
+        "description": "Selected predictor (other debtors/guarantors, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_other_debtors\",-0.842122927601429",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "property",
+        "role": "input",
+        "description": "Selected predictor (property held, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_property\",-0.293402732694043",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "age",
+        "role": "input",
+        "description": "Selected predictor (applicant age, inferred from name). Age is a protected characteristic in many contexts; its use warrants fairness review.",
+        "transformation": "5 quantile bins with breaks -Inf, 26, 30.6, 36, 44, Inf -> WoE.",
+        "evidence": "\"age\": [\"-Inf\", 26, 30.6, 36, 44, \"Inf\"]",
+        "source": "artifacts/reference/credit_scorecard/metrics.json"
+      },
+      {
+        "name": "other_installment_plans",
+        "role": "input",
+        "description": "Selected predictor (other installment plans, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_other_installment_plans\",-0.785223869688382",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "housing",
+        "role": "input",
+        "description": "Selected predictor (housing status, inferred from name).",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_housing\",-0.532995760851906",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      },
+      {
+        "name": "job",
+        "role": "input",
+        "description": "Selected predictor (job type, inferred from name). Its coefficient is positive (0.657) with a large standard error (0.670), which is counter-intuitive for a WoE-transformed variable and suggests collinearity.",
+        "transformation": "Categorical bins -> WoE.",
+        "evidence": "\"woe_job\",0.657300111660154,0.669835020703555",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv"
+      }
+    ],
+    "transformations": [
+      {
+        "step": "Candidate selection",
+        "description": "Candidates are all columns of the training data except id, bad, personal_status_sex, sex, age_group and foreign_worker.",
+        "evidence": "CANDIDATES  <- setdiff(names(train), EXCLUDED)",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "step": "Binning",
+        "description": "Numeric variables with more than 10 distinct values are cut into 5 quantile bins (type 7) from training data with outer breaks set to -Inf/Inf and right-closed intervals; all other variables use one bin per level.",
+        "evidence": "is_binned_numeric <- function(x) is.numeric(x) && length(unique(x)) > 10",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "step": "WoE and IV",
+        "description": "WoE = ln(((n_good+0.5)/total_good)/((n_bad+0.5)/total_bad)) per bin; IV is the sum of (dist_good - dist_bad)*WoE.",
+        "evidence": "dist_good <- (n_good + 0.5) / total_good",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "step": "IV-based variable selection",
+        "description": "Variables with IV >= 0.02 are kept; 14 were selected in the reference run.",
+        "evidence": "selected <- names(iv)[iv >= IV_MIN]",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "step": "WoE substitution",
+        "description": "Each selected variable is replaced by the WoE of its bin; levels unseen in training receive WoE 0 (neutral).",
+        "evidence": "w[is.na(w)] <- 0  # level not seen in training: neutral WoE",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "step": "Logistic regression",
+        "description": "glm binomial of bad on the WoE-transformed selected variables; PD is the predicted response probability.",
+        "evidence": "fit <- glm(train[[TARGET]] ~ ., data = X_train, family = binomial())",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "step": "Points scaling",
+        "description": "factor = PDO/ln(2) with PDO=20; offset = 600 - factor*ln(50); score = offset + factor*ln((1-pd)/pd).",
+        "evidence": "to_score   <- function(pd) offset_pts + factor_pts * log((1 - pd) / pd)",
+        "source": "models/credit_scorecard/scorecard.R"
+      }
+    ],
+    "assumptions": [
+      {
+        "text": "Quantile breaks and WoE/IV values estimated on the training data are assumed to remain valid for new applications.",
+        "confidence": "medium",
+        "evidence": "breaks from the training data, outer breaks set to -Inf/Inf",
+        "source": "models/credit_scorecard/scorecard.R",
+        "grounded": true
+      },
+      {
+        "text": "Categories unseen in training are assumed neutral (WoE 0).",
+        "confidence": "high",
+        "evidence": "w[is.na(w)] <- 0  # level not seen in training: neutral WoE",
+        "source": "models/credit_scorecard/scorecard.R",
+        "grounded": true
+      },
+      {
+        "text": "A 0.5 additive smoothing is assumed adequate to avoid zero-count bins in WoE.",
+        "confidence": "high",
+        "evidence": "dist_good <- (n_good + 0.5) / total_good",
+        "source": "models/credit_scorecard/scorecard.R",
+        "grounded": true
+      },
+      {
+        "text": "IV >= 0.02 is assumed an appropriate selection threshold; no correlation or multicollinearity screening is applied.",
+        "confidence": "medium",
+        "evidence": "IV_MIN      <- 0.02",
+        "source": "models/credit_scorecard/scorecard.R",
+        "grounded": true
+      },
+      {
+        "text": "A linear logistic relationship on WoE values is assumed; no interaction terms are included.",
+        "confidence": "medium",
+        "evidence": "fit <- glm(train[[TARGET]] ~ ., data = X_train, family = binomial())",
+        "source": "models/credit_scorecard/scorecard.R",
+        "grounded": true
+      }
+    ],
+    "limitations": [
+      {
+        "text": "Development data is the public UCI German Credit set (stand-in), with 700 training and 300 test records, so results may not represent the bank's portfolio and sampling error is wide.",
+        "confidence": "high",
+        "evidence": "used here as a stand-in for the bank's application data",
+        "source": "models/credit_scorecard/scorecard.R",
+        "grounded": true
+      },
+      {
+        "text": "The methodology note materially contradicts the code (variables, bins, model form, scaling), so documentation cannot be relied on.",
+        "confidence": "high",
+        "evidence": "Each characteristic is grouped into 4 bins.",
+        "source": "models/credit_scorecard/methodology_note_2019.txt",
+        "grounded": true
+      },
+      {
+        "text": "Validation is overdue against the 12-month high-tier requirement (last validated 2021-03-15).",
+        "confidence": "high",
+        "evidence": "Last validated: 2021-03-15",
+        "source": "models/credit_scorecard/scorecard.R",
+        "grounded": true
+      },
+      {
+        "text": "The job coefficient is positive with a large standard error, and several coefficients (credit_amount, other_debtors, age, job) have wide standard errors, indicating possible collinearity or instability; no multicollinearity checks are in the code.",
+        "confidence": "medium",
+        "evidence": "\"woe_job\",0.657300111660154,0.669835020703555",
+        "source": "artifacts/reference/credit_scorecard/coefficients.csv",
+        "grounded": true
+      },
+      {
+        "text": "Age is a selected input even though age_group is treated as protected; this inconsistency needs fairness and legal review. No fairness testing is evidenced.",
+        "confidence": "medium",
+        "evidence": "\"selected_variables\": [\"checking_status\", \"duration\", \"credit_history\", \"purpose\", \"credit_amount\"",
+        "source": "artifacts/reference/credit_scorecard/metrics.json",
+        "grounded": true
+      },
+      {
+        "text": "Only a random-style hold-out is evidenced; there is no out-of-time test, calibration assessment or reject inference, so the model reflects accepted applicants only if the data does.",
+        "confidence": "low",
+        "evidence": "\"n\": 300,",
+        "source": "artifacts/reference/credit_scorecard/metrics.json",
+        "grounded": true
+      }
+    ],
+    "unknowns": [
+      "How the train/test split was produced (method, seed, stratification) and the data lineage from the raw UCI file to data/processed",
+      "Default definition, performance window and observation point for the 12-month PD target",
+      "Data dictionary: meaning and coding of each variable (names are used here as an inference only)",
+      "Whether the production scorecard uses real bank application data and how it differs from this stand-in",
+      "Calibration of PD to a long-run or through-the-cycle level and any overrides or cut-offs used in decisioning",
+      "Why the 2019 methodology note differs from the code, and which version was validated in March 2021",
+      "Findings, scope and outcome of the 2021 validation",
+      "Monitoring framework: PSI, back-testing, performance triggers, recalibration schedule",
+      "Fairness and discrimination assessment, and justification for using age while excluding age_group",
+      "Reject inference treatment and population (through-the-door vs accepted)",
+      "Deployment and production scoring implementation, including how new data is validated",
+      "Package versions beyond R 4.1.2 and jsonlite, and how the environment is controlled"
+    ],
+    "rejected": [],
+    "llm": {
+      "model": "claude-sonnet-5-5",
+      "calls": 2,
+      "input_tokens": 12352,
+      "output_tokens": 15939,
+      "cost_usd": 0.276141,
+      "cached": false
+    },
+    "coverage": {
+      "available": true,
+      "model_terms": 14,
+      "documented": 14,
+      "missing": [],
+      "extra": []
+    },
+    "gaps": [],
+    "generated_at": "2026-11-07T16:35:49.308846+00:00",
+    "sources": [
+      "models/credit_scorecard/scorecard.R",
+      "models/credit_scorecard/methodology_note_2019.txt",
+      "artifacts/reference/credit_scorecard/metrics.json",
+      "artifacts/reference/credit_scorecard/coefficients.csv"
+    ],
+    "status": "pending Gate 2",
+    "doc_path": "/home/ubuntu/repos/EXL-Hackathon/docs/models/credit_scorecard.md",
     "reviewer_feedback_used": null
   }
 }

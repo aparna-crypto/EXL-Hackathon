@@ -21,12 +21,13 @@ def _months_between(earlier: str, as_of: date) -> int:
     return (as_of.year - y) * 12 + (as_of.month - m)
 
 
-def reviewer_feedback(audit_dir: str, model_id: str, since: str | None) -> str | None:
-    """Reasons given in reject/comment decisions on the previous run of this stage."""
+def reviewer_feedback(audit_dir: str, model_id: str, since: str | None,
+                      stage: str = STAGE) -> str | None:
+    """Reasons given in reject/comment decisions on the previous run of a stage."""
     if not since:
         return None
     notes = [f"- {e['decision']} by {e['reviewer']}: {e['reason']}"
-             for e in gates.history(audit_dir, model_id, STAGE)
+             for e in gates.history(audit_dir, model_id, stage)
              if e["decision"] in ("reject", "comment") and e["timestamp"] >= since and e["reason"]]
     return "\n".join(notes) or None
 

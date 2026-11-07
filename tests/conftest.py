@@ -16,6 +16,7 @@ def cfg(tmp_path, monkeypatch):
         "llm_cache": str(tmp_path / "llm_cache"),
         "llm_ledger": str(tmp_path / "audit" / "llm_ledger.jsonl"),
         "inventory": str(tmp_path / "inventory"),
+        "model_docs": str(tmp_path / "model_docs"),
     }
     c["tracking"]["local_uri"] = str(tmp_path / "mlruns")
     return c

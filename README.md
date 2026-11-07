@@ -6,7 +6,7 @@ calls specialised agents (Discover, Document, Redevelop, Validate, Monitor) that
 **model card**. Every stage ends in a **human gate** (approve, reject or comment), and each decision is
 logged with a timestamp, the reviewer and the reason.
 
-> Status: **Stages 0-2 done** (setup; legacy models and data; Discover agent, inventory and dependency map, waiting at Gate 1). The remaining agents are built in Stages 3-7. See `docs/work_log.md`.
+> Status: **Stages 0-2 done, Stage 3 in progress** (Document agent built; generated docs in `docs/models/`). The remaining agents are built in Stages 4-7. See `docs/work_log.md`.
 
 ## Quickstart
 

@@ -73,3 +73,22 @@ models/x/*.{R,py,sas,md} ─► scanner (AST / regex) ─► scan summary ─┐
 | `src/factory/discover.py` | Stage function, gap rules, cross-model inventory table and dependency map (Graphviz + Mermaid). |
 
 A reject or comment at Gate 1 is fed back into the next run's prompt, so the agent can correct itself.
+
+## Stage 3: Document
+
+```
+code + doc files + reference outputs (metrics.json, coefficients.csv) ─┐
+Gate 1-approved inventory (owner, tier, gaps, contradictions) ─────────┼─► documentation agent (Sonnet, 1 call)
+reviewer feedback from a Gate 2 reject/comment ────────────────────────┘          │ JSON: sections, variables,
+                                                                                  ▼ transformations, assumptions...
+            evidence check (drop unquoted facts, lower confidence) ─► coverage check vs fitted model terms
+                                                                                  │
+            card.documentation + docs/models/<model>.md (rendered by code) ───────┴─► Gate 2
+```
+
+| File | Responsibility |
+|---|---|
+| `src/factory/agents/documentation.py` | Prompt, evidence checks, confidence downgrades. |
+| `src/factory/document.py` | Stage function, reference model terms, coverage check, gap list, Markdown rendering. |
+
+Stage 3 runs for a model only after its Gate 1 is approved (the orchestrator runs stages in order).

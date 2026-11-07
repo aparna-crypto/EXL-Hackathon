@@ -24,3 +24,9 @@
   bins vs WoE).
 - **Risk tier for the fraud model is `unknown`**: its header records no owner, use or validation, so the agent
   correctly declined to guess. The reviewer is expected to supply it at Gate 1.
+- **SS1/23 tags are a topic mapping, not a compliance claim.** Generated documentation is a draft for a
+  human reviewer (Gate 2) and does not by itself meet SS1/23 documentation standards.
+- **No data dictionaries.** Variable meanings in generated docs are inferred from column names and are
+  labelled as such by the agent.
+- **JSON retry re-sends the same token budget.** If a reply is cut off at `max_tokens`, the single retry
+  is likely to be cut off too; the budget is set with headroom instead (D28).

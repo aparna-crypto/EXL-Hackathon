@@ -84,5 +84,17 @@ def test_thinking_setting_is_passed_per_agent(cfg):
 
     c = LLMClient(cfg, backend=Recorder(), log_to_mlflow=False)
     c.complete("inventory", "a")
-    c.complete("documentation", "a")
+    c.complete("translation", "a")
     assert seen == ["disabled", None]
+
+
+def test_provider_error_becomes_llm_error(cfg):
+    from factory.llm import LLMError
+
+    class Broken(FakeBackend):
+        def call(self, *a, **k):
+            raise ValueError("400 bad request")
+
+    c = LLMClient(cfg, backend=Broken(), log_to_mlflow=False)
+    with pytest.raises(LLMError, match="400 bad request"):
+        c.complete("inventory", "a")
