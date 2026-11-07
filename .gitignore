@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project
+artifacts/mlruns/
+artifacts/mlflow.db
+.env.*
+!.env.example

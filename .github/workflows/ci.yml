@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    # Ubuntu 22.04 apt ships R 4.1.2, the same R used in development.
+    runs-on: ubuntu-22.04
+    env:
+      LLM_PROVIDER: fake  # tests never call the real API and need no secrets
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install R
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends r-base-core r-cran-jsonlite
+      - name: Install Python deps
+        run: |
+          pip install -r requirements.txt
+          pip install --no-deps -e .
+      - name: Lint
+        run: ruff check src app tests
+      - name: Test
+        run: pytest

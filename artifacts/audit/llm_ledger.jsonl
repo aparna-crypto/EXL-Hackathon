@@ -1,0 +1,2 @@
+{"timestamp": "2026-11-07T14:29:44.842958+00:00", "session_id": "stages-0-3", "run_id": "612daf554185", "model_id": null, "agent": "healthcheck", "model": "claude-haiku-5-5", "input_tokens": 18, "output_tokens": 4, "cost_usd": 3.8e-05, "cached": false, "duration_s": 0.659}
+{"timestamp": "2026-11-07T14:29:47.342204+00:00", "session_id": "stages-0-3", "run_id": "8286763c06f0", "model_id": null, "agent": "healthcheck", "model": "claude-haiku-5-5", "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0, "cached": true, "duration_s": 0.0}

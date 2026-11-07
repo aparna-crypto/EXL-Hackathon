@@ -1,0 +1,16 @@
+# Decision log
+
+| # | Date | Decision | Options considered | Rationale |
+|---|---|---|---|---|
+| D1 | 2026-11-07 | Commit straight to `main` during early stages | PR per stage; direct to main | Agreed with the team. Nobody else is contributing yet. |
+| D2 | 2026-11-07 | Python 3.11 via `uv`; deps pinned in `requirements.txt` compiled from `requirements.in` | Poetry; conda; plain pip freeze | uv is fast, installs Python itself and produces a plain pinned requirements file that anyone can read. |
+| D3 | 2026-11-07 | R 4.1.2 from Ubuntu 22.04 apt; R packages from `r-cran-*` apt packages, listed in `r/packages.txt` | renv lockfile; rig + CRAN snapshot | The distro pins the versions, so dev VM and CI (ubuntu-22.04) match. We keep R dependencies minimal (base `glm` + `jsonlite`) so the R→Python translation stays explainable. |
+| D4 | 2026-11-07 | Model card is JSON validated by JSON Schema (`schema_version` 1.0.0), not YAML | YAML + schema; pydantic models | JSON maps directly to Python dicts and JSON Schema. It has no extra parsing rules and is easy to show in the UI. |
+| D5 | 2026-11-07 | Gate audit log is an append-only JSONL file; gate status is derived from it | DB table; status field on the card | Simple and tamper-evident enough for a hackathon. The UI and CLI share one writer function. |
+| D6 | 2026-11-07 | Orchestrator is resumable: each `make run` advances until the next pending gate | Long-running process polling for approvals; Airflow/Prefect | Easiest to explain. One command covers both CLI and UI approval paths. |
+| D7 | 2026-11-07 | LLM budget: per-run 300k tokens / $1.50; session bucket `stages-0-3` capped at **$7.00**, summed from the ledger across runs | Token-only caps; provider-side limits | The team asked for about $7 across Stages 0-3. A USD cap maps directly to that. It is checked before each call against a worst-case estimate. |
+| D8 | 2026-11-07 | Prices for `claude-*-5-5` in config are conservative assumptions (Haiku $1/$5, Sonnet $3/$15, Opus $15/$75 per MTok) | Look up live prices | Published prices for these IDs were not verified. Overestimating means the real spend is at or below the reported cost, so the cap stays safe. |
+| D9 | 2026-11-07 | `temperature` not sent to the API (`null` in config) | temperature 0 | The API returns 400 "`temperature` is deprecated for this model" for `claude-haiku-5-5`. Response caching gives the consistency instead. |
+| D10 | 2026-11-07 | MLflow 2.19 with a local file store (`artifacts/mlruns`); `azureml-mlflow` only in `requirements-azure.txt` | sqlite backend; MLflow 3 | A file store needs no database. Keeping the Azure plugin out of the default install keeps CI light. |
+| D11 | 2026-11-07 | Tests use `FakeBackend` (`LLM_PROVIDER=fake`); CI needs no secrets | Recorded real responses | Tests are free and deterministic. A real-API check is a separate manual command (`make llm-check`). |
+| D12 | 2026-11-07 | Datasets: German Credit (scorecard), ULB credit-card fraud via public mirror, freMTPL2 claims (pricing GLM); SAS model is inventory and documentation only | Give Me Some Credit; Home Credit | German Credit is small and has age and sex/personal status for fairness tests. It has no date, so out-of-time testing uses a synthetic split (see limitations). No EXL sample code was supplied. |

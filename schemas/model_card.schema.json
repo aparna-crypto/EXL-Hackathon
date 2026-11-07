@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "model_card.schema.json",
+  "title": "Model card",
+  "description": "Shared record passed between pipeline stages. schema_version follows semver; bump MAJOR on breaking changes.",
+  "type": "object",
+  "required": ["schema_version", "model_id", "card_version", "name", "language", "source_files",
+               "inventory", "stages", "history"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "model_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+    "card_version": {"type": "integer", "minimum": 1},
+    "name": {"type": "string"},
+    "language": {"enum": ["R", "Python", "SAS"]},
+    "source_files": {"type": "array", "items": {"type": "string"}},
+    "inventory": {
+      "type": "object",
+      "properties": {
+        "owner": {"type": ["string", "null"]},
+        "purpose": {"type": ["string", "null"]},
+        "model_type": {"type": ["string", "null"]},
+        "risk_tier": {"enum": ["high", "medium", "low", null]},
+        "data_sources": {"type": "array", "items": {"type": "string"}},
+        "last_validation_date": {"type": ["string", "null"]},
+        "documentation_status": {"enum": ["missing", "outdated", "current", null]}
+      },
+      "additionalProperties": true
+    },
+    "discovery": {"type": "object"},
+    "documentation": {"type": "object"},
+    "redevelopment": {"type": "object"},
+    "validation": {"type": "object"},
+    "monitoring": {"type": "object"},
+    "gaps": {"type": "array", "items": {"type": "string"}},
+    "stages": {
+      "type": "object",
+      "description": "Per-stage run status. completed_at is set when the stage finished running (before its gate).",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {"enum": ["not_started", "awaiting_review", "approved", "rejected", "not_applicable"]},
+          "completed_at": {"type": ["string", "null"]},
+          "summary": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["card_version", "timestamp", "note"],
+        "properties": {
+          "card_version": {"type": "integer"},
+          "timestamp": {"type": "string"},
+          "note": {"type": "string"}
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

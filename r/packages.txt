@@ -1,0 +1,3 @@
+# R packages needed by the legacy R models (one per line). Installed by r/install_packages.R.
+# On Ubuntu 22.04 these come pinned by the distro as r-cran-<name> (see Makefile / CI).
+jsonlite

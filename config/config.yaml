@@ -1,0 +1,59 @@
+# Central configuration for the Agentic Model Risk Factory.
+# Environment variables override selected keys (see src/factory/config.py).
+
+project: agentic-model-risk-factory
+seed: 42
+
+paths:
+  artifacts: artifacts
+  model_cards: artifacts/model_cards
+  audit: artifacts/audit              # gate decisions (append-only JSONL)
+  llm_cache: artifacts/llm_cache      # cached LLM responses, reruns cost 0 tokens
+  llm_ledger: artifacts/audit/llm_ledger.jsonl
+
+llm:
+  provider: anthropic                 # anthropic | fake   (env: LLM_PROVIDER)
+  # null = not sent. The claude-*-5-5 models reject `temperature` (API: "deprecated for this
+  # model"), so run-to-run consistency comes from the response cache instead.
+  temperature: null
+  default_max_tokens: 2000
+  # Model used by each agent. Change models here, never in code.
+  agents:
+    scanner: claude-haiku-5-5
+    inventory: claude-haiku-5-5
+    documentation: claude-sonnet-5-5
+    translation: claude-sonnet-5-5
+    report: claude-sonnet-5-5
+    monitor: claude-haiku-5-5
+    healthcheck: claude-haiku-5-5
+  # Used only after `max_retries_before_escalation` failed attempts on the agent's normal model.
+  escalation:
+    translation: claude-opus-5-5
+  max_retries_before_escalation: 3
+  # USD per million tokens. ASSUMED, deliberately conservative (rounded up) because published
+  # prices for these model IDs were not verified. Overestimating keeps the budget cap safe.
+  pricing_usd_per_mtok:
+    claude-haiku-5-5:  {input: 1.0,  output: 5.0}
+    claude-sonnet-5-5: {input: 3.0,  output: 15.0}
+    claude-opus-5-5:   {input: 15.0, output: 75.0}
+  budget:
+    # A "run" is one CLI invocation (e.g. one `make run`). Hard caps, checked BEFORE each call
+    # using a worst-case estimate (estimated input + full max_tokens).
+    per_run_tokens: 300000
+    per_run_usd: 1.50
+    # A "session" is a named spending bucket summed across all runs from the ledger.
+    # Agreed with the team: about $7 for Stages 0-3. Start a new bucket only on purpose.
+    session_id: stages-0-3
+    session_usd: 7.00
+
+tracking:
+  backend: local                      # local | azureml   (env: TRACKING_BACKEND)
+  local_uri: artifacts/mlruns         # MLflow file store, relative to repo root
+  azureml_uri_env: AZUREML_MLFLOW_URI # env var holding the workspace MLflow tracking URI
+  experiment: model-risk-factory
+
+gates:
+  # Every pipeline stage ends in a human gate, in this order.
+  stages: [discover, document, redevelop, validate]
+  # Decisions that require a written reason.
+  reason_required_for: [reject, comment]

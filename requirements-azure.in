@@ -1,0 +1,3 @@
+# Extra dependency only needed when TRACKING_BACKEND=azureml (Stage 8).
+-c requirements.txt
+azureml-mlflow

@@ -1,0 +1,96 @@
+"""Streamlit UI: inventory, gate approvals, audit log, LLM spend.
+
+Run with `make ui`. Report viewer (Stage 5) and drift dashboard (Stage 6) are added later.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+import pandas as pd  # noqa: E402
+import streamlit as st  # noqa: E402
+
+from factory import gates, model_card, tracking  # noqa: E402
+from factory.config import load_config  # noqa: E402
+
+cfg = load_config()
+CARDS, AUDIT = cfg["paths"]["model_cards"], cfg["paths"]["audit"]
+
+st.set_page_config(page_title="Model Risk Factory", layout="wide")
+st.title("Agentic Model Risk Factory")
+page = st.sidebar.radio("View", ["Inventory", "Gate review", "Audit log", "LLM spend",
+                                 "Validation reports", "Drift monitoring"])
+cards = model_card.list_cards(CARDS)
+
+
+def stage_status(card: dict, stage: str) -> str:
+    e = card["stages"][stage]
+    if e["status"] in ("approved", "not_applicable", "not_started"):
+        return e["status"]
+    gate = gates.status(AUDIT, card["model_id"], stage, since=e["completed_at"])
+    return {"pending": "awaiting_review"}.get(gate, gate)
+
+
+if page == "Inventory":
+    if not cards:
+        st.info("No model cards yet. Run `make run MODEL=<name>`.")
+    else:
+        rows = [{"model_id": c["model_id"], "language": c["language"], "card_version": c["card_version"],
+                 **{k: c["inventory"].get(k) for k in ("owner", "model_type", "risk_tier",
+                                                        "documentation_status")},
+                 **{f"gate:{s}": stage_status(c, s) for s in c["stages"]}} for c in cards]
+        st.dataframe(pd.DataFrame(rows), use_container_width=True)
+
+elif page == "Gate review":
+    if not cards:
+        st.info("No model cards yet.")
+    else:
+        model_id = st.selectbox("Model", [c["model_id"] for c in cards])
+        card = next(c for c in cards if c["model_id"] == model_id)
+        st.table(pd.DataFrame([{"stage": s, "status": stage_status(card, s),
+                                "summary": card["stages"][s]["summary"]} for s in card["stages"]]))
+        pending = [s for s in card["stages"] if stage_status(card, s) == "awaiting_review"]
+        if not pending:
+            st.success("Nothing awaiting review for this model.")
+        else:
+            stage = pending[0]
+            st.subheader(f"Review gate: {stage}")
+            st.write(card["stages"][stage]["summary"])
+            with st.expander("Model card JSON"):
+                st.json(card)
+            with st.form("gate"):
+                decision = st.radio("Decision", gates.DECISIONS, horizontal=True)
+                reviewer = st.text_input("Reviewer")
+                reason = st.text_area("Reason")
+                if st.form_submit_button("Submit decision"):
+                    try:
+                        rec = gates.record_decision(AUDIT, model_id, stage, decision, reviewer,
+                                                    reason, card["card_version"],
+                                                    tuple(cfg["gates"]["reason_required_for"]))
+                        tracking.configure(cfg)
+                        tracking.log_gate_decision(rec)
+                        st.success(f"Logged: {decision} by {rec['reviewer']} at {rec['timestamp']}. "
+                                   "Re-run `make run` to continue the pipeline.")
+                    except gates.GateError as e:
+                        st.error(str(e))
+
+elif page == "Audit log":
+    log = gates.history(AUDIT)
+    st.dataframe(pd.DataFrame(log) if log else pd.DataFrame(), use_container_width=True)
+
+elif page == "LLM spend":
+    path = Path(cfg["paths"]["llm_ledger"])
+    rows = [json.loads(x) for x in path.read_text().splitlines()] if path.exists() else []
+    b = cfg["llm"]["budget"]
+    spent = sum(r["cost_usd"] for r in rows if r["session_id"] == b["session_id"])
+    st.metric(f"Spend in session '{b['session_id']}'", f"${spent:.4f}", f"cap ${b['session_usd']:.2f}",
+              delta_color="off")
+    if rows:
+        st.dataframe(pd.DataFrame(rows), use_container_width=True)
+
+else:
+    st.info("Added in a later stage (Validation reports: Stage 5, Drift monitoring: Stage 6).")
