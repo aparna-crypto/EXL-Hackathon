@@ -15,3 +15,12 @@
 - **freMTPL2 version.** The CASdatasets copy has 677,991 rows, which is 22 fewer than the older OpenML copy
   (678,013), and it uses region names rather than codes.
 - **German Credit is small** (1,000 rows; 300 in the test set), so metric confidence intervals are wide.
+- **Scanner is pattern-based for R and SAS.** Python uses the AST; R and SAS use regular expressions, so unusual
+  code styles (computed file paths, macro-generated dataset names) can be missed. The scan summary lists what
+  was found so the reviewer can spot omissions.
+- **Doc/code contradictions come from the LLM.** Grounding checks confirm that quoted evidence exists in the
+  files, but not that the LLM's reading of it is right. They are presented as findings for the Gate 1 reviewer,
+  not as facts. Example: one scorecard finding mixes a consistent point (validation date) with a real one (dummy
+  bins vs WoE).
+- **Risk tier for the fraud model is `unknown`**: its header records no owner, use or validation, so the agent
+  correctly declined to guess. The reviewer is expected to supply it at Gate 1.

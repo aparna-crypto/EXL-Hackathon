@@ -10,6 +10,7 @@ paths:
   audit: artifacts/audit              # gate decisions (append-only JSONL)
   llm_cache: artifacts/llm_cache      # cached LLM responses, reruns cost 0 tokens
   llm_ledger: artifacts/audit/llm_ledger.jsonl
+  inventory: artifacts/inventory      # Stage 2 inventory table + dependency map
 
 llm:
   provider: anthropic                 # anthropic | fake   (env: LLM_PROVIDER)
@@ -26,6 +27,14 @@ llm:
     report: claude-sonnet-5-5
     monitor: claude-haiku-5-5
     healthcheck: claude-haiku-5-5
+  # Extended thinking per agent. The claude-*-5-5 models think adaptively by default, and
+  # thinking tokens count against max_tokens. Extraction agents turn it off (cheaper, and the
+  # JSON answer is not cut short). Agents not listed use the model default.
+  thinking:
+    scanner: disabled
+    inventory: disabled
+    monitor: disabled
+    healthcheck: disabled
   # Used only after `max_retries_before_escalation` failed attempts on the agent's normal model.
   escalation:
     translation: claude-opus-5-5
@@ -51,6 +60,21 @@ tracking:
   local_uri: artifacts/mlruns         # MLflow file store, relative to repo root
   azureml_uri_env: AZUREML_MLFLOW_URI # env var holding the workspace MLflow tracking URI
   experiment: model-risk-factory
+
+discover:
+  as_of: null                         # date for age checks (YYYY-MM-DD); null = today
+  max_chars_per_file: 15000           # code/doc text sent to the inventory agent, per file
+  max_tokens: 2000
+  doc_max_age_months: 24              # documentation older than this is "outdated"
+  # Maximum months between independent validations, by risk tier (unknown tier -> high).
+  revalidation_months: {high: 12, medium: 24, low: 36}
+  executable_languages: [R, Python]   # no SAS runtime in this environment
+  risk_tier_rubric: |
+    high: output directly drives customer credit decisions, pricing or regulatory capital /
+          provisions, or the model affects large exposures or many customers.
+    medium: material business use with mandatory human review of outputs, or indirect customer
+          impact (e.g. alerts reviewed by analysts, limit management with overrides).
+    low: internal analysis or reporting with no direct customer or financial impact.
 
 gates:
   # Every pipeline stage ends in a human gate, in this order.

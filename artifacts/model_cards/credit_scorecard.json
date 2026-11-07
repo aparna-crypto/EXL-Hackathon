@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0.0",
+  "model_id": "credit_scorecard",
+  "card_version": 2,
+  "name": "Retail Application Scorecard (RCS-APP-02)",
+  "language": "R",
+  "source_files": [
+    "models/credit_scorecard/scorecard.R"
+  ],
+  "inventory": {
+    "owner": "Retail Credit Risk Modelling",
+    "purpose": "Estimates 12-month probability of default for unsecured personal loan applications.",
+    "model_type": "Application PD scorecard: weight-of-evidence binning with logistic regression, scaled to points",
+    "risk_tier": "high",
+    "data_sources": [
+      "data/processed/german_credit_test.csv",
+      "data/processed/german_credit_train.csv"
+    ],
+    "last_validation_date": "2021-03-15",
+    "documentation_status": "outdated",
+    "model_ref": "RCS-APP-02",
+    "documentation_date": "2019-06",
+    "evidence": {
+      "name": {
+        "evidence": "# Retail Application Scorecard  (RCS-APP-02)",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      "model_ref": {
+        "evidence": "# Retail Application Scorecard  (RCS-APP-02)",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      "owner": {
+        "evidence": "# Owner      : Retail Credit Risk Modelling",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      "purpose": {
+        "evidence": "# Purpose    : Probability of default (12m) for unsecured personal loan applications",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      "model_type": {
+        "evidence": "# Method: weight-of-evidence (WoE) binning + logistic regression, scaled to points.",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      "last_validation_date": {
+        "evidence": "# Developed  : 2019   Last validated: 2021-03-15",
+        "source": "models/credit_scorecard/scorecard.R"
+      },
+      "documentation_date": {
+        "evidence": "RCS-APP-02 Retail Application Scorecard - Methodology note (version 1.0, June 2019)",
+        "source": "models/credit_scorecard/methodology_note_2019.txt"
+      },
+      "risk_tier": {
+        "evidence": "# Purpose    : Probability of default (12m) for unsecured personal loan applications",
+        "source": "models/credit_scorecard/scorecard.R",
+        "rationale": "The scorecard outputs a probability of default used for unsecured personal loan application decisions, which directly drives customer credit decisions."
+      }
+    },
+    "unknowns": [
+      "Whether the 2019 methodology note version 1.0 is the current documentation for the code as it stands; no later documentation version is provided.",
+      "Exact model version/identifier beyond RCS-APP-02 and its validation report reference (no validation report file provided).",
+      "Whether the model is used on the bank's real application data; code states public UCI German Credit data is a stand-in.",
+      "Documented usage scope, approval status and governance sign-off for production use.",
+      "Model owner named individual or contact beyond the team name.",
+      "Frequency of monitoring and revalidation schedule.",
+      "Whether the 2021 validation covered the current code (no evidence of a code change log)."
+    ],
+    "assessed_as_of": "2026-11-07"
+  },
+  "gaps": [
+    "Documentation contradicts code: Methodology note describes four coarse-classed characteristics with 4 bins each (checking account, duration, credit history, savings); code uses all candidate variables with 5 quantile bins for numeric variables and IV >= 0.02 selection.",
+    "Documentation contradicts code: Methodology note states scores scaled to 500 points at odds 20:1 with 25 points to double odds; code uses base score 600 at odds 50:1 and PDO 20.",
+    "Documentation contradicts code: Methodology note says validation was March 2021 by internal team; header says last validated 2021-03-15 (consistent), but note says model uses coarse-classed dummy bins while code uses WoE-transformed variables in logistic regression, not dummy-coded bins.",
+    "Documentation last updated 2019-06 (89 months ago; limit 24).",
+    "Validation overdue: last validated 2021-03-15 (68 months ago; high tier requires every 12 months)."
+  ],
+  "stages": {
+    "discover": {
+      "status": "awaiting_review",
+      "completed_at": "2026-11-07T16:16:06.470080+00:00",
+      "summary": "RCS-APP-02 Retail Application Scorecard (RCS-APP-02) | owner: Retail Credit Risk Modelling | type: Application PD scorecard: weight-of-evidence binning with logistic regression, scaled to points | risk tier: high\nLast validation: 2021-03-15 | documentation: outdated | 3 doc/code contradiction(s)\nScan: R, 102 LOC, libraries jsonlite; 2 inputs, 4 outputs\nGaps (5):\n- Documentation contradicts code: Methodology note describes four coarse-classed characteristics with 4 bins each (checking account, duration, credit history, savings); code uses all candidate variables with 5 quantile bins for numeric variables and IV >= 0.02 selection.\n- Documentation contradicts code: Methodology note states scores scaled to 500 points at odds 20:1 with 25 points to double odds; code uses base score 600 at odds 50:1 and PDO 20.\n- Documentation contradicts code: Methodology note says validation was March 2021 by internal team; header says last validated 2021-03-15 (consistent), but note says model uses coarse-classed dummy bins while code uses WoE-transformed variables in logistic regression, not dummy-coded bins.\n- Documentation last updated 2019-06 (89 months ago; limit 24).\n- Validation overdue: last validated 2021-03-15 (68 months ago; high tier requires every 12 months).\nLLM: claude-haiku-5-5, 6685 tokens, $0.0128"
+    },
+    "document": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "redevelop": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "validate": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    }
+  },
+  "history": [
+    {
+      "card_version": 1,
+      "timestamp": "2026-11-07T16:15:59.893332+00:00",
+      "note": "card created"
+    },
+    {
+      "card_version": 2,
+      "timestamp": "2026-11-07T16:16:06.470103+00:00",
+      "note": "discover: completed, awaiting review"
+    }
+  ],
+  "discovery": {
+    "scanned_at": "2026-11-07T16:15:59.904484+00:00",
+    "languages": [
+      "R"
+    ],
+    "files": [
+      {
+        "path": "models/credit_scorecard/scorecard.R",
+        "language": "R",
+        "header": "=============================================================================\n Retail Application Scorecard  (RCS-APP-02)\n Owner      : Retail Credit Risk Modelling\n Purpose    : Probability of default (12m) for unsecured personal loan applications\n Developed  : 2019   Last validated: 2021-03-15\n Data       : data/processed/german_credit_{train,test}.csv  (public UCI German Credit,\n              used here as a stand-in for the bank's application data)\n =============================================================================\n Method: weight-of-evidence (WoE) binning + logistic regression, scaled to points.\n   1. Numeric variables with more than 10 distinct values are cut into 5 quantile bins\n      (quantile type 7, breaks from the training data, outer breaks set to -Inf/Inf).\n      All other variables are treated as categorical, one bin per level.\n   2. WoE per bin = ln( ((n_good + 0.5) / total_good) / ((n_bad + 0.5) / total_bad) ).\n      Information value IV = sum((dist_good - dist_bad) * WoE) with the same smoothing.\n   3. Variables with IV >= 0.02 are kept. Protected attributes are never candidates.\n   4. Logistic regression of bad (1 = default) on the WoE-transformed variables.\n   5. Score = offset + factor * ln(odds_good), PDO 20, 600 points at good:bad odds 50:1.\n Usage: Rscript models/credit_scorecard/scorecard.R [data_dir] [out_dir]\n =============================================================================",
+        "header_fields": {
+          "Owner": "Retail Credit Risk Modelling",
+          "Purpose": "Probability of default (12m) for unsecured personal loan applications",
+          "Developed": "2019   Last validated: 2021-03-15",
+          "Data": "data/processed/german_credit_{train,test}.csv  (public UCI German Credit,",
+          "Method": "weight-of-evidence (WoE) binning + logistic regression, scaled to points.",
+          "Usage": "Rscript models/credit_scorecard/scorecard.R [data_dir] [out_dir]"
+        },
+        "libraries": [
+          "jsonlite"
+        ],
+        "stdlib": [],
+        "inputs": [
+          "data/processed/german_credit_test.csv",
+          "data/processed/german_credit_train.csv"
+        ],
+        "outputs": [
+          "artifacts/reference/credit_scorecard/bins.csv",
+          "artifacts/reference/credit_scorecard/coefficients.csv",
+          "artifacts/reference/credit_scorecard/metrics.json",
+          "artifacts/reference/credit_scorecard/predictions_test.csv"
+        ],
+        "sourced_scripts": [],
+        "functions": [
+          "is_binned_numeric",
+          "numeric_breaks",
+          "assign_bin",
+          "woe_table",
+          "apply_woe",
+          "woe_frame",
+          "to_score",
+          "auc",
+          "ks"
+        ],
+        "methods": [
+          "logistic regression",
+          "points scaling (scorecard)",
+          "weight of evidence (WoE) binning"
+        ],
+        "seeds": [
+          "42"
+        ],
+        "loc": 102
+      }
+    ],
+    "libraries": [
+      "jsonlite"
+    ],
+    "inputs": [
+      "data/processed/german_credit_test.csv",
+      "data/processed/german_credit_train.csv"
+    ],
+    "outputs": [
+      "artifacts/reference/credit_scorecard/bins.csv",
+      "artifacts/reference/credit_scorecard/coefficients.csv",
+      "artifacts/reference/credit_scorecard/metrics.json",
+      "artifacts/reference/credit_scorecard/predictions_test.csv"
+    ],
+    "methods": [
+      "logistic regression",
+      "points scaling (scorecard)",
+      "weight of evidence (WoE) binning"
+    ],
+    "seeds": [
+      "42"
+    ],
+    "loc": 102,
+    "doc_files": [
+      {
+        "path": "models/credit_scorecard/methodology_note_2019.txt",
+        "chars": 472,
+        "years_mentioned": [
+          "2019",
+          "2021"
+        ]
+      }
+    ],
+    "documentation_findings": [
+      {
+        "issue": "Methodology note describes four coarse-classed characteristics with 4 bins each (checking account, duration, credit history, savings); code uses all candidate variables with 5 quantile bins for numeric variables and IV >= 0.02 selection.",
+        "doc_quote": "The scorecard uses four coarse-classed characteristics: checking account status, loan duration, credit history and savings balance. Each characteristic is grouped into 4 bins.",
+        "doc_source": "models/credit_scorecard/methodology_note_2019.txt",
+        "code_quote": "N_BINS      <- 5",
+        "code_source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "issue": "Methodology note states scores scaled to 500 points at odds 20:1 with 25 points to double odds; code uses base score 600 at odds 50:1 and PDO 20.",
+        "doc_quote": "Scores are scaled to 500 points at odds 20:1 with 25 points to double the odds.",
+        "doc_source": "models/credit_scorecard/methodology_note_2019.txt",
+        "code_quote": "PDO         <- 20\nBASE_SCORE  <- 600\nBASE_ODDS   <- 50",
+        "code_source": "models/credit_scorecard/scorecard.R"
+      },
+      {
+        "issue": "Methodology note says validation was March 2021 by internal team; header says last validated 2021-03-15 (consistent), but note says model uses coarse-classed dummy bins while code uses WoE-transformed variables in logistic regression, not dummy-coded bins.",
+        "doc_quote": "The model is a logistic regression on dummy-coded bins.",
+        "doc_source": "models/credit_scorecard/methodology_note_2019.txt",
+        "code_quote": "fit <- glm(train[[TARGET]] ~ ., data = X_train, family = binomial())",
+        "code_source": "models/credit_scorecard/scorecard.R"
+      }
+    ],
+    "rejected_agent_answers": [],
+    "llm": {
+      "model": "claude-haiku-5-5",
+      "calls": 1,
+      "input_tokens": 5161,
+      "output_tokens": 1524,
+      "cost_usd": 0.012781,
+      "cached": false
+    },
+    "reviewer_feedback_used": null
+  }
+}

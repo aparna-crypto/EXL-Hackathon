@@ -72,3 +72,17 @@ def test_budget_blocks_before_calling_provider(cfg):
     with pytest.raises(BudgetExceeded):
         client(cfg, backend=backend).complete("scanner", "x" * 100)
     assert backend.calls == 0
+
+
+def test_thinking_setting_is_passed_per_agent(cfg):
+    seen = []
+
+    class Recorder(FakeBackend):
+        def call(self, model, system, prompt, max_tokens, temperature, thinking=None):
+            seen.append(thinking)
+            return super().call(model, system, prompt, max_tokens, temperature)
+
+    c = LLMClient(cfg, backend=Recorder(), log_to_mlflow=False)
+    c.complete("inventory", "a")
+    c.complete("documentation", "a")
+    assert seen == ["disabled", None]

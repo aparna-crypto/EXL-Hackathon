@@ -70,3 +70,50 @@
   byte-identical to the committed reference.
 
 **Token cost for Stage 1:** $0 (no LLM calls). Session `stages-0-3` total is still about $0.00004 of $7.00.
+
+## Stage 2: Discover (2026-11-07)
+
+**What was built**
+- `factory.scanner`: static scan of every file in `models/<name>/`. Python via the AST; R and SAS via regular
+  expressions. It records libraries, data inputs and outputs, model methods, seeds, lines of code, SAS librefs,
+  PROCs and macro variables, and documentation files with the years they mention (D20).
+- `factory.agents.inventory`: one Haiku call per model. The prompt holds the scan summary, the file text
+  (capped at 15k chars per file, no data rows), the risk-tier rubric from config, and any Gate 1 reviewer
+  feedback from a previous reject or comment. Every non-null answer must carry a quote and its source file;
+  quotes not found in the files are nulled and listed under `rejected_agent_answers` (D21).
+- `factory.discover`: the stage function, fixed gap rules (D22), the cross-model inventory
+  (`artifacts/inventory/inventory.{md,csv,json}`) and the dependency map (`dependency_map.dot` / `.mmd`).
+- UI: the inventory page shows the table, gaps and the Graphviz dependency map. The Discover gate review shows
+  each value with its evidence quote, the contradictions found and any rejected answers.
+- CLI / Makefile: `make run-all` (every model to its next gate) and `make inventory`.
+- Config: `discover` section (as-of date, file cap, thresholds, rubric) and `llm.thinking` per agent (D24).
+
+**Result (all four models waiting at Gate 1)**
+
+| Model | Owner | Tier | Last validation | Docs | Gaps |
+|---|---|---|---|---|---|
+| `credit_scorecard` (RCS-APP-02) | Retail Credit Risk Modelling | high | 2021-03-15 | outdated, 3 contradictions | 5 |
+| `fraud_gbm` (FRD-CARD-07) | unknown | unknown | unknown | missing | 4 |
+| `pricing_glm` (PRC-MTPL-03) | Personal Lines Pricing | high | 2024-11 | outdated, 2 contradictions | 4 |
+| `sas_behaviour_scorecard` (BHV-CC-01) | Cards Risk Analytics | medium | unknown | missing | 3 |
+
+The agent found the gaps planted in Stage 1: the 2019 scorecard note disagrees with the code on variables,
+bins and score scaling; the fraud model has no documentation or owner; the pricing README claims caps the code
+doesn't apply. No answer was rejected by the evidence check.
+
+**Failures and fixes**
+- The scanner first tagged the R scorecard as an "offset" model because the word appeared in a comment. The
+  pattern now requires `offset =`.
+- First live run: 3 of 4 inventory replies were cut off mid-JSON at `max_tokens` 2000, even after one retry.
+  The cause was default extended thinking using the output budget. Turning thinking off for extraction agents
+  fixed it (D24); the four replies used 807-1,524 output tokens. The truncated replies were removed from the
+  response cache; the ledger keeps their cost.
+
+**Verification**
+- `make test`: 47 passed (15 new: scanner per language, evidence grounding and rejection, gap rules,
+  artifacts, JSON retry, failed-stage handling, reviewer feedback in the prompt, cache reuse, thinking setting
+  per agent). `ruff` clean.
+- Live run of all four models through the real API; cards validate against the schema.
+
+**Token cost for Stage 2:** 12 inventory calls, 63,520 tokens, about $0.146 (of which $0.108 was the failed
+first run). Session `stages-0-3` total: $0.1464 of $7.00.

@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0.0",
+  "model_id": "pricing_glm",
+  "card_version": 2,
+  "name": "Motor TPL claim frequency GLM",
+  "language": "Python",
+  "source_files": [
+    "models/pricing_glm/pricing_glm.py"
+  ],
+  "inventory": {
+    "owner": "Personal Lines Pricing",
+    "purpose": "Expected claim frequency per policy-year, used as the frequency component of the technical premium.",
+    "model_type": "Poisson GLM with log link and log(exposure) offset (motor TPL claim frequency)",
+    "risk_tier": "high",
+    "data_sources": [
+      "data/processed/fremtpl2_test.parquet",
+      "data/processed/fremtpl2_train.parquet"
+    ],
+    "last_validation_date": "2024-11",
+    "documentation_status": "outdated",
+    "model_ref": "PRC-MTPL-03",
+    "documentation_date": "2024-09",
+    "evidence": {
+      "name": {
+        "evidence": "\"\"\"Motor third-party liability claim frequency GLM (pricing).",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      "model_ref": {
+        "evidence": "Model ID : PRC-MTPL-03",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      "owner": {
+        "evidence": "Owner    : Personal Lines Pricing",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      "purpose": {
+        "evidence": "Purpose  : Expected claim frequency per policy-year, used as the frequency component of the",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      "model_type": {
+        "evidence": "Method   : Poisson GLM, log link, log(Exposure) offset.",
+        "source": "models/pricing_glm/pricing_glm.py"
+      },
+      "last_validation_date": {
+        "evidence": "Last validation: 2024-11 (annual pricing review).",
+        "source": "models/pricing_glm/README.md"
+      },
+      "documentation_date": {
+        "evidence": "*Last updated: 2024-09 by Personal Lines Pricing.*",
+        "source": "models/pricing_glm/README.md"
+      },
+      "risk_tier": {
+        "evidence": "used as the frequency component of the",
+        "source": "models/pricing_glm/pricing_glm.py",
+        "rationale": "The output is the frequency component of the technical premium, which directly drives customer pricing, and it is applied across many policyholders."
+      }
+    },
+    "unknowns": [
+      "Whether the model has been formally approved or is in production use for pricing, and by which governance body",
+      "Model version number",
+      "Validator identity and whether the 2024-11 validation covered the code as it currently stands",
+      "Whether the 'annual pricing review' validation was a full independent model validation or a pricing review",
+      "Rationale for the 2024-11 validation date being later than the 2024-09 documentation date",
+      "Whether the freMTPL2 stand-in data is the data used in production pricing",
+      "Whether the README's 'Exposure capped at one year / claim counts at four' is applied in an upstream data pipeline not provided",
+      "Documentation of the chosen model-specific risk tier against the bank's rubric beyond the code's role in premium setting, including customer count and premium volumes",
+      "Output consumer and whether predictions are overridden by human review before use in pricing",
+      "Model owner contact person (only team is named)",
+      "Intended review frequency and next review date",
+      "Regulatory/SS1/23 risk classification approval record"
+    ],
+    "assessed_as_of": "2026-11-07"
+  },
+  "gaps": [
+    "Documentation contradicts code: README states exposure is capped at one year and claim counts at four, but the code applies no such caps; it uses Exposure and ClaimNb as-is (only BonusMalus is clipped, at 150).",
+    "Documentation contradicts code: README says VehPower is a rating factor and the model uses it, but the README states no clipping; the code clips VehPower at 9, which the documentation does not mention.",
+    "Documentation last updated 2024-09 (26 months ago; limit 24).",
+    "Validation overdue: last validated 2024-11 (24 months ago; high tier requires every 12 months)."
+  ],
+  "stages": {
+    "discover": {
+      "status": "awaiting_review",
+      "completed_at": "2026-11-07T16:16:22.169590+00:00",
+      "summary": "PRC-MTPL-03 Motor TPL claim frequency GLM | owner: Personal Lines Pricing | type: Poisson GLM with log link and log(exposure) offset (motor TPL claim frequency) | risk tier: high\nLast validation: 2024-11 | documentation: outdated | 2 doc/code contradiction(s)\nScan: Python, 64 LOC, libraries numpy, pandas, statsmodels; 2 inputs, 3 outputs\nGaps (4):\n- Documentation contradicts code: README states exposure is capped at one year and claim counts at four, but the code applies no such caps; it uses Exposure and ClaimNb as-is (only BonusMalus is clipped, at 150).\n- Documentation contradicts code: README says VehPower is a rating factor and the model uses it, but the README states no clipping; the code clips VehPower at 9, which the documentation does not mention.\n- Documentation last updated 2024-09 (26 months ago; limit 24).\n- Validation overdue: last validated 2024-11 (24 months ago; high tier requires every 12 months).\nLLM: claude-haiku-5-5, 5073 tokens, $0.0105"
+    },
+    "document": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "redevelop": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "validate": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    }
+  },
+  "history": [
+    {
+      "card_version": 1,
+      "timestamp": "2026-11-07T16:16:15.768200+00:00",
+      "note": "card created"
+    },
+    {
+      "card_version": 2,
+      "timestamp": "2026-11-07T16:16:22.169605+00:00",
+      "note": "discover: completed, awaiting review"
+    }
+  ],
+  "discovery": {
+    "scanned_at": "2026-11-07T16:16:15.781752+00:00",
+    "languages": [
+      "Python"
+    ],
+    "files": [
+      {
+        "path": "models/pricing_glm/pricing_glm.py",
+        "language": "Python",
+        "header": "Motor third-party liability claim frequency GLM (pricing).\n\nModel ID : PRC-MTPL-03\nOwner    : Personal Lines Pricing\nPurpose  : Expected claim frequency per policy-year, used as the frequency component of the\n           technical premium.\nMethod   : Poisson GLM, log link, log(Exposure) offset. See README.md in this folder.\nUsage    : python models/pricing_glm/pricing_glm.py [data_dir] [out_dir]",
+        "header_fields": {
+          "Model ID": "PRC-MTPL-03",
+          "Owner": "Personal Lines Pricing",
+          "Purpose": "Expected claim frequency per policy-year, used as the frequency component of the",
+          "Method": "Poisson GLM, log link, log(Exposure) offset. See README.md in this folder.",
+          "Usage": "python models/pricing_glm/pricing_glm.py [data_dir] [out_dir]"
+        },
+        "libraries": [
+          "numpy",
+          "pandas",
+          "statsmodels"
+        ],
+        "stdlib": [
+          "json",
+          "pathlib",
+          "sys"
+        ],
+        "inputs": [
+          "data/processed/fremtpl2_test.parquet",
+          "data/processed/fremtpl2_train.parquet"
+        ],
+        "outputs": [
+          "artifacts/reference/pricing_glm/coefficients.csv",
+          "artifacts/reference/pricing_glm/metrics.json",
+          "artifacts/reference/pricing_glm/predictions_test.csv.gz"
+        ],
+        "functions": [
+          "prepare",
+          "poisson_deviance"
+        ],
+        "methods": [
+          "Poisson GLM",
+          "offset term"
+        ],
+        "seeds": [
+          "42"
+        ],
+        "loc": 64
+      }
+    ],
+    "libraries": [
+      "numpy",
+      "pandas",
+      "statsmodels"
+    ],
+    "inputs": [
+      "data/processed/fremtpl2_test.parquet",
+      "data/processed/fremtpl2_train.parquet"
+    ],
+    "outputs": [
+      "artifacts/reference/pricing_glm/coefficients.csv",
+      "artifacts/reference/pricing_glm/metrics.json",
+      "artifacts/reference/pricing_glm/predictions_test.csv.gz"
+    ],
+    "methods": [
+      "Poisson GLM",
+      "offset term"
+    ],
+    "seeds": [
+      "42"
+    ],
+    "loc": 64,
+    "doc_files": [
+      {
+        "path": "models/pricing_glm/README.md",
+        "chars": 566,
+        "years_mentioned": [
+          "2024"
+        ]
+      }
+    ],
+    "documentation_findings": [
+      {
+        "issue": "README states exposure is capped at one year and claim counts at four, but the code applies no such caps; it uses Exposure and ClaimNb as-is (only BonusMalus is clipped, at 150).",
+        "doc_quote": "Exposure is capped at one year and claim counts at four.",
+        "doc_source": "models/pricing_glm/README.md",
+        "code_quote": "out = pd.DataFrame({\"ClaimNb\": df[\"ClaimNb\"], \"Exposure\": df[\"Exposure\"]})",
+        "code_source": "models/pricing_glm/pricing_glm.py"
+      },
+      {
+        "issue": "README says VehPower is a rating factor and the model uses it, but the README states no clipping; the code clips VehPower at 9, which the documentation does not mention.",
+        "doc_quote": "Rating factors: vehicle power, vehicle",
+        "doc_source": "models/pricing_glm/README.md",
+        "code_quote": "out[\"VehPower\"] = df[\"VehPower\"].clip(upper=9).astype(int).astype(str)",
+        "code_source": "models/pricing_glm/pricing_glm.py"
+      }
+    ],
+    "rejected_agent_answers": [],
+    "llm": {
+      "model": "claude-haiku-5-5",
+      "calls": 1,
+      "input_tokens": 3707,
+      "output_tokens": 1366,
+      "cost_usd": 0.010537,
+      "cached": false
+    },
+    "reviewer_feedback_used": null
+  }
+}

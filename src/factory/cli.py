@@ -9,7 +9,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from factory import gates, model_card, orchestrator, tracking
+from factory import discover, gates, model_card, orchestrator, tracking
 from factory.config import load_config
 from factory.llm import LLMClient
 
@@ -55,6 +55,12 @@ def cmd_status(args, cfg) -> int:
     card = model_card.load(cfg["paths"]["model_cards"], args.model)
     for stage, e in card["stages"].items():
         print(f"{stage:<10} {e['status']:<16} {e['summary'] or ''}")
+    return 0
+
+
+def cmd_inventory(args, cfg) -> int:
+    out = discover.write_inventory(cfg)
+    print(f"inventory written to {out}/ (inventory.md, inventory.csv, dependency_map.dot/.mmd)")
     return 0
 
 
@@ -108,11 +114,12 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("status", help="show stage status for a model")
     s.add_argument("--model", required=True)
     sub.add_parser("spend", help="LLM token and cost summary from the ledger")
+    sub.add_parser("inventory", help="rebuild the inventory table and dependency map")
     c = sub.add_parser("llm-check", help="verify configured model IDs")
     c.add_argument("--ping", action="store_true", help="also make one tiny paid call")
     args = p.parse_args(argv)
     cfg = load_config()
-    handlers = {"run": cmd_run, "gate": cmd_gate, "status": cmd_status, "spend": cmd_spend,
+    handlers = {"run": cmd_run, "gate": cmd_gate, "status": cmd_status, "spend": cmd_spend, "inventory": cmd_inventory,
                 "llm-check": cmd_llm_check}
     return handlers[args.cmd](args, cfg)
 

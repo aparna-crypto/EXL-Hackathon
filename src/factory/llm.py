@@ -46,10 +46,12 @@ class AnthropicBackend:
         self._client = anthropic.Anthropic()
 
     def call(self, model: str, system: str, prompt: str, max_tokens: int,
-             temperature: float) -> tuple[str, int, int]:
+             temperature: float, thinking: str | None = None) -> tuple[str, int, int]:
         kwargs = {"system": system} if system else {}
         if temperature is not None:
             kwargs["temperature"] = temperature
+        if thinking:
+            kwargs["thinking"] = {"type": thinking}
         msg = self._client.messages.create(
             model=model, max_tokens=max_tokens,
             messages=[{"role": "user", "content": prompt}], **kwargs,
@@ -65,7 +67,7 @@ class FakeBackend:
         self.responder = responder or (lambda model, system, prompt: f"[fake:{model}] ok")
         self.calls = 0
 
-    def call(self, model, system, prompt, max_tokens, temperature):
+    def call(self, model, system, prompt, max_tokens, temperature, thinking=None):
         self.calls += 1
         text = self.responder(model, system, prompt)
         return text, estimate_tokens(system + prompt), estimate_tokens(text)
@@ -144,8 +146,13 @@ class LLMClient:
                                  f"${worst_cost:.4f})")
 
     # cache
-    def _cache_file(self, model: str, system: str, prompt: str, max_tokens: int) -> Path:
-        key = json.dumps([model, system, prompt, max_tokens, self.cfg["temperature"]])
+    def thinking_for(self, agent: str) -> str | None:
+        return (self.cfg.get("thinking") or {}).get(agent)
+
+    def _cache_file(self, model: str, system: str, prompt: str, max_tokens: int,
+                    thinking: str | None = None) -> Path:
+        key = json.dumps([model, system, prompt, max_tokens, self.cfg["temperature"]]
+                         + ([thinking] if thinking else []))
         digest = hashlib.sha256(key.encode()).hexdigest()
         return Path(self.paths["llm_cache"]) / f"{digest}.json"
 
@@ -155,7 +162,8 @@ class LLMClient:
                  use_cache: bool = True) -> LLMResult:
         model = self.model_for(agent, escalate)
         max_tokens = max_tokens or self.cfg["default_max_tokens"]
-        cache_file = self._cache_file(model, system, prompt, max_tokens)
+        thinking = self.thinking_for(agent)
+        cache_file = self._cache_file(model, system, prompt, max_tokens, thinking)
 
         if use_cache and cache_file.exists():
             text = json.loads(cache_file.read_text())["text"]
@@ -163,8 +171,9 @@ class LLMClient:
         else:
             self._check_budget(model, system, prompt, max_tokens)
             t0 = time.perf_counter()
-            text, in_tok, out_tok = self.backend.call(model, system, prompt, max_tokens,
-                                                      self.cfg["temperature"])
+            text, in_tok, out_tok = self.backend.call(
+                model, system, prompt, max_tokens, self.cfg["temperature"],
+                **({"thinking": thinking} if thinking else {}))
             duration = round(time.perf_counter() - t0, 3)
             result = LLMResult(text, agent, model, in_tok, out_tok,
                                round(self.cost(model, in_tok, out_tok), 6), False, duration)

@@ -50,3 +50,26 @@ models/x/ ──►   │  Discover ─► Gate1 ─► Document ─► Gate2 �
 - **Cache keyed on (model, system, prompt, max_tokens, temperature).** Reruns and demos cost nothing, and
   repeated runs give identical outputs. This matters because the `claude-*-5-5` models reject `temperature`.
 - **MLflow file store for local runs.** It needs no database. The Azure switch only changes the tracking URI.
+
+## Stage 2: Discover
+
+```
+models/x/*.{R,py,sas,md} ─► scanner (AST / regex) ─► scan summary ─┐
+                                                                   ├─► inventory agent (Haiku, 1 call)
+             bounded file text (≤15k chars/file) ──────────────────┘          │ JSON + evidence quotes
+                                                                              ▼
+                     evidence check (quotes must appear in the files) ─► rule-based gap assessment
+                                                                              │
+                     model card: inventory, discovery, stages.discover ◄──────┘
+                                                                              │
+                     artifacts/inventory/: inventory.md/.csv/.json, dependency_map.dot/.mmd ─► Gate 1
+```
+
+| File | Responsibility |
+|---|---|
+| `src/factory/scanner.py` | Static facts per file: language, libraries, inputs, outputs, methods, seeds, LOC; SAS librefs, PROCs and macro variables; doc files and the years they mention. |
+| `src/factory/agents/inventory.py` | Builds the prompt (scan + file text + risk rubric + any reviewer feedback), checks every quote against the files, nulls unsupported values. |
+| `src/factory/agents/common.py` | JSON parsing with one corrective retry; raises `AgentError` if the reply is still not JSON. |
+| `src/factory/discover.py` | Stage function, gap rules, cross-model inventory table and dependency map (Graphviz + Mermaid). |
+
+A reject or comment at Gate 1 is fed back into the next run's prompt, so the agent can correct itself.

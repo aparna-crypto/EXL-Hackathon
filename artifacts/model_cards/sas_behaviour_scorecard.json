@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0.0",
+  "model_id": "sas_behaviour_scorecard",
+  "card_version": 2,
+  "name": "Credit Card Behavioural Score (BHV-CC-01)",
+  "language": "SAS",
+  "source_files": [
+    "models/sas_behaviour_scorecard/behaviour_score.sas"
+  ],
+  "inventory": {
+    "owner": "Cards Risk Analytics",
+    "purpose": "Monthly behavioural PD for existing credit card accounts, used for limit management and collections prioritisation.",
+    "model_type": "Behavioural PD scorecard (logistic regression with stepwise variable selection)",
+    "risk_tier": "medium",
+    "data_sources": [
+      "crdw.account_month",
+      "crdw.bureau_monthly",
+      "crdw.delinquency_flags"
+    ],
+    "last_validation_date": null,
+    "documentation_status": "missing",
+    "model_ref": "BHV-CC-01",
+    "documentation_date": null,
+    "evidence": {
+      "name": {
+        "evidence": "Credit Card Behavioural Score  (BHV-CC-01)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      "model_ref": {
+        "evidence": "Credit Card Behavioural Score  (BHV-CC-01)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      "owner": {
+        "evidence": "Owner   : Cards Risk Analytics",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      "purpose": {
+        "evidence": "Purpose : Monthly behavioural PD for existing credit card accounts, used for",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      "model_type": {
+        "evidence": "model bad_flag = util_band mob_band payment_ratio bureau_score num_searches_6m",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      "risk_tier": {
+        "evidence": "used for limit management and collections prioritisation.",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "rationale": "Scores drive limit management and collections prioritisation for existing card customers, which is material business use with direct customer impact, but the material contains no evidence of mandatory human review of outputs, so high tier cannot be confirmed as the scores are not stated to directly set final credit decisions, pricing or capital."
+      }
+    },
+    "unknowns": [
+      "Last validation date of the model is not stated in the material.",
+      "No separate model documentation file was provided; documentation date is unknown.",
+      "Whether outputs are subject to mandatory human review is not stated, which bears on the risk tier.",
+      "Whether limit-management and collections decisions are automated or overridden by analysts is not stated.",
+      "Model owner individual or contact and approval status are not stated.",
+      "Data currency and refresh schedule beyond the fixed performance month 202312 are not stated.",
+      "Performance monitoring, backtesting and model approval/governance records are not stated.",
+      "Size of the account population scored and the exposure amounts affected are not stated.",
+      "The header note states the source library and tables do not exist and the program was never run; whether a production version runs elsewhere is not stated."
+    ],
+    "assessed_as_of": "2026-11-07"
+  },
+  "gaps": [
+    "Documentation missing: no documentation file is kept with the code (only code comments).",
+    "No validation record: last independent validation date is unknown.",
+    "Not executable here (no runtime for SAS): outputs cannot be reproduced; document only."
+  ],
+  "stages": {
+    "discover": {
+      "status": "awaiting_review",
+      "completed_at": "2026-11-07T16:16:28.738990+00:00",
+      "summary": "BHV-CC-01 Credit Card Behavioural Score (BHV-CC-01) | owner: Cards Risk Analytics | type: Behavioural PD scorecard (logistic regression with stepwise variable selection) | risk tier: medium\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: SAS, 35 LOC, libraries PROC EXPORT, PROC FORMAT, PROC LOGISTIC; 3 inputs, 3 outputs\nGaps (3):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- Not executable here (no runtime for SAS): outputs cannot be reproduced; document only.\nLLM: claude-haiku-5-5, 3727 tokens, $0.0080"
+    },
+    "document": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "redevelop": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "validate": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    }
+  },
+  "history": [
+    {
+      "card_version": 1,
+      "timestamp": "2026-11-07T16:16:23.660984+00:00",
+      "note": "card created"
+    },
+    {
+      "card_version": 2,
+      "timestamp": "2026-11-07T16:16:28.739007+00:00",
+      "note": "discover: completed, awaiting review"
+    }
+  ],
+  "discovery": {
+    "scanned_at": "2026-11-07T16:16:23.671500+00:00",
+    "languages": [
+      "SAS"
+    ],
+    "files": [
+      {
+        "path": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "language": "SAS",
+        "header": "Credit Card Behavioural Score  (BHV-CC-01)\nOwner   : Cards Risk Analytics\nPurpose : Monthly behavioural PD for existing credit card accounts, used for\nlimit management and collections prioritisation.\nNote    : SYNTHETIC hackathon example. Library CRDW and its tables do not\nexist; this program is inventoried and documented only, never run.",
+        "header_fields": {
+          "Owner": "Cards Risk Analytics",
+          "Purpose": "Monthly behavioural PD for existing credit card accounts, used for",
+          "Note": "SYNTHETIC hackathon example. Library CRDW and its tables do not"
+        },
+        "libraries": [
+          "PROC EXPORT",
+          "PROC FORMAT",
+          "PROC LOGISTIC"
+        ],
+        "stdlib": [],
+        "librefs": {
+          "crdw": "/data/warehouse/cards",
+          "model": "/models/bhv_cc_01"
+        },
+        "inputs": [
+          "crdw.account_month",
+          "crdw.bureau_monthly",
+          "crdw.delinquency_flags"
+        ],
+        "outputs": [
+          "/exports/bhv_cc_01_scores.csv",
+          "model.bhv_cc_01_fit",
+          "model.bhv_cc_01_scored"
+        ],
+        "intermediate": [
+          "work.base",
+          "work.base_binned"
+        ],
+        "macro_vars": {
+          "perf_month": "202312",
+          "outcome_window": "12"
+        },
+        "functions": [],
+        "methods": [
+          "logistic regression",
+          "stepwise variable selection"
+        ],
+        "seeds": [],
+        "loc": 35
+      }
+    ],
+    "libraries": [
+      "PROC EXPORT",
+      "PROC FORMAT",
+      "PROC LOGISTIC"
+    ],
+    "inputs": [
+      "crdw.account_month",
+      "crdw.bureau_monthly",
+      "crdw.delinquency_flags"
+    ],
+    "outputs": [
+      "/exports/bhv_cc_01_scores.csv",
+      "model.bhv_cc_01_fit",
+      "model.bhv_cc_01_scored"
+    ],
+    "methods": [
+      "logistic regression",
+      "stepwise variable selection"
+    ],
+    "seeds": [],
+    "loc": 35,
+    "doc_files": [],
+    "documentation_findings": [],
+    "rejected_agent_answers": [],
+    "llm": {
+      "model": "claude-haiku-5-5",
+      "calls": 1,
+      "input_tokens": 2666,
+      "output_tokens": 1061,
+      "cost_usd": 0.007971,
+      "cached": false
+    },
+    "reviewer_feedback_used": null
+  }
+}

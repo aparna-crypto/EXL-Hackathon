@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
-from factory import gates, model_card, tracking  # noqa: E402
+from factory import discover, gates, model_card, tracking  # noqa: E402
 from factory.config import load_config  # noqa: E402
 
 cfg = load_config()
@@ -39,11 +39,18 @@ if page == "Inventory":
     if not cards:
         st.info("No model cards yet. Run `make run MODEL=<name>`.")
     else:
-        rows = [{"model_id": c["model_id"], "language": c["language"], "card_version": c["card_version"],
-                 **{k: c["inventory"].get(k) for k in ("owner", "model_type", "risk_tier",
-                                                        "documentation_status")},
-                 **{f"gate:{s}": stage_status(c, s) for s in c["stages"]}} for c in cards]
-        st.dataframe(pd.DataFrame(rows), use_container_width=True)
+        rows = [{**r, "card_version": c["card_version"],
+                 **{f"gate:{s}": stage_status(c, s) for s in c["stages"]}}
+                for r, c in zip(discover.inventory_rows(cards), cards)]
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.subheader("Gaps flagged by Discover")
+        for c in cards:
+            with st.expander(f"{c['model_id']}: {len(c.get('gaps', []))} gap(s)"):
+                for g in c.get("gaps", []) or ["none"]:
+                    st.write(f"- {g}")
+        if any(c.get("discovery") for c in cards):
+            st.subheader("Dependency map")
+            st.graphviz_chart(discover.to_dot(cards), use_container_width=True)
 
 elif page == "Gate review":
     if not cards:
@@ -59,7 +66,26 @@ elif page == "Gate review":
         else:
             stage = pending[0]
             st.subheader(f"Review gate: {stage}")
-            st.write(card["stages"][stage]["summary"])
+            st.text(card["stages"][stage]["summary"])
+            if stage == "discover" and card.get("discovery"):
+                ev = card["inventory"].get("evidence", {})
+                st.markdown("**Inventory fields and the source quote behind each**")
+                st.dataframe(pd.DataFrame([
+                    {"field": k, "value": card["inventory"].get(k) if k != "name" else card["name"],
+                     "quote": ev.get(k, {}).get("evidence"), "source": ev.get(k, {}).get("source")}
+                    for k in ("name", "model_ref", "owner", "purpose", "model_type", "risk_tier",
+                              "last_validation_date", "documentation_date")]),
+                    use_container_width=True, hide_index=True)
+                if ev.get("risk_tier", {}).get("rationale"):
+                    st.caption(f"Risk tier rationale: {ev['risk_tier']['rationale']}")
+                findings = card["discovery"].get("documentation_findings", [])
+                if findings:
+                    st.markdown("**Documentation vs code contradictions**")
+                    st.dataframe(pd.DataFrame(findings), use_container_width=True, hide_index=True)
+                rejected = card["discovery"].get("rejected_agent_answers", [])
+                if rejected:
+                    st.markdown("**Agent answers rejected by the evidence check**")
+                    st.dataframe(pd.DataFrame(rejected), use_container_width=True, hide_index=True)
             with st.expander("Model card JSON"):
                 st.json(card)
             with st.form("gate"):

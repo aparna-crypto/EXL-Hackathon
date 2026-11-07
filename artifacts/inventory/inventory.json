@@ -1,0 +1,58 @@
+[
+  {
+    "model_id": "credit_scorecard",
+    "model_ref": "RCS-APP-02",
+    "name": "Retail Application Scorecard (RCS-APP-02)",
+    "language": "R",
+    "owner": "Retail Credit Risk Modelling",
+    "purpose": "Estimates 12-month probability of default for unsecured personal loan applications.",
+    "model_type": "Application PD scorecard: weight-of-evidence binning with logistic regression, scaled to points",
+    "risk_tier": "high",
+    "last_validation_date": "2021-03-15",
+    "documentation_status": "outdated",
+    "n_gaps": 5,
+    "data_sources": "data/processed/german_credit_test.csv; data/processed/german_credit_train.csv"
+  },
+  {
+    "model_id": "fraud_gbm",
+    "model_ref": "FRD-CARD-07",
+    "name": "fraud_gbm",
+    "language": "Python",
+    "owner": null,
+    "purpose": "Card transaction fraud detection model using gradient boosting on anonymised card transactions.",
+    "model_type": "Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for card fraud",
+    "risk_tier": null,
+    "last_validation_date": null,
+    "documentation_status": "missing",
+    "n_gaps": 4,
+    "data_sources": "data/processed/creditcard_test.parquet; data/processed/creditcard_train.parquet"
+  },
+  {
+    "model_id": "pricing_glm",
+    "model_ref": "PRC-MTPL-03",
+    "name": "Motor TPL claim frequency GLM",
+    "language": "Python",
+    "owner": "Personal Lines Pricing",
+    "purpose": "Expected claim frequency per policy-year, used as the frequency component of the technical premium.",
+    "model_type": "Poisson GLM with log link and log(exposure) offset (motor TPL claim frequency)",
+    "risk_tier": "high",
+    "last_validation_date": "2024-11",
+    "documentation_status": "outdated",
+    "n_gaps": 4,
+    "data_sources": "data/processed/fremtpl2_test.parquet; data/processed/fremtpl2_train.parquet"
+  },
+  {
+    "model_id": "sas_behaviour_scorecard",
+    "model_ref": "BHV-CC-01",
+    "name": "Credit Card Behavioural Score (BHV-CC-01)",
+    "language": "SAS",
+    "owner": "Cards Risk Analytics",
+    "purpose": "Monthly behavioural PD for existing credit card accounts, used for limit management and collections prioritisation.",
+    "model_type": "Behavioural PD scorecard (logistic regression with stepwise variable selection)",
+    "risk_tier": "medium",
+    "last_validation_date": null,
+    "documentation_status": "missing",
+    "n_gaps": 3,
+    "data_sources": "crdw.account_month; crdw.bureau_monthly; crdw.delinquency_flags"
+  }
+]

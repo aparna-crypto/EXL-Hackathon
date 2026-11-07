@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0.0",
+  "model_id": "fraud_gbm",
+  "card_version": 2,
+  "name": "fraud_gbm",
+  "language": "Python",
+  "source_files": [
+    "models/fraud_gbm/train_fraud.py"
+  ],
+  "inventory": {
+    "owner": null,
+    "purpose": "Card transaction fraud detection model using gradient boosting on anonymised card transactions.",
+    "model_type": "Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for card fraud",
+    "risk_tier": null,
+    "data_sources": [
+      "data/processed/creditcard_test.parquet",
+      "data/processed/creditcard_train.parquet"
+    ],
+    "last_validation_date": null,
+    "documentation_status": "missing",
+    "model_ref": "FRD-CARD-07",
+    "documentation_date": null,
+    "evidence": {
+      "name": {
+        "evidence": "\"Card transaction fraud model: gradient boosting on anonymised card transactions.\"",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      "model_ref": {
+        "evidence": "\"Model ID: FRD-CARD-07 (no owner, purpose or validation record is kept with this code).\"",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      "purpose": {
+        "evidence": "\"Card transaction fraud model: gradient boosting on anonymised card transactions.\"",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      "model_type": {
+        "evidence": "model = HistGradientBoostingClassifier(",
+        "source": "models/fraud_gbm/train_fraud.py"
+      }
+    },
+    "unknowns": [
+      "Model owner / responsible team (header states no owner is kept)",
+      "Business use of the fraud predictions and whether outputs are acted on automatically or reviewed by humans (needed for risk tier)",
+      "Number of customers or transaction volume affected in production",
+      "Last validation date and validation outcome (header states no validation record is kept)",
+      "Separate model documentation file and its date (no doc files in the scan)",
+      "Whether a production deployment or champion/challenger status exists",
+      "Source and governance of the input data files data/processed/creditcard_train.parquet and creditcard_test.parquet (provenance of the 'anonymised' data is not stated)",
+      "Approval, monitoring and change-control arrangements"
+    ],
+    "assessed_as_of": "2026-11-07"
+  },
+  "gaps": [
+    "Documentation missing: no documentation file is kept with the code (only code comments).",
+    "No validation record: last independent validation date is unknown.",
+    "No owner recorded.",
+    "No risk tier recorded."
+  ],
+  "stages": {
+    "discover": {
+      "status": "awaiting_review",
+      "completed_at": "2026-11-07T16:16:13.745647+00:00",
+      "summary": "FRD-CARD-07 fraud_gbm | owner: unknown | type: Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for card fraud | risk tier: unknown\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: Python, 52 LOC, libraries numpy, pandas, sklearn; 2 inputs, 2 outputs\nGaps (4):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- No owner recorded.\n- No risk tier recorded.\nLLM: claude-haiku-5-5, 3502 tokens, $0.0067"
+    },
+    "document": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "redevelop": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    },
+    "validate": {
+      "status": "not_started",
+      "completed_at": null,
+      "summary": null
+    }
+  },
+  "history": [
+    {
+      "card_version": 1,
+      "timestamp": "2026-11-07T16:16:08.646914+00:00",
+      "note": "card created"
+    },
+    {
+      "card_version": 2,
+      "timestamp": "2026-11-07T16:16:13.745669+00:00",
+      "note": "discover: completed, awaiting review"
+    }
+  ],
+  "discovery": {
+    "scanned_at": "2026-11-07T16:16:08.658528+00:00",
+    "languages": [
+      "Python"
+    ],
+    "files": [
+      {
+        "path": "models/fraud_gbm/train_fraud.py",
+        "language": "Python",
+        "header": "Card transaction fraud model: gradient boosting on anonymised card transactions.\n\nModel ID: FRD-CARD-07 (no owner, purpose or validation record is kept with this code).\nUsage:    python models/fraud_gbm/train_fraud.py [data_dir] [out_dir]",
+        "header_fields": {
+          "Model ID": "FRD-CARD-07 (no owner, purpose or validation record is kept with this code).",
+          "Usage": "python models/fraud_gbm/train_fraud.py [data_dir] [out_dir]"
+        },
+        "libraries": [
+          "numpy",
+          "pandas",
+          "sklearn"
+        ],
+        "stdlib": [
+          "json",
+          "pathlib",
+          "sys"
+        ],
+        "inputs": [
+          "data/processed/creditcard_test.parquet",
+          "data/processed/creditcard_train.parquet"
+        ],
+        "outputs": [
+          "artifacts/reference/fraud_gbm/metrics.json",
+          "artifacts/reference/fraud_gbm/predictions_test.csv.gz"
+        ],
+        "functions": [
+          "features",
+          "ks"
+        ],
+        "methods": [
+          "gradient boosting"
+        ],
+        "seeds": [
+          "42"
+        ],
+        "loc": 52
+      }
+    ],
+    "libraries": [
+      "numpy",
+      "pandas",
+      "sklearn"
+    ],
+    "inputs": [
+      "data/processed/creditcard_test.parquet",
+      "data/processed/creditcard_train.parquet"
+    ],
+    "outputs": [
+      "artifacts/reference/fraud_gbm/metrics.json",
+      "artifacts/reference/fraud_gbm/predictions_test.csv.gz"
+    ],
+    "methods": [
+      "gradient boosting"
+    ],
+    "seeds": [
+      "42"
+    ],
+    "loc": 52,
+    "doc_files": [],
+    "documentation_findings": [],
+    "rejected_agent_answers": [],
+    "llm": {
+      "model": "claude-haiku-5-5",
+      "calls": 1,
+      "input_tokens": 2695,
+      "output_tokens": 807,
+      "cost_usd": 0.00673,
+      "cached": false
+    },
+    "reviewer_feedback_used": null
+  }
+}
