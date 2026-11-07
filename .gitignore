@@ -224,3 +224,6 @@ artifacts/mlruns/
 artifacts/mlflow.db
 .env.*
 !.env.example
+
+# Datasets (downloaded by make data)
+data/

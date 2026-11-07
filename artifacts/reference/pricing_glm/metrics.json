@@ -1,0 +1,24 @@
+{
+  "model": "pricing_glm",
+  "language": "Python",
+  "statsmodels_version": "0.14.4",
+  "seed": 42,
+  "formula": "ClaimNb ~ C(VehPower) + C(VehAge) + C(DrivAge, Treatment('31-40')) + BonusMalus + LogDensity + C(Area) + C(VehBrand) + C(VehGas) + C(Region)",
+  "aic": 172097.16030154537,
+  "metrics": {
+    "train": {
+      "n": 542392,
+      "exposure": 286600.0194819972,
+      "observed_claims": 21171,
+      "predicted_claims": 21170.999999999636,
+      "mean_poisson_deviance": 0.24212080571505518
+    },
+    "test": {
+      "n": 135599,
+      "exposure": 71743.47598098661,
+      "observed_claims": 5234,
+      "predicted_claims": 5306.899002569732,
+      "mean_poisson_deviance": 0.238614231992223
+    }
+  }
+}

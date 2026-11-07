@@ -3,10 +3,12 @@ PY      ?= .venv/bin/python
 UV      ?= $(shell command -v uv || echo $$HOME/.local/bin/uv)
 MODEL   ?=
 
-.PHONY: help setup setup-r lock test lint run status ui mlflow-ui llm-check spend clean
+.PHONY: help setup setup-r lock data legacy test lint run status ui mlflow-ui llm-check spend clean
 
 help:
 	@echo "make setup            create .venv (Python 3.11) and install pinned deps + R packages"
+	@echo "make data             download public datasets and build fixed train/test splits"
+	@echo "make legacy           run the legacy models and save reference outputs"
 	@echo "make test             run the test suite"
 	@echo "make lint             ruff lint"
 	@echo "make run MODEL=<name> run the pipeline (with human gates) for models/<name>"
@@ -27,6 +29,14 @@ setup-r:
 
 lock:
 	$(UV) pip compile --python-version 3.11 requirements.in -o requirements.txt
+
+data:
+	$(PY) -m factory.data
+
+legacy:
+	Rscript models/credit_scorecard/scorecard.R
+	$(PY) models/fraud_gbm/train_fraud.py
+	$(PY) models/pricing_glm/pricing_glm.py
 
 test:
 	LLM_PROVIDER=fake $(PY) -m pytest

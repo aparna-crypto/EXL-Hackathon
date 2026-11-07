@@ -1,0 +1,8 @@
+RCS-APP-02 Retail Application Scorecard - Methodology note (version 1.0, June 2019)
+
+The scorecard uses four coarse-classed characteristics: checking account status, loan
+duration, credit history and savings balance. Each characteristic is grouped into 4 bins.
+The model is a logistic regression on dummy-coded bins. Scores are scaled to 500 points
+at odds 20:1 with 25 points to double the odds.
+
+Last independent validation: March 2021 (internal model validation team).

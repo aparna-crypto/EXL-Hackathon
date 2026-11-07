@@ -6,7 +6,7 @@ calls specialised agents (Discover, Document, Redevelop, Validate, Monitor) that
 **model card**. Every stage ends in a **human gate** (approve, reject or comment), and each decision is
 logged with a timestamp, the reviewer and the reason.
 
-> Status: **Stage 0 (setup) done.** The agents themselves are built in Stages 1-7. See `docs/work_log.md`.
+> Status: **Stages 0-1 done** (setup; legacy models, data and reference outputs). The agents are built in Stages 2-7. See `docs/work_log.md`.
 
 ## Quickstart
 
@@ -16,6 +16,8 @@ Prerequisites: Linux or macOS, `make`, R 4.x (`apt install r-base r-cran-jsonlit
 ```bash
 make setup                 # .venv with Python 3.11, pinned deps, R packages
 cp .env.example .env       # then set ANTHROPIC_API_KEY (never commit .env)
+make data                  # download public datasets, build fixed splits (about 1 min)
+make legacy                # run the legacy models, refresh artifacts/reference/
 make test                  # offline: uses a fake LLM, needs no key
 make llm-check             # confirms the configured Claude model IDs exist (free call)
 ```
