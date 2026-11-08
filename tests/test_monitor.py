@@ -6,6 +6,7 @@ import pytest
 from factory import model_card, monitor, orchestrator, validate
 from factory.config import REPO_ROOT
 from factory.llm import FakeBackend, LLMClient
+from test_validate import fake_report
 
 DATA = REPO_ROOT / "data" / "processed"
 CARD = REPO_ROOT / "artifacts/model_cards/credit_scorecard.json"
@@ -39,7 +40,6 @@ def fake_alert(model, system, prompt):
         return json.dumps({"alert": "Breach in month [[trigger.month]]. PSI was 0.99.",
                            "likely_drivers": ["Largest shift in [[trigger.month]]."],
                            "recommended_actions": ["Re-validate.", "Uses [[nope]]."]})
-    from tests.test_validate import fake_report
     return fake_report(model, system, prompt)
 
 
