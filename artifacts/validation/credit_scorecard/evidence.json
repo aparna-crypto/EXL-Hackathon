@@ -1,0 +1,495 @@
+{
+ "model_id": "credit_scorecard",
+ "builder": "scorecard_rebuild",
+ "metrics": {
+  "performance": {
+   "test_auc": 0.800952380952381,
+   "train_auc": 0.8170602526724975,
+   "auc_drop": 0.016107871720116518,
+   "test_auc_ci_low": 0.7448088549689932,
+   "test_auc_ci_high": 0.8534724654368829,
+   "test_gini": 0.6019047619047619,
+   "test_ks": 0.5063492063492063,
+   "test_n": 300,
+   "test_event_rate": 0.3,
+   "train_ks": 0.49523809523809526
+  },
+  "calibration": {
+   "mean_predicted": 0.2960427106092689,
+   "observed_rate": 0.3,
+   "brier_score": 0.15902182554287778,
+   "hl_statistic": 3.495324216247317,
+   "hl_pvalue": 0.8995522344128971,
+   "calib_ratio_dev": 0.013190964635770297
+  },
+  "stability": {
+   "score_psi": 0.011223501395379833,
+   "max_csi": 0.04342887507408934,
+   "tranche_min_auc": 0.7580952380952382,
+   "tranche_max_psi": 0.13036601740070353
+  },
+  "fairness": {
+   "score_cutoff": 496.53387021455177,
+   "test_approval_rate": 0.7233333333333334,
+   "sex_adverse_impact_ratio": 0.980782289827516,
+   "sex_equalized_odds_difference": 0.06753246753246755,
+   "age_group_adverse_impact_ratio": 0.9231063870535285,
+   "age_group_equalized_odds_difference": 0.13248847926267282
+  }
+ },
+ "checks": [
+  {
+   "section": "performance",
+   "check": "Discrimination: test AUC",
+   "metric": "performance.test_auc",
+   "value": 0.800952380952381,
+   "rule": ">= 0.75 green, >= 0.65 amber",
+   "rag": "green",
+   "note": "95% bootstrap CI 0.745-0.853"
+  },
+  {
+   "section": "performance",
+   "check": "Overfitting: train AUC - test AUC",
+   "metric": "performance.auc_drop",
+   "value": 0.016107871720116518,
+   "rule": "<= 0.03 green, <= 0.07 amber",
+   "rag": "green",
+   "note": ""
+  },
+  {
+   "section": "calibration",
+   "check": "Calibration in the large: |mean predicted / observed - 1|",
+   "metric": "calibration.calib_ratio_dev",
+   "value": 0.013190964635770297,
+   "rule": "<= 0.1 green, <= 0.2 amber",
+   "rag": "green",
+   "note": ""
+  },
+  {
+   "section": "calibration",
+   "check": "Hosmer-Lemeshow goodness of fit (p-value)",
+   "metric": "calibration.hl_pvalue",
+   "value": 0.8995522344128971,
+   "rule": ">= 0.05 green, >= 0.01 amber",
+   "rag": "green",
+   "note": "10 equal-count groups, 8 d.f."
+  },
+  {
+   "section": "stability",
+   "check": "Score PSI (train -> test)",
+   "metric": "stability.score_psi",
+   "value": 0.011223501395379833,
+   "rule": "<= 0.1 green, <= 0.25 amber",
+   "rag": "green",
+   "note": ""
+  },
+  {
+   "section": "stability",
+   "check": "Characteristic stability: largest CSI",
+   "metric": "stability.max_csi",
+   "value": 0.04342887507408934,
+   "rule": "<= 0.1 green, <= 0.25 amber",
+   "rag": "green",
+   "note": "variable age"
+  },
+  {
+   "section": "stability",
+   "check": "Synthetic out-of-time: worst tranche score PSI",
+   "metric": "stability.tranche_max_psi",
+   "value": 0.13036601740070353,
+   "rule": "<= 0.1 green, <= 0.25 amber",
+   "rag": "amber",
+   "note": "3 tranches of the test set in id order (synthetic time)"
+  },
+  {
+   "section": "fairness",
+   "check": "sex: adverse impact ratio of approval rates",
+   "metric": "fairness.sex_adverse_impact_ratio",
+   "value": 0.980782289827516,
+   "rule": ">= 0.8 green, >= 0.7 amber",
+   "rag": "green",
+   "note": ""
+  },
+  {
+   "section": "fairness",
+   "check": "sex: equalized odds difference",
+   "metric": "fairness.sex_equalized_odds_difference",
+   "value": 0.06753246753246755,
+   "rule": "<= 0.1 green, <= 0.2 amber",
+   "rag": "green",
+   "note": ""
+  },
+  {
+   "section": "fairness",
+   "check": "age_group: adverse impact ratio of approval rates",
+   "metric": "fairness.age_group_adverse_impact_ratio",
+   "value": 0.9231063870535285,
+   "rule": ">= 0.8 green, >= 0.7 amber",
+   "rag": "green",
+   "note": ""
+  },
+  {
+   "section": "fairness",
+   "check": "age_group: equalized odds difference",
+   "metric": "fairness.age_group_equalized_odds_difference",
+   "value": 0.13248847926267282,
+   "rule": "<= 0.1 green, <= 0.2 amber",
+   "rag": "amber",
+   "note": ""
+  },
+  {
+   "section": "fairness",
+   "check": "foreign_worker: group too small to rate",
+   "metric": null,
+   "value": null,
+   "rule": "n >= 30 per group",
+   "rag": "amber",
+   "note": "A202 n=9"
+  }
+ ],
+ "notes": {
+  "performance": [],
+  "calibration": [],
+  "stability": [
+   "German Credit has no application date, so the out-of-time back-test orders the test set by record id and splits it into 3 tranches. This is a synthetic time ordering, not a true out-of-time sample."
+  ],
+  "fairness": [
+   "Decision rule for the fairness tests: approve if score >= 496.5, the cut-off that approves 70% of the training sample. Favourable outcome = approval; equalized odds compares approval rates among good and among bad applicants. Protected attributes are excluded from the model but kept for testing. Age is a model input."
+  ]
+ },
+ "not_assessed": {},
+ "data": "German Credit (UCI), fixed split seed 42: 700 train / 300 test rows. Re-scoring with the rebuild's bins, WoE and coefficients reproduces its test predictions (max abs diff 2.2e-16).",
+ "model_under_test": "redeveloped/credit_scorecard/scorecard.py (Python rebuild, sha256 dc0f6c4e40ed, approved at Gate 3)",
+ "thresholds": {
+  "auc_min": [
+   0.75,
+   0.65
+  ],
+  "auc_drop_max": [
+   0.03,
+   0.07
+  ],
+  "hl_pvalue_min": [
+   0.05,
+   0.01
+  ],
+  "calib_ratio_dev_max": [
+   0.1,
+   0.2
+  ],
+  "psi_max": [
+   0.1,
+   0.25
+  ],
+  "ae_dev_max": [
+   0.05,
+   0.1
+  ],
+  "segment_ae_dev_max": [
+   0.1,
+   0.2
+  ],
+  "air_min": [
+   0.8,
+   0.7
+  ],
+  "eod_max": [
+   0.1,
+   0.2
+  ]
+ },
+ "tables": {
+  "performance": {},
+  "calibration": {
+   "Calibration by decile of predicted value": [
+    {
+     "group": 1,
+     "n": 30,
+     "observed": 2,
+     "expected": 0.8866713630993679,
+     "mean_predicted": 0.029555712103312263,
+     "observed_rate": 0.06666666666666667
+    },
+    {
+     "group": 2,
+     "n": 30,
+     "observed": 2,
+     "expected": 1.9084739233558974,
+     "mean_predicted": 0.06361579744519658,
+     "observed_rate": 0.06666666666666667
+    },
+    {
+     "group": 3,
+     "n": 30,
+     "observed": 2,
+     "expected": 2.8816545178854898,
+     "mean_predicted": 0.096055150596183,
+     "observed_rate": 0.06666666666666667
+    },
+    {
+     "group": 4,
+     "n": 30,
+     "observed": 5,
+     "expected": 4.21380615687854,
+     "mean_predicted": 0.14046020522928468,
+     "observed_rate": 0.16666666666666666
+    },
+    {
+     "group": 5,
+     "n": 30,
+     "observed": 5,
+     "expected": 5.894670490596324,
+     "mean_predicted": 0.1964890163532108,
+     "observed_rate": 0.16666666666666666
+    },
+    {
+     "group": 6,
+     "n": 30,
+     "observed": 8,
+     "expected": 8.144360881764676,
+     "mean_predicted": 0.2714786960588225,
+     "observed_rate": 0.26666666666666666
+    },
+    {
+     "group": 7,
+     "n": 30,
+     "observed": 11,
+     "expected": 10.702251045572632,
+     "mean_predicted": 0.35674170151908774,
+     "observed_rate": 0.36666666666666664
+    },
+    {
+     "group": 8,
+     "n": 30,
+     "observed": 16,
+     "expected": 13.651475554218239,
+     "mean_predicted": 0.45504918514060794,
+     "observed_rate": 0.5333333333333333
+    },
+    {
+     "group": 9,
+     "n": 30,
+     "observed": 18,
+     "expected": 17.665432172309696,
+     "mean_predicted": 0.5888477390769898,
+     "observed_rate": 0.6
+    },
+    {
+     "group": 10,
+     "n": 30,
+     "observed": 21,
+     "expected": 22.86401707709982,
+     "mean_predicted": 0.762133902569994,
+     "observed_rate": 0.7
+    }
+   ]
+  },
+  "stability": {
+   "Score distribution: train vs test": [
+    {
+     "bin": "(-inf, 467.644]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.1,
+     "psi": 0.0
+    },
+    {
+     "bin": "(467.644, 483.885]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.09333333333333334,
+     "psi": 0.00045995247657967635
+    },
+    {
+     "bin": "(483.885, 496.534]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.08333333333333333,
+     "psi": 0.00303869261323258
+    },
+    {
+     "bin": "(496.534, 508.957]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.11333333333333333,
+     "psi": 0.0016688419060534119
+    },
+    {
+     "bin": "(508.957, 520.398]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.09666666666666666,
+     "psi": 0.00011300517225227178
+    },
+    {
+     "bin": "(520.398, 533.409]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.11,
+     "psi": 0.000953101798043247
+    },
+    {
+     "bin": "(533.409, 547.901]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.11333333333333333,
+     "psi": 0.0016688419060534119
+    },
+    {
+     "bin": "(547.901, 560.283]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.11,
+     "psi": 0.000953101798043247
+    },
+    {
+     "bin": "(560.283, 577.081]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.09333333333333334,
+     "psi": 0.00045995247657967635
+    },
+    {
+     "bin": "(577.081, inf]",
+     "expected_pct": 0.1,
+     "actual_pct": 0.08666666666666667,
+     "psi": 0.001908011248542311
+    }
+   ],
+   "Characteristic stability (CSI) per selected variable": [
+    {
+     "variable": "checking_status",
+     "csi": 1.6788406097941322e-05
+    },
+    {
+     "variable": "duration",
+     "csi": 0.009007159485941683
+    },
+    {
+     "variable": "credit_history",
+     "csi": 0.018371837401760762
+    },
+    {
+     "variable": "purpose",
+     "csi": 0.03660154569391442
+    },
+    {
+     "variable": "credit_amount",
+     "csi": 0.018718468815915625
+    },
+    {
+     "variable": "savings",
+     "csi": 0.03158129629331076
+    },
+    {
+     "variable": "employment_since",
+     "csi": 0.033150472602708966
+    },
+    {
+     "variable": "installment_rate",
+     "csi": 0.011795249831443939
+    },
+    {
+     "variable": "other_debtors",
+     "csi": 0.0034109877052447227
+    },
+    {
+     "variable": "property",
+     "csi": 0.0029946226774652147
+    },
+    {
+     "variable": "age",
+     "csi": 0.04342887507408934
+    },
+    {
+     "variable": "other_installment_plans",
+     "csi": 0.016158244086529504
+    },
+    {
+     "variable": "housing",
+     "csi": 0.0010059442862752717
+    },
+    {
+     "variable": "job",
+     "csi": 0.016253026759055954
+    }
+   ],
+   "Synthetic out-of-time tranches (test set, id order)": [
+    {
+     "tranche": 1,
+     "n": 100,
+     "bad_rate": 0.3,
+     "auc": 0.7580952380952382,
+     "psi_vs_train": 0.035056259991342195
+    },
+    {
+     "tranche": 2,
+     "n": 100,
+     "bad_rate": 0.29,
+     "auc": 0.8125303545410393,
+     "psi_vs_train": 0.13036601740070353
+    },
+    {
+     "tranche": 3,
+     "n": 100,
+     "bad_rate": 0.31,
+     "auc": 0.825619448340346,
+     "psi_vs_train": 0.04296251472422513
+    }
+   ]
+  },
+  "fairness": {
+   "Outcomes by sex (test set)": [
+    {
+     "group": "female",
+     "approval_rate": 0.7326732673267327,
+     "approval_rate_goods": 0.8636363636363636,
+     "approval_rate_bads": 0.4857142857142857,
+     "n": 101,
+     "bad_rate": 0.3465346534653465,
+     "auc": 0.8402597402597403
+    },
+    {
+     "group": "male",
+     "approval_rate": 0.7185929648241206,
+     "approval_rate_goods": 0.8333333333333334,
+     "approval_rate_bads": 0.41818181818181815,
+     "n": 199,
+     "bad_rate": 0.27638190954773867,
+     "auc": 0.7790404040404041
+    }
+   ],
+   "Outcomes by age_group (test set)": [
+    {
+     "group": "25_plus",
+     "approval_rate": 0.7344398340248963,
+     "approval_rate_goods": 0.8491620111731844,
+     "approval_rate_bads": 0.4032258064516129,
+     "n": 241,
+     "bad_rate": 0.2572614107883817,
+     "auc": 0.8058208686249775
+    },
+    {
+     "group": "under_25",
+     "approval_rate": 0.6779661016949152,
+     "approval_rate_goods": 0.8064516129032258,
+     "approval_rate_bads": 0.5357142857142857,
+     "n": 59,
+     "bad_rate": 0.4745762711864407,
+     "auc": 0.7730414746543778
+    }
+   ],
+   "Outcomes by foreign_worker (test set)": [
+    {
+     "group": "A201",
+     "approval_rate": 0.718213058419244,
+     "approval_rate_goods": 0.8374384236453202,
+     "approval_rate_bads": 0.4431818181818182,
+     "n": 291,
+     "bad_rate": 0.3024054982817869,
+     "auc": 0.7983654276757727
+    },
+    {
+     "group": "A202",
+     "approval_rate": 0.8888888888888888,
+     "approval_rate_goods": 1.0,
+     "approval_rate_bads": 0.5,
+     "n": 9,
+     "bad_rate": 0.2222222222222222,
+     "auc": 0.8571428571428572
+    }
+   ]
+  }
+ }
+}

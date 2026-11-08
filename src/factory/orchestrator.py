@@ -12,7 +12,7 @@ from typing import Callable
 
 import mlflow
 
-from factory import discover, document, gates, model_card, redevelop, tracking
+from factory import discover, document, gates, model_card, redevelop, tracking, validate
 from factory.agents import AgentError
 from factory.config import REPO_ROOT, load_config
 from factory.llm import BudgetExceeded, LLMClient, LLMError
@@ -47,7 +47,8 @@ def _not_implemented(card: dict, ctx: Context) -> dict:
 # Filled in as stages are built (Stage 2: discover, 3: document, 4: redevelop, 5: validate).
 STAGE_FUNCS: dict[str, StageFn] = {"discover": discover.run_stage,
                                    "document": document.run_stage,
-                                   "redevelop": redevelop.run_stage}
+                                   "redevelop": redevelop.run_stage,
+                                   "validate": validate.run_stage}
 
 
 def find_source_files(model_dir: Path) -> tuple[str, list[str]]:

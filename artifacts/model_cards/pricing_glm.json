@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "pricing_glm",
-  "card_version": 5,
+  "card_version": 7,
   "name": "Motor TPL claim frequency GLM",
   "language": "Python",
   "source_files": [
@@ -89,14 +89,14 @@
       "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/pricing_glm.md\nSection confidence: Purpose and intended use high, Data medium, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n12 variables, 8 transformations, 4 assumptions, 6 limitations, 8 unknowns\nCoverage vs fitted model: 8/9 variables\nGaps (2):\n- Model uses variables not documented: LogDensity.\n- Documented as inputs but not in the fitted model: Density.\nLLM: claude-sonnet-5-5, 12584 tokens, $0.1200"
     },
     "redevelop": {
-      "status": "not_started",
+      "status": "not_applicable",
       "completed_at": null,
-      "summary": null
+      "summary": "Not applicable: only R models are rebuilt in Python; this model is Python."
     },
     "validate": {
-      "status": "not_started",
-      "completed_at": null,
-      "summary": null
+      "status": "awaiting_review",
+      "completed_at": "2026-11-08T21:43:54.485452+00:00",
+      "summary": "Validation report: docs/validation/pricing_glm.html (+ PDF)\nModel under test: legacy Python model pricing_glm: committed reference test predictions (artifacts/reference/pricing_glm, statsmodels 0.14.4)\nOverall: AMBER - Fit for use with conditions: remediate the amber findings.\nBy area: performance GREEN, calibration AMBER, stability GREEN, fairness AMBER\n- [GREEN] Overall actual / expected claims: |A/E - 1|: 0.014\n- [AMBER] Worst predicted-frequency decile: |A/E - 1|: 0.159\n- [GREEN] Worst Area segment: |A/E - 1|: 0.054\n- [GREEN] Worst VehGas segment: |A/E - 1|: 0.019\n- [GREEN] Input stability: largest feature PSI (train -> test): 1.14e-04\n- [AMBER] Driver age bands: worst |A/E - 1|: 0.125\nFindings: 3; narrative sentences dropped by the number check: 0\nComputation 1.5s; LLM: claude-sonnet-5-5, 3785 tokens, $0.0329"
     }
   },
   "history": [
@@ -124,6 +124,16 @@
       "card_version": 5,
       "timestamp": "2026-11-08T02:36:13.207972+00:00",
       "note": "document: gate approved"
+    },
+    {
+      "card_version": 6,
+      "timestamp": "2026-11-08T21:43:39.490332+00:00",
+      "note": "redevelop: not applicable"
+    },
+    {
+      "card_version": 7,
+      "timestamp": "2026-11-08T21:43:54.485470+00:00",
+      "note": "validate: completed, awaiting review"
     }
   ],
   "discovery": {
@@ -620,6 +630,111 @@
     ],
     "status": "pending Gate 2",
     "doc_path": "/home/ubuntu/repos/EXL-Hackathon/docs/models/pricing_glm.md",
+    "reviewer_feedback_used": null
+  },
+  "validation": {
+    "generated_at": "2026-11-08T21:43:54.170898+00:00",
+    "status": "pending Gate 4",
+    "model_under_test": "legacy Python model pricing_glm: committed reference test predictions (artifacts/reference/pricing_glm, statsmodels 0.14.4)",
+    "data": "freMTPL2 motor claims, random split seed 42: 542,392 train / 135,599 test policies.",
+    "overall_rag": "amber",
+    "outcome": "Fit for use with conditions: remediate the amber findings.",
+    "section_rag": {
+      "performance": "green",
+      "calibration": "amber",
+      "stability": "green",
+      "fairness": "amber"
+    },
+    "checks": [
+      {
+        "section": "performance",
+        "check": "Overall actual / expected claims: |A/E - 1|",
+        "metric": "performance.ae_dev",
+        "value": 0.013736647811026459,
+        "rule": "<= 0.05 green, <= 0.1 amber",
+        "rag": "green",
+        "note": ""
+      },
+      {
+        "section": "calibration",
+        "check": "Worst predicted-frequency decile: |A/E - 1|",
+        "metric": "calibration.worst_decile_ae_dev",
+        "value": 0.15888116096591776,
+        "rule": "<= 0.1 green, <= 0.2 amber",
+        "rag": "amber",
+        "note": ""
+      },
+      {
+        "section": "calibration",
+        "check": "Worst Area segment: |A/E - 1|",
+        "metric": "calibration.worst_Area_ae_dev",
+        "value": 0.05390244565348057,
+        "rule": "<= 0.1 green, <= 0.2 amber",
+        "rag": "green",
+        "note": "segments with exposure >= 1,000"
+      },
+      {
+        "section": "calibration",
+        "check": "Worst VehGas segment: |A/E - 1|",
+        "metric": "calibration.worst_VehGas_ae_dev",
+        "value": 0.018537132930297684,
+        "rule": "<= 0.1 green, <= 0.2 amber",
+        "rag": "green",
+        "note": "segments with exposure >= 1,000"
+      },
+      {
+        "section": "stability",
+        "check": "Input stability: largest feature PSI (train -> test)",
+        "metric": "stability.max_feature_psi",
+        "value": 0.00011383180142936095,
+        "rule": "<= 0.1 green, <= 0.25 amber",
+        "rag": "green",
+        "note": "feature Region"
+      },
+      {
+        "section": "fairness",
+        "check": "Driver age bands: worst |A/E - 1|",
+        "metric": "fairness.worst_driver_age_ae_dev",
+        "value": 0.1245566709287309,
+        "rule": "<= 0.1 green, <= 0.2 amber",
+        "rag": "amber",
+        "note": "checks no age band is systematically over- or under-priced"
+      }
+    ],
+    "not_assessed": {},
+    "findings": [
+      {
+        "severity": "medium",
+        "section": "calibration",
+        "finding": "The worst predicted-frequency decile has an A/E deviation of 0.159, outside the green tolerance, although overall A/E is 0.986. Predictions are therefore not uniformly calibrated across the risk range.",
+        "recommendation": "Identify which decile is affected and whether the bias is over- or under-prediction, and test whether recalibration or a revised functional form removes it. Monitor decile A/E in ongoing monitoring with an agreed trigger."
+      },
+      {
+        "severity": "medium",
+        "section": "fairness",
+        "finding": "At least one driver age band shows an A/E deviation of 0.125, suggesting that age band is systematically mispriced relative to experience.",
+        "recommendation": "Review age-band A/E in detail, assess whether the age effect specification (for example banding or non-linearity) needs refinement, and refer the permissibility of using age as a rating factor to the legal and conduct reviewer."
+      },
+      {
+        "severity": "low",
+        "section": "performance",
+        "finding": "Documentation does not match the fitted model: LogDensity is used but undocumented, while Density is documented as an input but is not in the fitted model.",
+        "recommendation": "Update the model documentation to describe the LogDensity transformation and remove or correct the reference to Density, with owner sign-off."
+      }
+    ],
+    "narrative_dropped": [],
+    "llm": {
+      "model": "claude-sonnet-5-5",
+      "calls": 1,
+      "input_tokens": 1986,
+      "output_tokens": 1799,
+      "cost_usd": 0.032943,
+      "cached": false
+    },
+    "report_html": "docs/validation/pricing_glm.html",
+    "report_pdf": "docs/validation/pricing_glm.pdf",
+    "evidence_path": "artifacts/validation/pricing_glm/evidence.json",
+    "elapsed_s": 1.5,
     "reviewer_feedback_used": null
   }
 }

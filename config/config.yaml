@@ -15,6 +15,8 @@ paths:
   redeveloped: redeveloped            # Stage 4 Python rebuilds (<model>/<name>.py)
   redevelop_artifacts: artifacts/redevelop  # Stage 4 attempts, test results, parity.json
   parity_report: docs/parity_report.md
+  validation_reports: docs/validation          # Stage 5 reports (<model>.html / .pdf)
+  validation_artifacts: artifacts/validation   # Stage 5 evidence.json + charts
 
 llm:
   provider: anthropic                 # anthropic | fake   (env: LLM_PROVIDER)
@@ -40,6 +42,7 @@ llm:
     inventory: disabled
     documentation: between_tools
     translation: between_tools
+    report: between_tools
     monitor: disabled
     healthcheck: disabled
   # Thinking for escalation models. Opus rejects both `disabled` and `between_tools` and asks for
@@ -62,12 +65,12 @@ llm:
     per_run_tokens: 300000
     # Raised from $1.50 for Stage 4: worst case is 3 Sonnet + 2 Opus translation attempts at
     # 12k output tokens each (~$2.80); the pre-call check blocks any attempt that would pass this.
-    per_run_usd: 3.00
+    per_run_usd: 1.00
     # A "session" is a named spending bucket summed across all runs from the ledger.
     # Agreed with the team: $7 for Stages 0-3 (bucket `stages-0-3`, closed at $0.948), $4 for
     # Stage 4. Start a new bucket only on purpose.
-    session_id: stage-4
-    session_usd: 4.00
+    session_id: stage-5
+    session_usd: 2.00
 
 tracking:
   backend: local                      # local | azureml   (env: TRACKING_BACKEND)
@@ -115,6 +118,33 @@ redevelop:
     metric: 1.0e-9
   allowed_imports: [numpy, pandas, scipy, statsmodels, sklearn, json, math, pathlib, sys, argparse,
                     typing, dataclasses, __future__, warnings, collections, functools, itertools]
+
+validate:
+  # model_id -> evidence builder; models not listed (e.g. SAS: no runtime) are not applicable
+  models: {credit_scorecard: scorecard_rebuild, fraud_gbm: binary_classifier,
+           pricing_glm: poisson_frequency}
+  max_tokens: 6000
+  bootstrap_samples: 500              # AUC 95% CI, seed = top-level seed
+  calibration_bins: 10
+  psi_bins: 10
+  synthetic_time_tranches: 3          # German Credit has no dates: id order stands in for time
+  thresholds:                         # [green limit, amber limit]; beyond amber = red
+    auc_min: [0.75, 0.65]             # test AUC
+    auc_drop_max: [0.03, 0.07]        # train AUC - test AUC
+    hl_pvalue_min: [0.05, 0.01]       # Hosmer-Lemeshow p-value
+    calib_ratio_dev_max: [0.10, 0.20] # |mean predicted / observed rate - 1|
+    psi_max: [0.10, 0.25]             # score PSI, characteristic (CSI) and feature PSI
+    ae_dev_max: [0.05, 0.10]          # pricing: |actual / expected - 1| overall
+    segment_ae_dev_max: [0.10, 0.20]  # pricing: worst segment with enough exposure
+    air_min: [0.80, 0.70]             # adverse impact ratio of approval rates (four-fifths rule)
+    eod_max: [0.10, 0.20]             # equalized odds difference
+  fairness:
+    protected: {credit_scorecard: [sex, age_group, foreign_worker]}
+    approval_rate: 0.70               # cut-off = train score quantile giving this approval rate
+    min_group_n: 30                   # smaller groups are reported, not rated
+  pricing:
+    segments: [Area, VehGas]
+    min_segment_exposure: 1000
 
 gates:
   # Every pipeline stage ends in a human gate, in this order.

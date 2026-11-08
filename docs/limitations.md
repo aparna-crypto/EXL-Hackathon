@@ -42,3 +42,20 @@
   import allow-list and stripped environment reduce, not remove, that risk.
 - The Opus escalation path is tested with a fake LLM only; the live run passed on Sonnet's second attempt.
 
+## Stage 5
+- **Synthetic out-of-time.** German Credit has no dates; the scorecard's OOT tranches are id-ordered
+  slices of the 300-row test set (100 rows each), so their PSI is noisy and not evidence of real drift.
+- **Small samples.** The scorecard test set has 300 rows (AUC CI 0.745-0.853); `foreign_worker=A202` has 9
+  test records and is not rated.
+- **Fraud and pricing use the legacy reference predictions.** Development-sample predictions are not
+  kept, so there is no score PSI for them (feature PSI instead) and the fraud train AUC comes from the
+  legacy metrics file.
+- **Fraud fairness not assessable:** the data has only anonymised PCA features, amount and time.
+- **Fraud was not validated through the pipeline:** its Gate 2 (documentation) is still awaiting review.
+- **Thresholds are illustrative**, not a bank's model risk policy; they sit in config for the reviewer.
+- **Narrative findings can repeat upstream errors.** The pricing report repeats the Stage 3
+  `Density`/`LogDensity` name-matching false gap as a low-severity finding. Numbers in the narrative are
+  always filled from evidence; interpretation still needs the Gate 4 reviewer.
+- **The PDF is a summary** (ratings, checks, findings, charts); the full report with tables and
+  narrative is the HTML.
+

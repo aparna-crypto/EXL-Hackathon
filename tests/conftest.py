@@ -20,6 +20,9 @@ def cfg(tmp_path, monkeypatch):
         "redeveloped": str(tmp_path / "redeveloped"),
         "redevelop_artifacts": str(tmp_path / "redevelop"),
         "parity_report": str(tmp_path / "parity_report.md"),
+        "validation_reports": str(tmp_path / "validation_reports"),
+        "validation_artifacts": str(tmp_path / "validation"),
     }
+    c["llm"]["budget"].update(per_run_usd=10.0, session_usd=100.0)  # tests never use live caps
     c["tracking"]["local_uri"] = str(tmp_path / "mlruns")
     return c

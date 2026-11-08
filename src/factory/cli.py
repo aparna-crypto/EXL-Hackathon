@@ -18,7 +18,12 @@ def prompt_decision(card: dict, stage: str, summary: str):
     print(f"\n=== Gate: {stage} | model: {card['model_id']} | card v{card['card_version']} ===")
     print(summary or "(no summary)")
     while True:
-        decision = input("Decision [approve/reject/comment, blank = defer to UI]: ").strip().lower()
+        try:
+            decision = input("Decision [approve/reject/comment, blank = defer to UI]: ")
+        except EOFError:  # non-interactive run: leave the decision to the UI
+            print("\n(no terminal input: decide in the UI)")
+            return None
+        decision = decision.strip().lower()
         if not decision:
             return None
         if decision in gates.DECISIONS:

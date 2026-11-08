@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "credit_scorecard",
-  "card_version": 9,
+  "card_version": 11,
   "name": "Retail Application Scorecard (RCS-APP-02)",
   "language": "R",
   "source_files": [
@@ -85,14 +85,14 @@
       "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/credit_scorecard.md\nSection confidence: Purpose and intended use high, Data medium, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n20 variables, 8 transformations, 5 assumptions, 7 limitations, 10 unknowns\nCoverage vs fitted model: 14/14 variables\nGaps (0):\nLLM: claude-sonnet-5-5, 15260 tokens, $0.1545"
     },
     "redevelop": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-08T02:41:54.039762+00:00",
       "summary": "Python rebuild: redeveloped/credit_scorecard/scorecard.py (from models/credit_scorecard/scorecard.R)\nAttempts: 2 (claude-sonnet-5-5 FAIL, claude-sonnet-5-5 PASS)\nTransformation unit tests: 18/18 cases passed across 8 transformations\nParity checks: 38/38 passed (original + resampled split)\nMax abs diff (original): coefficient estimates 3.4e-15, predicted PD 1.5e-15, score 6.8e-13, AUC (train, test) 4.4e-16\nParity report: docs/parity_report.md\nLLM: 0 tokens, $0.0000"
     },
     "validate": {
-      "status": "not_started",
-      "completed_at": null,
-      "summary": null
+      "status": "awaiting_review",
+      "completed_at": "2026-11-08T21:43:37.144177+00:00",
+      "summary": "Validation report: docs/validation/credit_scorecard.html (+ PDF)\nModel under test: redeveloped/credit_scorecard/scorecard.py (Python rebuild, sha256 dc0f6c4e40ed, approved at Gate 3)\nOverall: AMBER - Fit for use with conditions: remediate the amber findings.\nBy area: performance GREEN, calibration GREEN, stability AMBER, fairness AMBER\n- [GREEN] Discrimination: test AUC: 0.801\n- [GREEN] Overfitting: train AUC - test AUC: 0.016\n- [GREEN] Calibration in the large: |mean predicted / observed - 1|: 0.013\n- [GREEN] Hosmer-Lemeshow goodness of fit (p-value): 0.900\n- [GREEN] Score PSI (train -> test): 0.011\n- [GREEN] Characteristic stability: largest CSI: 0.043\n- [AMBER] Synthetic out-of-time: worst tranche score PSI: 0.130\n- [GREEN] sex: adverse impact ratio of approval rates: 0.981\n- [GREEN] sex: equalized odds difference: 0.068\n- [GREEN] age_group: adverse impact ratio of approval rates: 0.923\n- [AMBER] age_group: equalized odds difference: 0.132\n- [AMBER] foreign_worker: group too small to rate: n/a\nFindings: 2; narrative sentences dropped by the number check: 0\nComputation 1.0s; LLM: claude-sonnet-5-5, 4609 tokens, $0.0364"
     }
   },
   "history": [
@@ -140,6 +140,16 @@
       "card_version": 9,
       "timestamp": "2026-11-08T02:43:17.870637+00:00",
       "note": "redevelop: card paths made repo-relative (cached replies)"
+    },
+    {
+      "card_version": 10,
+      "timestamp": "2026-11-08T21:43:21.743476+00:00",
+      "note": "redevelop: gate approved"
+    },
+    {
+      "card_version": 11,
+      "timestamp": "2026-11-08T21:43:37.144195+00:00",
+      "note": "validate: completed, awaiting review"
     }
   ],
   "discovery": {
@@ -841,5 +851,158 @@
         "N (train, test)": 0.0
       }
     }
+  },
+  "validation": {
+    "generated_at": "2026-11-08T21:43:36.727305+00:00",
+    "status": "pending Gate 4",
+    "model_under_test": "redeveloped/credit_scorecard/scorecard.py (Python rebuild, sha256 dc0f6c4e40ed, approved at Gate 3)",
+    "data": "German Credit (UCI), fixed split seed 42: 700 train / 300 test rows. Re-scoring with the rebuild's bins, WoE and coefficients reproduces its test predictions (max abs diff 2.2e-16).",
+    "overall_rag": "amber",
+    "outcome": "Fit for use with conditions: remediate the amber findings.",
+    "section_rag": {
+      "performance": "green",
+      "calibration": "green",
+      "stability": "amber",
+      "fairness": "amber"
+    },
+    "checks": [
+      {
+        "section": "performance",
+        "check": "Discrimination: test AUC",
+        "metric": "performance.test_auc",
+        "value": 0.800952380952381,
+        "rule": ">= 0.75 green, >= 0.65 amber",
+        "rag": "green",
+        "note": "95% bootstrap CI 0.745-0.853"
+      },
+      {
+        "section": "performance",
+        "check": "Overfitting: train AUC - test AUC",
+        "metric": "performance.auc_drop",
+        "value": 0.016107871720116518,
+        "rule": "<= 0.03 green, <= 0.07 amber",
+        "rag": "green",
+        "note": ""
+      },
+      {
+        "section": "calibration",
+        "check": "Calibration in the large: |mean predicted / observed - 1|",
+        "metric": "calibration.calib_ratio_dev",
+        "value": 0.013190964635770297,
+        "rule": "<= 0.1 green, <= 0.2 amber",
+        "rag": "green",
+        "note": ""
+      },
+      {
+        "section": "calibration",
+        "check": "Hosmer-Lemeshow goodness of fit (p-value)",
+        "metric": "calibration.hl_pvalue",
+        "value": 0.8995522344128971,
+        "rule": ">= 0.05 green, >= 0.01 amber",
+        "rag": "green",
+        "note": "10 equal-count groups, 8 d.f."
+      },
+      {
+        "section": "stability",
+        "check": "Score PSI (train -> test)",
+        "metric": "stability.score_psi",
+        "value": 0.011223501395379833,
+        "rule": "<= 0.1 green, <= 0.25 amber",
+        "rag": "green",
+        "note": ""
+      },
+      {
+        "section": "stability",
+        "check": "Characteristic stability: largest CSI",
+        "metric": "stability.max_csi",
+        "value": 0.04342887507408934,
+        "rule": "<= 0.1 green, <= 0.25 amber",
+        "rag": "green",
+        "note": "variable age"
+      },
+      {
+        "section": "stability",
+        "check": "Synthetic out-of-time: worst tranche score PSI",
+        "metric": "stability.tranche_max_psi",
+        "value": 0.13036601740070353,
+        "rule": "<= 0.1 green, <= 0.25 amber",
+        "rag": "amber",
+        "note": "3 tranches of the test set in id order (synthetic time)"
+      },
+      {
+        "section": "fairness",
+        "check": "sex: adverse impact ratio of approval rates",
+        "metric": "fairness.sex_adverse_impact_ratio",
+        "value": 0.980782289827516,
+        "rule": ">= 0.8 green, >= 0.7 amber",
+        "rag": "green",
+        "note": ""
+      },
+      {
+        "section": "fairness",
+        "check": "sex: equalized odds difference",
+        "metric": "fairness.sex_equalized_odds_difference",
+        "value": 0.06753246753246755,
+        "rule": "<= 0.1 green, <= 0.2 amber",
+        "rag": "green",
+        "note": ""
+      },
+      {
+        "section": "fairness",
+        "check": "age_group: adverse impact ratio of approval rates",
+        "metric": "fairness.age_group_adverse_impact_ratio",
+        "value": 0.9231063870535285,
+        "rule": ">= 0.8 green, >= 0.7 amber",
+        "rag": "green",
+        "note": ""
+      },
+      {
+        "section": "fairness",
+        "check": "age_group: equalized odds difference",
+        "metric": "fairness.age_group_equalized_odds_difference",
+        "value": 0.13248847926267282,
+        "rule": "<= 0.1 green, <= 0.2 amber",
+        "rag": "amber",
+        "note": ""
+      },
+      {
+        "section": "fairness",
+        "check": "foreign_worker: group too small to rate",
+        "metric": null,
+        "value": null,
+        "rule": "n >= 30 per group",
+        "rag": "amber",
+        "note": "A202 n=9"
+      }
+    ],
+    "not_assessed": {},
+    "findings": [
+      {
+        "severity": "medium",
+        "section": "stability",
+        "finding": "The worst synthetic out-of-time tranche shows a score PSI of 0.130, above the green threshold, while train-to-test PSI is green. The tranches are an id-ordered split rather than true time periods, so the drift signal cannot be attributed to genuine temporal change.",
+        "recommendation": "Run a true out-of-time back-test on dated application data before or shortly after deployment, and set up periodic score PSI and CSI monitoring with escalation triggers in the ongoing monitoring plan."
+      },
+      {
+        "severity": "medium",
+        "section": "fairness",
+        "finding": "The age-group equalized odds difference is 0.132, above the green limit, and age is a direct model input. The foreign worker comparison could not be rated because one group has only 9 records.",
+        "recommendation": "Model Development should investigate which age bands drive the gap, assess whether the age bins are justified by risk evidence, and test alternatives such as coarser banding or constraints. Fairness testing for foreign worker status should be repeated on a larger sample or with pooled data, and the age result should be tracked in ongoing monitoring."
+      }
+    ],
+    "narrative_dropped": [],
+    "llm": {
+      "model": "claude-sonnet-5-5",
+      "calls": 1,
+      "input_tokens": 2730,
+      "output_tokens": 1879,
+      "cost_usd": 0.036375,
+      "cached": false
+    },
+    "report_html": "docs/validation/credit_scorecard.html",
+    "report_pdf": "docs/validation/credit_scorecard.pdf",
+    "evidence_path": "artifacts/validation/credit_scorecard/evidence.json",
+    "elapsed_s": 1.02,
+    "reviewer_feedback_used": null
   }
 }

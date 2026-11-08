@@ -1,6 +1,6 @@
 """Streamlit UI: inventory, gate approvals, audit log, LLM spend.
 
-Run with `make ui`. Report viewer (Stage 5) and drift dashboard (Stage 6) are added later.
+Run with `make ui`. The drift dashboard (Stage 6) is added later.
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
+import streamlit.components.v1 as components  # noqa: E402
 
 from factory import discover, gates, model_card, tracking  # noqa: E402
 from factory.config import load_config  # noqa: E402
@@ -34,6 +35,23 @@ def stage_status(card: dict, stage: str) -> str:
         return e["status"]
     gate = gates.status(AUDIT, card["model_id"], stage, since=e["completed_at"])
     return {"pending": "awaiting_review"}.get(gate, gate)
+
+
+def show_validation(card: dict, height: int = 900) -> None:
+    val = card["validation"]
+    st.markdown(f"**Overall rating: {val['overall_rag'].upper()}** - {val['outcome']}")
+    st.dataframe(pd.DataFrame([{k: c[k] for k in ("section", "check", "value", "rule", "rag",
+                                                  "note")} for c in val["checks"]]),
+                 use_container_width=True, hide_index=True)
+    for key, mime in (("report_html", "text/html"), ("report_pdf", "application/pdf")):
+        f = Path(val[key]) if Path(val[key]).is_absolute() else ROOT / val[key]
+        if f.exists():
+            st.download_button(f"Download {f.suffix[1:].upper()} report", f.read_bytes(),
+                               file_name=f.name, mime=mime, key=f"{card['model_id']}-{key}")
+    html = Path(val["report_html"])
+    html = html if html.is_absolute() else ROOT / html
+    if html.exists():
+        components.html(html.read_text(), height=height, scrolling=True)
 
 
 if page == "Inventory":
@@ -129,6 +147,8 @@ elif page == "Gate review":
                                 st.code(f.read_text(), language="python")
                             else:
                                 st.markdown(f.read_text())
+            if stage == "validate" and card.get("validation"):
+                show_validation(card)
             with st.expander("Model card JSON"):
                 st.json(card)
             with st.form("gate"):
@@ -161,5 +181,15 @@ elif page == "LLM spend":
     if rows:
         st.dataframe(pd.DataFrame(rows), use_container_width=True)
 
+elif page == "Validation reports":
+    validated = [c for c in cards if c.get("validation")]
+    if not validated:
+        st.info("No validation reports yet: run Stage 5 (`make run MODEL=<name>`).")
+    else:
+        model_id = st.selectbox("Model", [c["model_id"] for c in validated])
+        card = next(c for c in validated if c["model_id"] == model_id)
+        st.caption(f"Gate 4 status: {stage_status(card, 'validate')}")
+        show_validation(card, height=1400)
+
 else:
-    st.info("Added in a later stage (Validation reports: Stage 5, Drift monitoring: Stage 6).")
+    st.info("Added in a later stage (Drift monitoring: Stage 6).")

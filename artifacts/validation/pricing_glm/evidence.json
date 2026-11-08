@@ -1,0 +1,412 @@
+{
+ "model_id": "pricing_glm",
+ "builder": "poisson_frequency",
+ "metrics": {
+  "performance": {
+   "test_mean_poisson_deviance": 0.23861423199212087,
+   "train_mean_poisson_deviance": 0.24212080571505518,
+   "test_lorenz_gini": 0.27965261485150217,
+   "test_actual_claims": 5234,
+   "test_expected_claims": 5306.89900256695,
+   "test_policies": 135599,
+   "deviance_ratio_test_train": 0.9855172556832597,
+   "ae_overall": 0.9862633521889735,
+   "ae_dev": 0.013736647811026459
+  },
+  "calibration": {
+   "worst_decile_ae_dev": 0.15888116096591776,
+   "worst_Area_ae_dev": 0.05390244565348057,
+   "worst_VehGas_ae_dev": 0.018537132930297684
+  },
+  "stability": {
+   "max_feature_psi": 0.00011383180142936095
+  },
+  "fairness": {
+   "worst_driver_age_ae_dev": 0.1245566709287309
+  }
+ },
+ "checks": [
+  {
+   "section": "performance",
+   "check": "Overall actual / expected claims: |A/E - 1|",
+   "metric": "performance.ae_dev",
+   "value": 0.013736647811026459,
+   "rule": "<= 0.05 green, <= 0.1 amber",
+   "rag": "green",
+   "note": ""
+  },
+  {
+   "section": "calibration",
+   "check": "Worst predicted-frequency decile: |A/E - 1|",
+   "metric": "calibration.worst_decile_ae_dev",
+   "value": 0.15888116096591776,
+   "rule": "<= 0.1 green, <= 0.2 amber",
+   "rag": "amber",
+   "note": ""
+  },
+  {
+   "section": "calibration",
+   "check": "Worst Area segment: |A/E - 1|",
+   "metric": "calibration.worst_Area_ae_dev",
+   "value": 0.05390244565348057,
+   "rule": "<= 0.1 green, <= 0.2 amber",
+   "rag": "green",
+   "note": "segments with exposure >= 1,000"
+  },
+  {
+   "section": "calibration",
+   "check": "Worst VehGas segment: |A/E - 1|",
+   "metric": "calibration.worst_VehGas_ae_dev",
+   "value": 0.018537132930297684,
+   "rule": "<= 0.1 green, <= 0.2 amber",
+   "rag": "green",
+   "note": "segments with exposure >= 1,000"
+  },
+  {
+   "section": "stability",
+   "check": "Input stability: largest feature PSI (train -> test)",
+   "metric": "stability.max_feature_psi",
+   "value": 0.00011383180142936095,
+   "rule": "<= 0.1 green, <= 0.25 amber",
+   "rag": "green",
+   "note": "feature Region"
+  },
+  {
+   "section": "fairness",
+   "check": "Driver age bands: worst |A/E - 1|",
+   "metric": "fairness.worst_driver_age_ae_dev",
+   "value": 0.1245566709287309,
+   "rule": "<= 0.1 green, <= 0.2 amber",
+   "rag": "amber",
+   "note": "checks no age band is systematically over- or under-priced"
+  }
+ ],
+ "notes": {
+  "performance": [
+   "The Lorenz Gini and deviance ratio are reported without a rating: no agreed threshold exists for this portfolio."
+  ],
+  "calibration": [],
+  "stability": [
+   "Score PSI is not assessed: the legacy code does not keep development-sample predictions."
+  ],
+  "fairness": [
+   "Sex is not in the data. Driver age is a rating factor; age-based pricing must be supported by relevant and reliable data, which the A/E by age band tests. Whether the use of age is permissible is a legal and conduct question for the reviewer."
+  ]
+ },
+ "not_assessed": {},
+ "data": "freMTPL2 motor claims, random split seed 42: 542,392 train / 135,599 test policies.",
+ "model_under_test": "legacy Python model pricing_glm: committed reference test predictions (artifacts/reference/pricing_glm, statsmodels 0.14.4)",
+ "thresholds": {
+  "auc_min": [
+   0.75,
+   0.65
+  ],
+  "auc_drop_max": [
+   0.03,
+   0.07
+  ],
+  "hl_pvalue_min": [
+   0.05,
+   0.01
+  ],
+  "calib_ratio_dev_max": [
+   0.1,
+   0.2
+  ],
+  "psi_max": [
+   0.1,
+   0.25
+  ],
+  "ae_dev_max": [
+   0.05,
+   0.1
+  ],
+  "segment_ae_dev_max": [
+   0.1,
+   0.2
+  ],
+  "air_min": [
+   0.8,
+   0.7
+  ],
+  "eod_max": [
+   0.1,
+   0.2
+  ]
+ },
+ "tables": {
+  "performance": {},
+  "calibration": {
+   "A/E by decile of predicted frequency": [
+    {
+     "segment": 1,
+     "policies": 13560,
+     "exposure": 7921.917991616116,
+     "actual": 265,
+     "expected": 287.4823004719561,
+     "ae": 0.921795879485286,
+     "mean_predicted_frequency": 0.03628948201385105,
+     "observed_frequency": 0.0334514949890233
+    },
+    {
+     "segment": 2,
+     "policies": 13560,
+     "exposure": 7821.403914215107,
+     "actual": 305,
+     "expected": 351.0134681943407,
+     "ae": 0.8689125279692542,
+     "mean_predicted_frequency": 0.04487857577031496,
+     "observed_frequency": 0.038995556724244096
+    },
+    {
+     "segment": 3,
+     "policies": 13560,
+     "exposure": 7768.130502283083,
+     "actual": 356,
+     "expected": 391.9061705084717,
+     "ae": 0.9083806961704995,
+     "mean_predicted_frequency": 0.05045051320820228,
+     "observed_frequency": 0.045828272310225765
+    },
+    {
+     "segment": 4,
+     "policies": 13560,
+     "exposure": 7691.591279287353,
+     "actual": 395,
+     "expected": 425.3043309532251,
+     "ae": 0.9287467144166986,
+     "mean_predicted_frequency": 0.05529471282470832,
+     "observed_frequency": 0.05135478286056274
+    },
+    {
+     "segment": 5,
+     "policies": 13560,
+     "exposure": 7707.50704992886,
+     "actual": 510,
+     "expected": 466.5960016894608,
+     "ae": 1.0930226537591001,
+     "mean_predicted_frequency": 0.060537862458882534,
+     "observed_frequency": 0.06616925507771118
+    },
+    {
+     "segment": 6,
+     "policies": 13559,
+     "exposure": 7353.217971405016,
+     "actual": 464,
+     "expected": 488.1178234158756,
+     "ae": 0.9505901602873303,
+     "mean_predicted_frequency": 0.066381525111054,
+     "observed_frequency": 0.06310162459543427
+    },
+    {
+     "segment": 7,
+     "policies": 13560,
+     "exposure": 7163.77687326893,
+     "actual": 615,
+     "expected": 530.6842674769194,
+     "ae": 1.1588811609659178,
+     "mean_predicted_frequency": 0.07407883814152923,
+     "observed_frequency": 0.0858485699484617
+    },
+    {
+     "segment": 8,
+     "policies": 13560,
+     "exposure": 6813.521503106488,
+     "actual": 644,
+     "expected": 586.3312801515476,
+     "ae": 1.098355182131076,
+     "mean_predicted_frequency": 0.08605407348963699,
+     "observed_frequency": 0.09451793756083122
+    },
+    {
+     "segment": 9,
+     "policies": 13560,
+     "exposure": 6051.046581330905,
+     "actual": 686,
+     "expected": 667.0835900810758,
+     "ae": 1.0283568809069716,
+     "mean_predicted_frequency": 0.11024267969432047,
+     "observed_frequency": 0.11336881823327774
+    },
+    {
+     "segment": 10,
+     "policies": 13560,
+     "exposure": 5451.362314544461,
+     "actual": 994,
+     "expected": 1112.3797696240777,
+     "ae": 0.8935797172362426,
+     "mean_predicted_frequency": 0.20405537284803146,
+     "observed_frequency": 0.18233974237008
+    }
+   ],
+   "A/E by Area": [
+    {
+     "segment": "A",
+     "policies": 20967,
+     "exposure": 12402.766391945466,
+     "actual": 685,
+     "expected": 671.419313767112,
+     "ae": 1.0202268328515771
+    },
+    {
+     "segment": "B",
+     "policies": 15006,
+     "exposure": 8537.570133243476,
+     "actual": 533,
+     "expected": 520.4823448746939,
+     "ae": 1.0240501051545172
+    },
+    {
+     "segment": "C",
+     "policies": 38251,
+     "exposure": 20845.632564563133,
+     "actual": 1359,
+     "expected": 1436.4269242178489,
+     "ae": 0.9460975543465194
+    },
+    {
+     "segment": "D",
+     "policies": 30282,
+     "exposure": 15426.737314918715,
+     "actual": 1270,
+     "expected": 1292.6682818240022,
+     "ae": 0.9824639606751885
+    },
+    {
+     "segment": "E",
+     "policies": 27412,
+     "exposure": 12848.784246575284,
+     "actual": 1228,
+     "expected": 1227.300531519409,
+     "ae": 1.000569924368667
+    },
+    {
+     "segment": "F",
+     "policies": 3681,
+     "exposure": 1681.985329740242,
+     "actual": 159,
+     "expected": 158.6016063638843,
+     "ae": 1.0025119142564147
+    }
+   ],
+   "A/E by VehGas": [
+    {
+     "segment": "Diesel",
+     "policies": 66496,
+     "exposure": 34140.54298749891,
+     "actual": 2651,
+     "expected": 2701.0700954127174,
+     "ae": 0.9814628670697023
+    },
+    {
+     "segment": "Regular",
+     "policies": 69103,
+     "exposure": 37602.932993487404,
+     "actual": 2583,
+     "expected": 2605.8289071542335,
+     "ae": 0.9912392916159778
+    }
+   ]
+  },
+  "stability": {
+   "Feature PSI (train -> test)": [
+    {
+     "feature": "VehPower",
+     "psi": 5.345524521987664e-05
+    },
+    {
+     "feature": "VehAge",
+     "psi": 4.5362859648487666e-05
+    },
+    {
+     "feature": "DrivAge",
+     "psi": 8.019364504530658e-05
+    },
+    {
+     "feature": "BonusMalus",
+     "psi": 3.7602558831482246e-05
+    },
+    {
+     "feature": "Density",
+     "psi": 8.581810126334547e-05
+    },
+    {
+     "feature": "Area",
+     "psi": 5.4084136645936895e-05
+    },
+    {
+     "feature": "VehBrand",
+     "psi": 8.58027813227588e-05
+    },
+    {
+     "feature": "VehGas",
+     "psi": 1.6666197732617689e-06
+    },
+    {
+     "feature": "Region",
+     "psi": 0.00011383180142936095
+    }
+   ]
+  },
+  "fairness": {
+   "A/E by driver age band": [
+    {
+     "segment": "18-20",
+     "policies": 1356,
+     "exposure": 519.72663747286,
+     "actual": 123,
+     "expected": 125.6144356902938,
+     "ae": 0.9791868213559485
+    },
+    {
+     "segment": "21-25",
+     "policies": 6364,
+     "exposure": 2727.737184669491,
+     "actual": 350,
+     "expected": 360.5223221661243,
+     "ae": 0.9708136736086046
+    },
+    {
+     "segment": "26-30",
+     "policies": 13351,
+     "exposure": 5903.876778201925,
+     "actual": 448,
+     "expected": 495.17060191221344,
+     "ae": 0.9047386865656938
+    },
+    {
+     "segment": "31-40",
+     "policies": 33906,
+     "exposure": 16787.92113256973,
+     "actual": 1127,
+     "expected": 1163.7532319420184,
+     "ae": 0.9684183631604733
+    },
+    {
+     "segment": "41-50",
+     "policies": 33116,
+     "exposure": 17727.587969907865,
+     "actual": 1294,
+     "expected": 1353.7764537998894,
+     "ae": 0.9558446642855222
+    },
+    {
+     "segment": "51-70",
+     "policies": 39739,
+     "exposure": 22782.863511490308,
+     "actual": 1543,
+     "expected": 1497.717437280655,
+     "ae": 1.0302343830633118
+    },
+    {
+     "segment": "71+",
+     "policies": 7767,
+     "exposure": 5293.762766674142,
+     "actual": 349,
+     "expected": 310.3445197757561,
+     "ae": 1.124556670928731
+    }
+   ]
+  }
+ }
+}

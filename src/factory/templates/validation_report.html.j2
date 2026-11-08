@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Validation report: {{ name }}</title>
+<style>
+ body{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:1050px;margin:24px auto;padding:0 18px;color:#1f2933;line-height:1.45}
+ h1{margin-bottom:4px} h2{border-bottom:2px solid #e4e7eb;padding-bottom:4px;margin-top:32px}
+ .meta{color:#616e7c;font-size:14px} .rag{display:inline-block;padding:2px 10px;border-radius:10px;font-weight:600;font-size:13px;color:#fff}
+ .green{background:#2f8f46}.amber{background:#d98b00}.red{background:#c62828}.na{background:#9aa5b1}
+ table{border-collapse:collapse;margin:10px 0;font-size:13px} th,td{border:1px solid #d9dee3;padding:4px 8px;text-align:left} th{background:#f5f7fa}
+ .outcome{font-size:18px;margin:12px 0;padding:10px 14px;border-left:6px solid #9aa5b1;background:#f5f7fa}
+ .outcome.green{border-color:#2f8f46;background:#eef8f0;color:#1f2933}.outcome.amber{border-color:#d98b00;background:#fff6e5;color:#1f2933}.outcome.red{border-color:#c62828;background:#fdecea;color:#1f2933}
+ img{max-width:100%;border:1px solid #e4e7eb;margin:8px 0} .note{color:#616e7c;font-size:13px}
+ .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style></head><body>
+<h1>Independent validation report: {{ name }}</h1>
+<div class="meta">Model under test: {{ model_under_test }}<br>
+Generated {{ generated_at }} by the Agentic Model Risk Factory (Stage 5). Metrics, thresholds and RAG
+ratings are computed deterministically; the narrative is drafted by the report agent ({{ llm.model }}) with every
+number filled in from the evidence. Status: <b>{{ status }}</b>.</div>
+
+<div class="outcome {{ overall }}">Overall rating: <span class="rag {{ overall }}">{{ overall|upper }}</span>
+ &nbsp; {{ outcome }}</div>
+
+<h2>Executive summary</h2>
+<p>{{ narrative.executive_summary }}</p>
+
+<h2>Ratings by area</h2>
+<table><tr><th>Area</th><th>Rating</th></tr>
+{% for s, r in section_rag.items() %}<tr><td>{{ s|capitalize }}</td><td><span class="rag {{ 'na' if r == 'n/a' else r }}">{{ r|upper }}</span></td></tr>{% endfor %}
+</table>
+
+<h2>Checks</h2>
+<table><tr><th>Area</th><th>Check</th><th>Value</th><th>Rule</th><th>Rating</th><th>Note</th></tr>
+{% for c in checks %}<tr><td>{{ c.section }}</td><td>{{ c.check }}</td><td>{{ c.value_fmt }}</td><td>{{ c.rule }}</td>
+<td><span class="rag {{ c.rag }}">{{ c.rag|upper }}</span></td><td>{{ c.note }}</td></tr>{% endfor %}
+</table>
+
+{% for s in sections %}
+<h2>{{ s|capitalize }} <span class="rag {{ 'na' if section_rag[s] == 'n/a' else section_rag[s] }}">{{ section_rag[s]|upper }}</span></h2>
+{% if narrative.sections[s] %}<p>{{ narrative.sections[s] }}</p>{% endif %}
+{% for n in notes_by_section[s] %}<p class="note">{{ n }}</p>{% endfor %}
+{% if metrics[s] %}<table><tr><th>Metric</th><th>Value</th></tr>
+{% for k, v in metrics[s].items() %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</table>{% endif %}
+{% for title, html in tables[s] %}<p><b>{{ title }}</b></p>{{ html|safe }}{% endfor %}
+<div class="charts">{% for title, b64 in charts[s] %}<img alt="{{ title }}" title="{{ title }}" src="data:image/png;base64,{{ b64 }}">{% endfor %}</div>
+{% endfor %}
+
+<h2>Findings and recommendations</h2>
+{% if narrative.findings %}<table><tr><th>Severity</th><th>Area</th><th>Finding</th><th>Recommendation</th></tr>
+{% for f in narrative.findings %}<tr><td>{{ f.severity }}</td><td>{{ f.section }}</td><td>{{ f.finding }}</td><td>{{ f.recommendation }}</td></tr>{% endfor %}
+</table>{% else %}<p>No findings.</p>{% endif %}
+
+<h2>Limitations of this validation</h2>
+<ul>{% for l in narrative.limitations %}<li>{{ l }}</li>{% endfor %}</ul>
+
+<h2>Audit trail</h2>
+<p class="note">Evidence: {{ evidence_path }} &middot; Thresholds: config/config.yaml (validate.thresholds) &middot;
+Narrative sentences dropped by the number check: {{ narrative.dropped_sentences|length }} &middot;
+LLM: {{ llm.input_tokens + llm.output_tokens }} tokens, ${{ '%.4f'|format(llm.cost_usd) }} &middot;
+Computation time: {{ '%.1f'|format(elapsed_s) }} s. Human sign-off is recorded at Gate 4 in artifacts/audit/gate_decisions.jsonl.</p>
+</body></html>

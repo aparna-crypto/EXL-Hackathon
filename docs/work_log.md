@@ -216,3 +216,61 @@ against R on every run). Ruff clean.
 
 **Token cost:** 2 live Sonnet calls, 22,671 tokens, $0.161 of the $4.00 `stage-4` bucket.
 
+## Stage 5 - Validate (2026-11-08)
+
+**Budget:** new session bucket `stage-5`, $2.00; per-run cap lowered to $1.00 (user agreed by "go" on the
+proposed default).
+
+**What was built**
+- `factory.validate`: deterministic evidence builders per model type (`validate.models` in config):
+  - `scorecard_rebuild` (credit scorecard): validates the Gate 3-approved Python rebuild. It runs its
+    `main()`, re-scores train and test with the rebuild's bins, WoE and coefficients, and checks that the
+    re-scoring reproduces its test predictions (max diff 0 on the live run) before any metric is used.
+  - `binary_classifier` (fraud GBM): committed reference test predictions + data.
+  - `poisson_frequency` (pricing GLM): committed reference predictions, exposure and claims.
+  - SAS: not applicable (no runtime, no outputs).
+- Checks: performance (AUC with 500-sample bootstrap CI, Gini, KS, train-test AUC drop; pricing: A/E,
+  Poisson deviance, ordered-Lorenz Gini), calibration (mean predicted vs observed, Hosmer-Lemeshow,
+  calibration deciles; pricing: A/E by predicted decile, `Area`, `VehGas`), stability (score PSI, CSI per
+  selected variable, synthetic out-of-time tranches; feature PSI for fraud and pricing), fairness
+  (Fairlearn `MetricFrame` by `sex`, `age_group`, `foreign_worker`: adverse impact ratio of approval rates,
+  equalized odds difference, per-group AUC and bad rate; pricing: A/E by driver age band). Groups below
+  30 records are reported and flagged amber, not rated.
+- RAG: every threshold is a `[green, amber]` pair in `validate.thresholds`; section rating = worst check,
+  overall = worst section.
+- `factory.agents.report` (Sonnet, one call per model): writes the executive summary, section narrative,
+  findings and recommendations. It gets the facts table, checks, notes and the Gate 1/2 card context, no
+  data rows. It writes numbers as `[[fact]]` placeholders; sentences with a typed decimal number or
+  percentage, or an unknown placeholder, are dropped and counted (0 dropped on the live run).
+- Outputs: `docs/validation/<model>.html` (self-contained, charts embedded) and `.pdf` (Matplotlib
+  `PdfPages`: summary page + one page per chart), `artifacts/validation/<model>/evidence.json` + charts,
+  and `card.validation` (ratings, checks, findings, report paths, LLM cost).
+- UI: new *Validation reports* page; Gate 4 review shows the checks table, download buttons and the
+  embedded report. `make run` without a terminal now defers the gate to the UI instead of crashing.
+
+**Live result**
+
+| Model | Overall | Performance | Calibration | Stability | Fairness |
+|---|---|---|---|---|---|
+| credit_scorecard | AMBER | GREEN (AUC 0.801, CI 0.745-0.853) | GREEN (HL p 0.90) | AMBER (worst synthetic tranche PSI 0.130) | AMBER (age_group EOD 0.132; foreign_worker A202 n=9) |
+| pricing_glm | AMBER | GREEN (A/E 0.986) | AMBER (worst decile A/E dev 0.159) | GREEN | AMBER (worst driver age band A/E dev 0.125) |
+
+Computation took 1.0 s (scorecard) and 1.5 s (pricing). Fraud was not run through the pipeline: its Gate 2
+(documentation) is still awaiting review. Its evidence builder was exercised offline: AUC 0.986, calibration
+amber (mean predicted 19% off the observed rate), stability red (feature `hour` PSI 5.2, because the
+out-of-time test window only contains hours 16-23), fairness not assessable.
+
+**Failures and fixes**
+- Raising the live caps would have leaked into tests: the redevelop test hit the new $1 per-run cap with
+  fake token estimates. Tests now set their own generous caps in `conftest.py`.
+- The LLM thinking test assumed `report` had no thinking setting; it now expects `between_tools`.
+- `make run` from a non-interactive shell raised `EOFError` at the gate prompt (card already saved);
+  the CLI now defers to the UI.
+
+**Verification:** `make test` all passing (new `test_validate.py`: PSI, Hosmer-Lemeshow, Poisson deviance,
+Lorenz Gini, RAG, number grounding, SAS not applicable, scorecard end to end with a fake LLM including
+HTML/PDF output, pricing evidence vs reference metrics). Ruff clean. HTML report checked visually in a
+headless browser.
+
+**Token cost:** 2 live Sonnet calls, 8,394 tokens, $0.069 of the $2.00 `stage-5` bucket.
+

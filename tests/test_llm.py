@@ -86,7 +86,7 @@ def test_thinking_setting_is_passed_per_agent(cfg):
     c.complete("inventory", "a")
     c.complete("report", "a")
     c.complete("translation", "a", escalate=True)
-    assert seen == ["disabled", None, "adaptive/medium"]
+    assert seen == ["disabled", "between_tools", "adaptive/medium"]
 
 
 def test_provider_error_becomes_llm_error(cfg):

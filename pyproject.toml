@@ -11,11 +11,15 @@ requires-python = ">=3.11,<3.12"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+factory = ["templates/*.j2"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-q"
-filterwarnings = ["ignore::DeprecationWarning", "ignore::pydantic.PydanticDeprecatedSince20"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::pydantic.PydanticDeprecatedSince20",
+                  "ignore:invalid value encountered in cast:RuntimeWarning"]
 
 [tool.ruff]
 line-length = 100

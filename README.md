@@ -6,7 +6,7 @@ calls specialised agents (Discover, Document, Redevelop, Validate, Monitor) that
 **model card**. Every stage ends in a **human gate** (approve, reject or comment), and each decision is
 logged with a timestamp, the reviewer and the reason.
 
-> Status: **Stages 0-3 done, Stage 4 done and waiting at Gate 3** (R scorecard rebuilt in Python: `redeveloped/credit_scorecard/scorecard.py`, parity in `docs/parity_report.md`). Stages 5-7 build the remaining agents. See `docs/work_log.md`.
+> Status: **Stages 0-4 done, Stage 5 done and waiting at Gate 4** (validation reports in `docs/validation/`: HTML + PDF with RAG ratings for performance, calibration, stability and fairness). Stages 6-7 add monitoring and the benchmark. See `docs/work_log.md`.
 
 ## Quickstart
 
@@ -36,7 +36,7 @@ Press Enter to defer the decision to the UI instead (`make ui` → *Gate review*
 
 | Command | What it does |
 |---|---|
-| `make ui` | Streamlit: inventory, gate review, audit log, LLM spend |
+| `make ui` | Streamlit: inventory, gate review, audit log, LLM spend, validation reports |
 | `make mlflow-ui` | MLflow UI on the local tracking store (`artifacts/mlruns`) |
 | `make status MODEL=<name>` | stage and gate status for one model |
 | `make run-all` | runs every model under `models/` to its next gate |
