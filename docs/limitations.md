@@ -69,3 +69,16 @@
 - **The re-validation reuses the Stage 5 builder** on the breaching batch, including the
   synthetic "tranches" by id order, which are not meaningful on a resampled batch.
 - **Thresholds and drift parameters are illustrative.**
+
+## Stage 7 (benchmark)
+
+- **No manual comparison until the user supplies the baseline.** `config/manual_baseline.yaml`
+  is empty, so no time saving is claimed.
+- **Human review time is not measured.** Gate timestamps show when a decision was made, not how
+  long the reviewer spent; `review_minutes_per_gate` in the baseline file adds it when supplied.
+- **LLM latency is historical** (from the ledger, this VM, these model IDs) and includes failed
+  attempts and reruns; it would differ with other models, load or network.
+- **Fraud and SAS have only Discover and Document times**: fraud is waiting at Gate 2 and SAS has
+  no runtime, so their totals are not comparable with the scorecard's.
+- **Four models is a small sample** for a "consistency" claim; the table shows the same process
+  ran, not that quality is equal.

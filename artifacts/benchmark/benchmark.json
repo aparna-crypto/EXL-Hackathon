@@ -1,0 +1,397 @@
+{
+ "generated_at": "2026-11-08T23:56:06.238913+00:00",
+ "models": [
+  {
+   "model_id": "credit_scorecard",
+   "language": "R",
+   "stages": {
+    "discover": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 23.1,
+     "machine_s": 23.1,
+     "llm_calls": 3,
+     "gate_decisions": 1
+    },
+    "document": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 137.71,
+     "machine_s": 137.71,
+     "llm_calls": 3,
+     "gate_decisions": 2
+    },
+    "redevelop": {
+     "ran": true,
+     "deterministic_s": 2.94,
+     "llm_s": 38.58,
+     "machine_s": 41.52,
+     "llm_calls": 2,
+     "gate_decisions": 1
+    },
+    "validate": {
+     "ran": true,
+     "deterministic_s": 1.17,
+     "llm_s": 29.04,
+     "machine_s": 30.21,
+     "llm_calls": 2,
+     "gate_decisions": 2
+    }
+   },
+   "machine_s": 232.5,
+   "llm_calls": 10,
+   "llm_cost_usd": 0.7139,
+   "checks": {
+    "redevelop": {
+     "passed": true,
+     "unit": 18,
+     "parity": 38,
+     "parity_passed": 38
+    },
+    "validate": {
+     "digest": "f262ab01b797",
+     "repeat_identical": true,
+     "matches_stored_stage5": true,
+     "metrics": 26
+    }
+   }
+  },
+  {
+   "model_id": "fraud_gbm",
+   "language": "Python",
+   "stages": {
+    "discover": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 23.49,
+     "machine_s": 23.49,
+     "llm_calls": 4,
+     "gate_decisions": 2
+    },
+    "document": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 37.5,
+     "machine_s": 37.5,
+     "llm_calls": 1,
+     "gate_decisions": 0
+    },
+    "redevelop": {
+     "ran": false,
+     "deterministic_s": 0.0,
+     "llm_s": 0.0,
+     "machine_s": 0.0,
+     "llm_calls": 0,
+     "gate_decisions": 0
+    },
+    "validate": {
+     "ran": false,
+     "deterministic_s": 0.0,
+     "llm_s": 0.0,
+     "machine_s": 0.0,
+     "llm_calls": 0,
+     "gate_decisions": 0
+    }
+   },
+   "machine_s": 61.0,
+   "llm_calls": 5,
+   "llm_cost_usd": 0.1432,
+   "checks": {}
+  },
+  {
+   "model_id": "pricing_glm",
+   "language": "Python",
+   "stages": {
+    "discover": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 21.56,
+     "machine_s": 21.57,
+     "llm_calls": 3,
+     "gate_decisions": 1
+    },
+    "document": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 37.41,
+     "machine_s": 37.41,
+     "llm_calls": 1,
+     "gate_decisions": 1
+    },
+    "redevelop": {
+     "ran": false,
+     "deterministic_s": 0.0,
+     "llm_s": 0.0,
+     "machine_s": 0.0,
+     "llm_calls": 0,
+     "gate_decisions": 0
+    },
+    "validate": {
+     "ran": true,
+     "deterministic_s": 1.6,
+     "llm_s": 12.78,
+     "machine_s": 14.37,
+     "llm_calls": 1,
+     "gate_decisions": 1
+    }
+   },
+   "machine_s": 73.3,
+   "llm_calls": 5,
+   "llm_cost_usd": 0.191,
+   "checks": {
+    "validate": {
+     "digest": "c155e99249d9",
+     "repeat_identical": true,
+     "matches_stored_stage5": true,
+     "metrics": 14
+    }
+   }
+  },
+  {
+   "model_id": "sas_behaviour_scorecard",
+   "language": "SAS",
+   "stages": {
+    "discover": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 25.39,
+     "machine_s": 25.39,
+     "llm_calls": 4,
+     "gate_decisions": 2
+    },
+    "document": {
+     "ran": true,
+     "deterministic_s": 0.0,
+     "llm_s": 46.52,
+     "machine_s": 46.52,
+     "llm_calls": 1,
+     "gate_decisions": 0
+    },
+    "redevelop": {
+     "ran": false,
+     "deterministic_s": 0.0,
+     "llm_s": 0.0,
+     "machine_s": 0.0,
+     "llm_calls": 0,
+     "gate_decisions": 0
+    },
+    "validate": {
+     "ran": false,
+     "deterministic_s": 0.0,
+     "llm_s": 0.0,
+     "machine_s": 0.0,
+     "llm_calls": 0,
+     "gate_decisions": 0
+    }
+   },
+   "machine_s": 71.9,
+   "llm_calls": 5,
+   "llm_cost_usd": 0.1729,
+   "checks": {}
+  }
+ ],
+ "consistency": [
+  {
+   "model_id": "credit_scorecard",
+   "language": "R",
+   "schema_version": "1.0.0",
+   "inventory_fields_found": 6,
+   "inventory_fields": 6,
+   "inventory_quotes": 8,
+   "gaps": 5,
+   "doc_sections": 6,
+   "doc_high_confidence": 4,
+   "doc_claims_dropped": 0,
+   "doc_unknowns": 10,
+   "variable_coverage": "14/14",
+   "validation_checks": 12,
+   "validation_overall": "red",
+   "narrative_dropped": 1,
+   "gate_decisions": 6,
+   "gate_rejections": 1,
+   "stage_status": {
+    "discover": "approved",
+    "document": "approved",
+    "redevelop": "approved",
+    "validate": "approved"
+   }
+  },
+  {
+   "model_id": "fraud_gbm",
+   "language": "Python",
+   "schema_version": "1.0.0",
+   "inventory_fields_found": 3,
+   "inventory_fields": 6,
+   "inventory_quotes": 4,
+   "gaps": 4,
+   "doc_sections": 6,
+   "doc_high_confidence": 4,
+   "doc_claims_dropped": 0,
+   "doc_unknowns": 9,
+   "variable_coverage": "30/30",
+   "validation_checks": null,
+   "validation_overall": null,
+   "narrative_dropped": null,
+   "gate_decisions": 2,
+   "gate_rejections": 1,
+   "stage_status": {
+    "discover": "approved",
+    "document": "awaiting_review",
+    "redevelop": "not_started",
+    "validate": "not_started"
+   }
+  },
+  {
+   "model_id": "pricing_glm",
+   "language": "Python",
+   "schema_version": "1.0.0",
+   "inventory_fields_found": 6,
+   "inventory_fields": 6,
+   "inventory_quotes": 8,
+   "gaps": 4,
+   "doc_sections": 6,
+   "doc_high_confidence": 4,
+   "doc_claims_dropped": 0,
+   "doc_unknowns": 8,
+   "variable_coverage": "8/9",
+   "validation_checks": 6,
+   "validation_overall": "amber",
+   "narrative_dropped": 0,
+   "gate_decisions": 3,
+   "gate_rejections": 0,
+   "stage_status": {
+    "discover": "approved",
+    "document": "approved",
+    "redevelop": "not_applicable",
+    "validate": "approved"
+   }
+  },
+  {
+   "model_id": "sas_behaviour_scorecard",
+   "language": "SAS",
+   "schema_version": "1.0.0",
+   "inventory_fields_found": 5,
+   "inventory_fields": 6,
+   "inventory_quotes": 6,
+   "gaps": 3,
+   "doc_sections": 6,
+   "doc_high_confidence": 5,
+   "doc_claims_dropped": 0,
+   "doc_unknowns": 12,
+   "variable_coverage": "n/a (not executed)",
+   "validation_checks": null,
+   "validation_overall": null,
+   "narrative_dropped": null,
+   "gate_decisions": 2,
+   "gate_rejections": 1,
+   "stage_status": {
+    "discover": "approved",
+    "document": "awaiting_review",
+    "redevelop": "not_started",
+    "validate": "not_started"
+   }
+  }
+ ],
+ "baseline_source": null,
+ "comparison": [
+  {
+   "model_id": "credit_scorecard",
+   "stage": "discover",
+   "machine_s": 23.1,
+   "review_h": null,
+   "automated_h": 0.006,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "credit_scorecard",
+   "stage": "document",
+   "machine_s": 137.7,
+   "review_h": null,
+   "automated_h": 0.038,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "credit_scorecard",
+   "stage": "redevelop",
+   "machine_s": 41.5,
+   "review_h": null,
+   "automated_h": 0.012,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "credit_scorecard",
+   "stage": "validate",
+   "machine_s": 30.2,
+   "review_h": null,
+   "automated_h": 0.008,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "fraud_gbm",
+   "stage": "discover",
+   "machine_s": 23.5,
+   "review_h": null,
+   "automated_h": 0.007,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "fraud_gbm",
+   "stage": "document",
+   "machine_s": 37.5,
+   "review_h": null,
+   "automated_h": 0.01,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "pricing_glm",
+   "stage": "discover",
+   "machine_s": 21.6,
+   "review_h": null,
+   "automated_h": 0.006,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "pricing_glm",
+   "stage": "document",
+   "machine_s": 37.4,
+   "review_h": null,
+   "automated_h": 0.01,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "pricing_glm",
+   "stage": "validate",
+   "machine_s": 14.4,
+   "review_h": null,
+   "automated_h": 0.004,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "sas_behaviour_scorecard",
+   "stage": "discover",
+   "machine_s": 25.4,
+   "review_h": null,
+   "automated_h": 0.007,
+   "manual_h": null,
+   "time_saved_pct": null
+  },
+  {
+   "model_id": "sas_behaviour_scorecard",
+   "stage": "document",
+   "machine_s": 46.5,
+   "review_h": null,
+   "automated_h": 0.013,
+   "manual_h": null,
+   "time_saved_pct": null
+  }
+ ]
+}

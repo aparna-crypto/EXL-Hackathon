@@ -1,0 +1,11 @@
+# Manual baseline for the Stage 7 benchmark. SUPPLIED BY THE USER - the factory never invents it.
+# Hours of analyst effort for the manual process, per activity. Leave null where unknown;
+# `make benchmark` only reports a time saving where a figure is given.
+source: null                    # who supplied these figures and how they were measured
+review_minutes_per_gate: null   # human review effort per gate decision in the automated flow
+activities:                     # default hours per model
+  discover: null                # build the inventory record + gap analysis
+  document: null                # write the model documentation
+  redevelop: null               # rebuild in Python + prove parity (only rebuilt models)
+  validate: null                # independent validation report
+models: {}                      # optional per-model overrides, e.g. {credit_scorecard: {validate: 120}}

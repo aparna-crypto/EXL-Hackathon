@@ -315,3 +315,41 @@ Validation reports pages without exceptions.
 
 **Spend.** Bucket `stage-6` ($1 cap): 2 live calls (Haiku alert + Sonnet re-validation report),
 8,678 tokens, $0.0498.
+
+## Stage 7 - Evidence and demo (2026-11-08)
+
+**Start state.** The user replied "approve it and go to stage 7". The Gate 4 re-validation approval
+for `credit_scorecard` was recorded via the CLI (reviewer "ap", reason states it came from the chat
+instruction). `make run` marked the scorecard complete; the next `make monitor` closed the
+re-validation and logged `revalidation_approved` without re-triggering.
+
+**Plan correction.** I first told the user I would use published figures for the manual baseline.
+The brief says the user supplies it and it must never be invented, so I reverted: the baseline is
+`config/manual_baseline.yaml`, shipped empty, and the user was told.
+
+**Built**
+- `src/factory/benchmark.py`, `make benchmark`: per model and stage, machine time = deterministic
+  work re-executed and timed (scanner; R oracle + R on the reshuffled split + all parity checks on
+  the approved rebuild; validation evidence) + live LLM latency from the ledger (all calls, incl.
+  failed attempts and reruns). Outputs `docs/benchmark.md`, `artifacts/benchmark/benchmark.json`
+  and a chart. Manual comparison only where the user supplied figures.
+- Consistency table across all four models and reproducibility checks: parity re-check, validation
+  evidence rebuilt twice and compared with the stored Stage 5 evidence.
+- Streamlit "Benchmark" page; `docs/demo_script.md` (5 min), `docs/slides_outline.md`, Mermaid
+  architecture diagram in `docs/architecture.md`.
+- `tests/test_benchmark.py` (5 tests), including one that fails if invented figures are committed to
+  the baseline template.
+
+**Bug found while building.** The first benchmark run reported the parity re-check as failed with 0
+unit cases: `evaluate()` reads `cases.json` from its work dir's parent, and I had passed the work dir
+itself. Fixed to mirror Stage 4; re-check now 18/18 unit cases and 38/38 parity checks.
+
+**Result.** Machine time: credit_scorecard 232 s (all four stages; 202 s of it LLM latency,
+incl. a truncated first documentation reply and the rejection rerun), fraud 61 s and SAS 72 s
+(Discover + Document only), pricing 73 s (no Redevelop). Validation evidence for both validated
+models is bit-identical across two rebuilds and equal to the stored Stage 5 evidence.
+
+**Verification.** 81 tests + ruff pass; Streamlit AppTest renders Benchmark, Drift monitoring and
+Inventory pages without exceptions.
+
+**Spend.** Bucket `stage-7` ($1 cap): 0 LLM calls, $0.

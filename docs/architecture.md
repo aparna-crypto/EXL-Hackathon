@@ -2,6 +2,28 @@
 
 ## Components
 
+```mermaid
+flowchart LR
+    src["models/&lt;x&gt;/<br/>SAS · R · Python"] --> D[Discover<br/>scanner + inventory agent]
+    D --> G1{{Gate 1}} --> Doc[Document<br/>documentation agent]
+    Doc --> G2{{Gate 2}} --> R[Redevelop<br/>translation agent + R/Python parity]
+    R --> G3{{Gate 3}} --> V[Validate<br/>code metrics + report agent]
+    V --> G4{{Gate 4}} --> M[Monitor<br/>drift + monitor agent]
+    M -- "breach" --> V
+    G4 --> B[Benchmark<br/>time + consistency]
+    subgraph shared[Shared services]
+      MC[(JSON model card)]
+      LLM[LLM interface<br/>budget · cache · ledger]
+      A[(append-only audit logs)]
+      ML[(MLflow / Azure ML)]
+    end
+    D & Doc & R & V & M -.-> MC & LLM & ML
+    G1 & G2 & G3 & G4 -.-> A
+    UI[Streamlit UI] -.-> MC & A
+```
+
+ASCII view:
+
 ```
                 ┌──────────────────────── make run MODEL=x ────────────────────────┐
                 │                         Orchestrator                              │

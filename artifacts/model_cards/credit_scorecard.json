@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "credit_scorecard",
-  "card_version": 13,
+  "card_version": 15,
   "name": "Retail Application Scorecard (RCS-APP-02)",
   "language": "R",
   "source_files": [
@@ -90,7 +90,7 @@
       "summary": "Python rebuild: redeveloped/credit_scorecard/scorecard.py (from models/credit_scorecard/scorecard.R)\nAttempts: 2 (claude-sonnet-5-5 FAIL, claude-sonnet-5-5 PASS)\nTransformation unit tests: 18/18 cases passed across 8 transformations\nParity checks: 38/38 passed (original + resampled split)\nMax abs diff (original): coefficient estimates 3.4e-15, predicted PD 1.5e-15, score 6.8e-13, AUC (train, test) 4.4e-16\nParity report: docs/parity_report.md\nLLM: 0 tokens, $0.0000"
     },
     "validate": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-08T22:19:37.672346+00:00",
       "summary": "RE-VALIDATION. Re-validation triggered by monitoring: month 9 rated AMBER (2 consecutive amber months): Largest characteristic CSI 0.134 (AMBER, limits [0.1, 0.25]); Calibration |mean PD / bad rate - 1| 0.154 (AMBER, limits [0.1, 0.2])\nValidation report: docs/validation/credit_scorecard_revalidation_m09.html (+ PDF)\nModel under test: redeveloped/credit_scorecard/scorecard.py (Python rebuild, sha256 dc0f6c4e40ed, approved at Gate 3)\nOverall: RED - Not fit for use until the red findings are remediated.\nBy area: performance GREEN, calibration RED, stability AMBER, fairness AMBER\n- [GREEN] Discrimination: test AUC: 0.810\n- [GREEN] Overfitting: train AUC - test AUC: 0.007\n- [AMBER] Calibration in the large: |mean predicted / observed - 1|: 0.154\n- [RED] Hosmer-Lemeshow goodness of fit (p-value): 2.65e-11\n- [GREEN] Score PSI (train -> test): 0.047\n- [AMBER] Characteristic stability: largest CSI: 0.134\n- [AMBER] Synthetic out-of-time: worst tranche score PSI: 0.189\n- [GREEN] sex: adverse impact ratio of approval rates: 0.960\n- [GREEN] sex: equalized odds difference: 0.095\n- [GREEN] age_group: adverse impact ratio of approval rates: 0.908\n- [AMBER] age_group: equalized odds difference: 0.154\n- [AMBER] foreign_worker: group too small to rate: n/a\nFindings: 4; narrative sentences dropped by the number check: 1\nComputation 1.1s; LLM: claude-sonnet-5-5, 5261 tokens, $0.0425"
     }
@@ -160,6 +160,16 @@
       "card_version": 13,
       "timestamp": "2026-11-08T22:19:37.673450+00:00",
       "note": "monitor: re-validation run on month 9 batch: overall RED; Gate 4 re-opened for review"
+    },
+    {
+      "card_version": 14,
+      "timestamp": "2026-11-08T23:54:25.723389+00:00",
+      "note": "validate: gate approved"
+    },
+    {
+      "card_version": 15,
+      "timestamp": "2026-11-08T23:54:29.413381+00:00",
+      "note": "monitor: month 9 breach already triggered re-validation at 2026-11-08T22:19:20.212984+00:00 (status: approved); not re-triggered"
     }
   ],
   "discovery": {
@@ -1031,7 +1041,7 @@
     "reviewer_feedback_used": null
   },
   "monitoring": {
-    "generated_at": "2026-11-08T22:19:14.343740+00:00",
+    "generated_at": "2026-11-08T23:54:29.411452+00:00",
     "baseline": "development (train) scores of the Gate 3/4-approved rebuild redeveloped/credit_scorecard/scorecard.py, 700 rows",
     "simulation": "12 monthly batches of 1000 rows resampled from the test set (seed 42 + month). SYNTHETIC drift from month 7: credit_amount x(1 + 0.04k), a share 0.08k of loans 12 months longer, riskier intake (weight exp(0.15k*bad)). Outcomes are assumed observed at batch time (no maturity lag).",
     "thresholds": {
@@ -1289,7 +1299,7 @@
       }
     },
     "revalidation": {
-      "status": "pending",
+      "status": "approved",
       "month": 9,
       "reason": "month 9 rated AMBER (2 consecutive amber months): Largest characteristic CSI 0.134 (AMBER, limits [0.1, 0.25]); Calibration |mean PD / bad rate - 1| 0.154 (AMBER, limits [0.1, 0.2])",
       "data_path": "artifacts/monitoring/credit_scorecard/batch_month_09.csv",
@@ -1300,7 +1310,8 @@
         "report_html": "docs/validation/credit_scorecard.html"
       },
       "report_html": "docs/validation/credit_scorecard_revalidation_m09.html",
-      "overall_rag": "red"
+      "overall_rag": "red",
+      "closed_at": "2026-11-08T23:54:28.408234+00:00"
     }
   }
 }

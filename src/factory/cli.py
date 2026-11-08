@@ -9,7 +9,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from factory import discover, gates, model_card, monitor, orchestrator, tracking
+from factory import benchmark, discover, gates, model_card, monitor, orchestrator, tracking
 from factory.agents import AgentError
 from factory.config import load_config
 from factory.llm import BudgetExceeded, LLMClient, LLMError
@@ -72,6 +72,17 @@ def cmd_monitor(args, cfg) -> int:
     print(out["summary"])
     if out["trigger"] and "re-opened" in out["action"]:
         print("Gate 4 is open again: review the re-validation in the UI, then `make run`.")
+    return 0
+
+
+def cmd_benchmark(args, cfg) -> int:
+    res = benchmark.run(cfg)
+    for r in res["models"]:
+        print(f"{r['model_id']:<26} machine {r['machine_s']:>7.1f}s  LLM calls {r['llm_calls']:>2}  "
+              f"${r['llm_cost_usd']:.3f}")
+    if not any(c["manual_h"] is not None for c in res["comparison"]):
+        print("Manual baseline not supplied: fill config/manual_baseline.yaml to compare.")
+    print(f"Report: {cfg['paths']['benchmark_report']}")
     return 0
 
 
@@ -139,13 +150,14 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--model", required=True)
     m = sub.add_parser("monitor", help="monthly drift monitoring; a breach re-opens Gate 4")
     m.add_argument("--model", required=True)
+    sub.add_parser("benchmark", help="time the pipeline per model vs the manual baseline")
     sub.add_parser("spend", help="LLM token and cost summary from the ledger")
     sub.add_parser("inventory", help="rebuild the inventory table and dependency map")
     c = sub.add_parser("llm-check", help="verify configured model IDs")
     c.add_argument("--ping", action="store_true", help="also make one tiny paid call")
     args = p.parse_args(argv)
     cfg = load_config()
-    handlers = {"run": cmd_run, "gate": cmd_gate, "status": cmd_status, "spend": cmd_spend, "inventory": cmd_inventory, "monitor": cmd_monitor,
+    handlers = {"run": cmd_run, "gate": cmd_gate, "status": cmd_status, "spend": cmd_spend, "inventory": cmd_inventory, "monitor": cmd_monitor, "benchmark": cmd_benchmark,
                 "llm-check": cmd_llm_check}
     return handlers[args.cmd](args, cfg)
 

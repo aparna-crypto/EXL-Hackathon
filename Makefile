@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 UV      ?= $(shell command -v uv || echo $$HOME/.local/bin/uv)
 MODEL   ?=
 
-.PHONY: help setup setup-r lock data legacy test lint run run-all monitor inventory status ui mlflow-ui llm-check spend clean
+.PHONY: help setup setup-r lock data legacy test lint run run-all monitor benchmark inventory status ui mlflow-ui llm-check spend clean
 
 help:
 	@echo "make setup            create .venv (Python 3.11) and install pinned deps + R packages"
@@ -14,6 +14,7 @@ help:
 	@echo "make run MODEL=<name> run the pipeline (with human gates) for models/<name>"
 	@echo "make run-all          run every model in models/ up to its next gate (no prompts)"
 	@echo "make monitor MODEL=<name>  drift monitoring; a breach triggers re-validation (Gate 4)"
+	@echo "make benchmark            time the pipeline per model vs config/manual_baseline.yaml"
 	@echo "make inventory        rebuild the inventory table + dependency map from model cards"
 	@echo "make status MODEL=<name>  stage/gate status for a model"
 	@echo "make ui               Streamlit UI (inventory, gates, reports, drift, audit, spend)"
@@ -58,6 +59,9 @@ run-all:
 monitor:
 	@test -n "$(MODEL)" || (echo "usage: make monitor MODEL=<name>" && exit 2)
 	$(PY) -m factory.cli monitor --model $(MODEL)
+
+benchmark:
+	$(PY) -m factory.cli benchmark
 
 inventory:
 	$(PY) -m factory.cli inventory

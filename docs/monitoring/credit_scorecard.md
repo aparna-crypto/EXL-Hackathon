@@ -1,6 +1,6 @@
 # Monitoring report: Retail Application Scorecard (RCS-APP-02)
 
-Generated 2026-11-08T22:19:14.343740+00:00. Baseline: development (train) scores of the Gate 3/4-approved rebuild redeveloped/credit_scorecard/scorecard.py, 700 rows
+Generated 2026-11-08T23:54:29.411452+00:00. Baseline: development (train) scores of the Gate 3/4-approved rebuild redeveloped/credit_scorecard/scorecard.py, 700 rows
 
 Simulation: 12 monthly batches of 1000 rows resampled from the test set (seed 42 + month). SYNTHETIC drift from month 7: credit_amount x(1 + 0.04k), a share 0.08k of loans 12 months longer, riskier intake (weight exp(0.15k*bad)). Outcomes are assumed observed at batch time (no maturity lag).
 
@@ -44,6 +44,6 @@ Recommended actions:
 - Confirm that outcome data is observed at batch time as the simulation assumes; if real loans mature with a lag, the performance monitoring basis must be reviewed before drawing final conclusions.
 - Escalate to the model owner and model risk committee given red ratings on CSI and calibration in months 10 to 12, and track the monthly monitoring results until the model is re-validated or remediated.
 
-## Re-validation: pending
+## Re-validation: approved
 
 Report: `docs/validation/credit_scorecard_revalidation_m09.html`. Previous validation: {'generated_at': '2026-11-08T21:43:36.727305+00:00', 'overall_rag': 'amber', 'report_html': 'docs/validation/credit_scorecard.html'}

@@ -25,7 +25,7 @@ CARDS, AUDIT = cfg["paths"]["model_cards"], cfg["paths"]["audit"]
 st.set_page_config(page_title="Model Risk Factory", layout="wide")
 st.title("Agentic Model Risk Factory")
 page = st.sidebar.radio("View", ["Inventory", "Gate review", "Audit log", "LLM spend",
-                                 "Validation reports", "Drift monitoring"])
+                                 "Validation reports", "Drift monitoring", "Benchmark"])
 cards = model_card.list_cards(CARDS)
 
 
@@ -191,7 +191,7 @@ elif page == "Validation reports":
         st.caption(f"Gate 4 status: {stage_status(card, 'validate')}")
         show_validation(card, height=1400)
 
-else:
+elif page == "Drift monitoring":
     monitored = [c for c in cards if c.get("monitoring")]
     if not monitored:
         st.info("No monitoring results yet: run `make monitor MODEL=<name>` for a model whose "
@@ -233,3 +233,32 @@ else:
             if events:
                 st.subheader("Monitoring events (append-only)")
                 st.dataframe(pd.DataFrame(events), use_container_width=True, hide_index=True)
+
+elif page == "Benchmark":
+    from factory.config import REPO_ROOT
+    bdir = REPO_ROOT / cfg["paths"]["benchmark_artifacts"]
+    if not (bdir / "benchmark.json").exists():
+        st.info("No benchmark yet: run `make benchmark`.")
+    else:
+        res = json.loads((bdir / "benchmark.json").read_text())
+        st.caption(f"Generated {res['generated_at']}. Machine time = deterministic work re-executed "
+                   "and timed + live LLM latency from the ledger; human review is not measured.")
+        st.dataframe(pd.DataFrame([{"model": r["model_id"], "language": r["language"],
+                                    **{s: v["machine_s"] if v["ran"] else None
+                                       for s, v in r["stages"].items()},
+                                    "total_s": r["machine_s"], "llm_calls": r["llm_calls"],
+                                    "llm_cost_usd": r["llm_cost_usd"]} for r in res["models"]]),
+                     use_container_width=True, hide_index=True)
+        st.image(str(bdir / "machine_time.png"))
+        st.subheader("Manual comparison")
+        cmp = [c for c in res["comparison"] if c["manual_h"] is not None]
+        if cmp:
+            st.caption(f"Manual figures supplied by: {res['baseline_source'] or 'not stated'}")
+            st.dataframe(pd.DataFrame(cmp), use_container_width=True, hide_index=True)
+        else:
+            st.warning("Manual baseline not supplied: fill `config/manual_baseline.yaml` and re-run "
+                       "`make benchmark`. No speed-up is shown until then.")
+        st.subheader("Consistency across models")
+        st.dataframe(pd.DataFrame([{k: v for k, v in c.items() if k != "stage_status"}
+                                   for c in res["consistency"]]),
+                     use_container_width=True, hide_index=True)

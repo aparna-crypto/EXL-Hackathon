@@ -1,1 +1,2 @@
 {"timestamp": "2026-11-08T22:19:20.213074+00:00", "model_id": "credit_scorecard", "event": "revalidation_triggered", "month": 9, "reason": "month 9 rated AMBER (2 consecutive amber months): Largest characteristic CSI 0.134 (AMBER, limits [0.1, 0.25]); Calibration |mean PD / bad rate - 1| 0.154 (AMBER, limits [0.1, 0.2])", "card_version": 12}
+{"timestamp": "2026-11-08T23:54:28.408311+00:00", "model_id": "credit_scorecard", "event": "revalidation_approved", "month": 9, "card_version": 14}

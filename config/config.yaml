@@ -19,6 +19,8 @@ paths:
   validation_artifacts: artifacts/validation   # Stage 5 evidence.json + charts
   monitoring_reports: docs/monitoring           # Stage 6 monitoring report (<model>.md)
   monitoring_artifacts: artifacts/monitoring   # Stage 6 batches, metrics, charts, events
+  benchmark_artifacts: artifacts/benchmark     # Stage 7 benchmark json + chart
+  benchmark_report: docs/benchmark.md          # Stage 7 benchmark report
 
 llm:
   provider: anthropic                 # anthropic | fake   (env: LLM_PROVIDER)
@@ -71,7 +73,7 @@ llm:
     # A "session" is a named spending bucket summed across all runs from the ledger.
     # Agreed with the team: $7 for Stages 0-3 (bucket `stages-0-3`, closed at $0.948), $4 for
     # Stage 4, $2 for Stage 5 (closed at $0.069), $1 for Stage 6. Start a new bucket only on purpose.
-    session_id: stage-6
+    session_id: stage-7
     session_usd: 1.00
 
 tracking:
@@ -171,3 +173,7 @@ gates:
   stages: [discover, document, redevelop, validate]
   # Decisions that require a written reason.
   reason_required_for: [reject, comment]
+
+benchmark:
+  # Stage 7. The manual baseline is supplied by the user; empty -> no speed-up is reported.
+  manual_baseline: config/manual_baseline.yaml
