@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "fraud_gbm",
-  "card_version": 3,
+  "card_version": 5,
   "name": "fraud_gbm",
   "language": "Python",
   "source_files": [
@@ -57,14 +57,14 @@
   ],
   "stages": {
     "discover": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-07T23:43:24.897935+00:00",
       "summary": "FRD-CARD-07 fraud_gbm | owner: unknown | type: Gradient boosting classifier (sklearn HistGradientBoostingClassifier) for fraud probability | risk tier: unknown\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: Python, 52 LOC, libraries numpy, pandas, sklearn; 2 inputs, 2 outputs\nGaps (4):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- No owner recorded.\n- No risk tier recorded.\nLLM: claude-haiku-5-5, 3475 tokens, $0.0065"
     },
     "document": {
-      "status": "not_started",
-      "completed_at": null,
-      "summary": null
+      "status": "awaiting_review",
+      "completed_at": "2026-11-08T02:35:15.112229+00:00",
+      "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/fraud_gbm.md\nSection confidence: Purpose and intended use medium, Data medium, Methodology high, Implementation high, Performance high, Monitoring and governance high\n7 variables, 7 transformations, 4 assumptions, 7 limitations, 9 unknowns\nCoverage vs fitted model: 30/30 variables\nGaps (1):\n- Documented as inputs but not in the fitted model: Amount, Time.\nLLM: claude-sonnet-5-5, 9631 tokens, $0.1048"
     },
     "redevelop": {
       "status": "not_started",
@@ -92,6 +92,16 @@
       "card_version": 3,
       "timestamp": "2026-11-07T23:43:24.897962+00:00",
       "note": "discover: completed, awaiting review"
+    },
+    {
+      "card_version": 4,
+      "timestamp": "2026-11-08T02:34:36.898839+00:00",
+      "note": "discover: gate approved"
+    },
+    {
+      "card_version": 5,
+      "timestamp": "2026-11-08T02:35:15.112245+00:00",
+      "note": "document: completed, awaiting review"
     }
   ],
   "discovery": {
@@ -171,5 +181,363 @@
       "cached": false
     },
     "reviewer_feedback_used": "- reject by ap: For checking"
+  },
+  "documentation": {
+    "sections": {
+      "purpose_and_use": {
+        "text": "The code trains a gradient boosting classifier that outputs a fraud probability (p_fraud) for card transactions, using anonymised card transaction data (columns V1-V28, Time, Amount, Class). The module docstring identifies it as 'Card transaction fraud model' with model ID FRD-CARD-07. The code does not say how the score is used in production (e.g. decline thresholds, alert queues, manual review), who the intended users are, or which portfolio it covers. The docstring states that no owner, purpose or validation record is kept with the code.",
+        "confidence": "medium",
+        "evidence": [
+          {
+            "quote": "Card transaction fraud model: gradient boosting on anonymised card transactions.",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "Model ID: FRD-CARD-07 (no owner, purpose or validation record is kept with this code).",
+            "source": "models/fraud_gbm/train_fraud.py"
+          }
+        ],
+        "flag": null
+      },
+      "data": {
+        "text": "Inputs are two pre-processed parquet files read from a data directory (default data/processed): creditcard_train.parquet and creditcard_test.parquet. The code expects columns V1-V28, Amount, Time, Class (binary target; Class is used as the fraud indicator) and id (carried through to the predictions file). The train/test split was made upstream of this script; the script does not do any splitting and the split method (random vs time-based), the upstream source and the data period are not documented. Reference outputs give train n=227,845 with fraud rate 0.183% and test n=56,962 with fraud rate 0.132%, i.e. a roughly 80/20 split with different fraud rates, which suggests the split is not stratified (not stated). No validation or out-of-time sample exists in the code; hyperparameters are fixed and no tuning is performed in the script.",
+        "confidence": "medium",
+        "evidence": [
+          {
+            "quote": "train = pd.read_parquet(data_dir / \"creditcard_train.parquet\")",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "test = pd.read_parquet(data_dir / \"creditcard_test.parquet\")",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "X_train, y_train = features(train), train[\"Class\"]",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "\"n\": 227845,",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          },
+          {
+            "quote": "\"n\": 56962,",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "methodology": {
+        "text": "Model form: sklearn HistGradientBoostingClassifier with log_loss, max_iter=200, learning_rate=0.05, max_leaf_nodes=31, l2_regularization=1.0, early_stopping=False, random_state=42. Other parameters are sklearn 1.5.2 defaults as recorded in metrics.json (e.g. min_samples_leaf=20, max_bins=255, max_depth=None, class_weight=None, no monotonic constraints). Because early stopping is disabled, all 200 iterations are fitted and the recorded validation_fraction/n_iter_no_change/scoring values are inactive. No class weighting or resampling is applied despite the very low fraud rate (~0.18% in training). Features: V1-V28 used unchanged, plus log_amount = log1p(Amount) and hour = (Time // 3600) % 24, giving 30 inputs. Nothing is standardised or imputed in the script (histogram gradient boosting handles missing values natively; whether any exist in the data is unknown). There is no variable selection step and no hyperparameter search in the code. Predicted probabilities are taken as predict_proba[:, 1]; no calibration step and no decision threshold is defined.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "max_iter=200, learning_rate=0.05, max_leaf_nodes=31, l2_regularization=1.0,",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "early_stopping=False, random_state=SEED,",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "X[\"log_amount\"] = np.log1p(df[\"Amount\"])",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "X[\"hour\"] = (df[\"Time\"] // 3600) % 24",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "\"class_weight\": null,",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "implementation": {
+        "text": "Python script using numpy, pandas and scikit-learn (reference run recorded sklearn 1.5.2; other library versions not recorded). Seed: SEED = 42 passed as random_state to the model. Run with: python models/fraud_gbm/train_fraud.py [data_dir] [out_dir]; defaults are data/processed and artifacts/reference/fraud_gbm. Outputs: predictions_test.csv.gz (columns id, Class, p_fraud for the test set only) and metrics.json (model name, language, sklearn version, seed, feature list, full model parameters, train and test metrics). The fitted model object is not saved to disk, so scoring of new data would require re-running the training. The script prints test AUC and average precision. No tests, scoring script, or environment/lock file are in the material provided.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Usage:    python models/fraud_gbm/train_fraud.py [data_dir] [out_dir]",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "SEED = 42",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "pd.DataFrame({\"id\": test[\"id\"], \"Class\": y_test, \"p_fraud\": p_test}).to_csv(",
+            "source": "models/fraud_gbm/train_fraud.py"
+          },
+          {
+            "quote": "\"sklearn_version\": \"1.5.2\",",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "performance": {
+        "text": "Reference results (metrics.json): Test (n=56,962, fraud rate 0.132%): AUC 0.9859, Gini 0.9718, KS 0.8881, average precision 0.7966. Train (n=227,845, fraud rate 0.183%): AUC 1.0, Gini 1.0, KS 1.0, average precision 1.0, i.e. the model separates the training data perfectly, which indicates substantial overfitting (200 iterations, no early stopping, no validation set); the test-set figures are therefore the relevant out-of-sample measures. The gap between training and test performance (average precision 1.0 vs 0.80) is large. There are no results by segment, over time, at any threshold (precision/recall, alert rate, false-positive rate), no calibration assessment, no comparison with a challenger or incumbent, and no confidence intervals. The test set contains only about 75 fraud cases (0.132% of 56,962, derived), so the metrics are subject to considerable sampling uncertainty.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "\"auc\": 0.9859192199741007,",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          },
+          {
+            "quote": "\"average_precision\": 0.7965982774053566",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          },
+          {
+            "quote": "\"ks\": 0.8880594863501328,",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          },
+          {
+            "quote": "\"auc\": 1.0,",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          },
+          {
+            "quote": "\"fraud_rate\": 0.001316667251852112,",
+            "source": "artifacts/reference/fraud_gbm/metrics.json"
+          }
+        ],
+        "flag": null
+      },
+      "monitoring_and_governance": {
+        "text": "No governance information is held with the code. The docstring states that no owner, purpose or validation record is kept with the code. No risk tier, last validation date, approval record, monitoring plan, performance triggers, retraining schedule, or change log appear in the material. The model ID FRD-CARD-07 is the only governance identifier. The script contains no monitoring logic (no drift, stability, or back-testing code).",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Model ID: FRD-CARD-07 (no owner, purpose or validation record is kept with this code).",
+            "source": "models/fraud_gbm/train_fraud.py"
+          }
+        ],
+        "flag": null
+      }
+    },
+    "variables": [
+      {
+        "name": "V1-V28",
+        "role": "input",
+        "description": "28 anonymised card-transaction features (meaning not documented in the material; names suggest anonymised/transformed components).",
+        "transformation": "Used as is, no scaling or imputation in the script.",
+        "evidence": "X = df[[f\"V{i}\" for i in range(1, 29)]].copy()",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "name": "log_amount",
+        "role": "input",
+        "description": "Log of transaction amount derived from Amount.",
+        "transformation": "np.log1p(Amount)",
+        "evidence": "X[\"log_amount\"] = np.log1p(df[\"Amount\"])",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "name": "hour",
+        "role": "input",
+        "description": "Hour-of-day derived from Time (assumed to be elapsed seconds; units not documented).",
+        "transformation": "(Time // 3600) % 24",
+        "evidence": "X[\"hour\"] = (df[\"Time\"] // 3600) % 24",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "name": "Amount",
+        "role": "input",
+        "description": "Raw transaction amount; not used directly, only via log_amount (currency not documented).",
+        "transformation": "Replaced by log1p(Amount) in the feature set.",
+        "evidence": "X[\"log_amount\"] = np.log1p(df[\"Amount\"])",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "name": "Time",
+        "role": "input",
+        "description": "Raw time field; not used directly, only via hour.",
+        "transformation": "Replaced by hour in the feature set.",
+        "evidence": "X[\"hour\"] = (df[\"Time\"] // 3600) % 24",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "name": "Class",
+        "role": "target",
+        "description": "Binary fraud indicator (1 = fraud) used as the training target and evaluation label.",
+        "transformation": "None.",
+        "evidence": "X_train, y_train = features(train), train[\"Class\"]",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "name": "id",
+        "role": "identifier",
+        "description": "Transaction identifier, not a model input; written to predictions output to key scores.",
+        "transformation": "None.",
+        "evidence": "pd.DataFrame({\"id\": test[\"id\"], \"Class\": y_test, \"p_fraud\": p_test})",
+        "source": "models/fraud_gbm/train_fraud.py"
+      }
+    ],
+    "transformations": [
+      {
+        "step": "Load train and test data",
+        "description": "Reads creditcard_train.parquet and creditcard_test.parquet from data_dir (default data/processed). Splits were made upstream.",
+        "evidence": "train = pd.read_parquet(data_dir / \"creditcard_train.parquet\")",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "step": "Select V1-V28",
+        "description": "Takes columns V1 to V28 unchanged as features.",
+        "evidence": "X = df[[f\"V{i}\" for i in range(1, 29)]].copy()",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "step": "Log-transform amount",
+        "description": "Adds log_amount = log(1 + Amount).",
+        "evidence": "X[\"log_amount\"] = np.log1p(df[\"Amount\"])",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "step": "Derive hour of day",
+        "description": "Adds hour = floor(Time / 3600) mod 24.",
+        "evidence": "X[\"hour\"] = (df[\"Time\"] // 3600) % 24",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "step": "Fit gradient boosting",
+        "description": "Fits HistGradientBoostingClassifier (200 iterations, learning rate 0.05, 31 leaves max, L2 = 1.0, no early stopping, seed 42) on the full training set.",
+        "evidence": "model.fit(X_train, y_train)",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "step": "Score train and test",
+        "description": "Predicted fraud probability = predict_proba[:, 1] on both sets; no calibration or thresholding.",
+        "evidence": "p_test = model.predict_proba(X_test)[:, 1]",
+        "source": "models/fraud_gbm/train_fraud.py"
+      },
+      {
+        "step": "Compute metrics",
+        "description": "AUC, Gini (2*AUC-1), KS (max gap between cumulative bad and good distributions over score-sorted data) and average precision for train and test.",
+        "evidence": "\"gini\": 2 * auc - 1, \"ks\": ks(y, p),",
+        "source": "models/fraud_gbm/train_fraud.py"
+      }
+    ],
+    "assumptions": [
+      {
+        "text": "Fraud can be predicted from the 28 anonymised features, transaction amount (log scale) and hour of day alone; no customer, merchant, velocity or historical behaviour features are used.",
+        "confidence": "medium",
+        "evidence": "X[\"hour\"] = (df[\"Time\"] // 3600) % 24",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      },
+      {
+        "text": "Time is assumed to be seconds elapsed, so integer division by 3600 gives hours; the hour feature is derived as hour-of-day mod 24 and assumes the time origin aligns with midnight (not stated).",
+        "confidence": "low",
+        "evidence": "X[\"hour\"] = (df[\"Time\"] // 3600) % 24",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      },
+      {
+        "text": "Fixed hyperparameters are assumed adequate with all 200 iterations fitted; no tuning or early stopping is used.",
+        "confidence": "medium",
+        "evidence": "early_stopping=False, random_state=SEED,",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      },
+      {
+        "text": "The upstream train/test split is assumed representative of future transactions.",
+        "confidence": "low",
+        "evidence": "test = pd.read_parquet(data_dir / \"creditcard_test.parquet\")",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      }
+    ],
+    "limitations": [
+      {
+        "text": "Training performance is perfect (AUC, KS and average precision all 1.0), indicating overfitting; the test average precision is 0.80 against 1.0 on training.",
+        "confidence": "high",
+        "evidence": "\"average_precision\": 1.0",
+        "source": "artifacts/reference/fraud_gbm/metrics.json",
+        "grounded": true
+      },
+      {
+        "text": "Test set contains only about 75 fraud cases (0.132% of 56,962), so test metrics are uncertain and no confidence intervals are given.",
+        "confidence": "medium",
+        "evidence": "\"fraud_rate\": 0.001316667251852112,",
+        "source": "artifacts/reference/fraud_gbm/metrics.json",
+        "grounded": true
+      },
+      {
+        "text": "No class weighting or resampling is used despite extreme class imbalance; no calibration step, so p_fraud may not be a calibrated probability.",
+        "confidence": "medium",
+        "evidence": "\"class_weight\": null,",
+        "source": "artifacts/reference/fraud_gbm/metrics.json",
+        "grounded": true
+      },
+      {
+        "text": "No decision threshold, precision/recall or alert-rate analysis is produced, so operating performance is not assessed.",
+        "confidence": "medium",
+        "evidence": "p_test = model.predict_proba(X_test)[:, 1]",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      },
+      {
+        "text": "The fitted model is not persisted, so scoring requires retraining; reproducibility is limited to a seed and sklearn version without a pinned environment.",
+        "confidence": "medium",
+        "evidence": "model.fit(X_train, y_train)",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      },
+      {
+        "text": "V1-V28 are anonymised, so features cannot be interpreted, and explainability, fairness or bias checks are not performed in the code.",
+        "confidence": "medium",
+        "evidence": "X = df[[f\"V{i}\" for i in range(1, 29)]].copy()",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      },
+      {
+        "text": "No documentation, owner, risk tier or validation record exists for this model.",
+        "confidence": "high",
+        "evidence": "no owner, purpose or validation record is kept with this code",
+        "source": "models/fraud_gbm/train_fraud.py",
+        "grounded": true
+      }
+    ],
+    "unknowns": [
+      "Model owner, risk tier, approval and last independent validation date.",
+      "Business use: where the score is deployed, decision thresholds, actions taken and users.",
+      "Origin, period and population of the data and how the upstream train/test split was made (random, stratified or time-based); whether any data preparation preceded the parquet files.",
+      "Meaning of V1-V28 and of Time and Amount units/currency; the time origin for the hour feature.",
+      "Presence of missing values and how they are handled in the source data.",
+      "Reason for chosen hyperparameters and whether any tuning was performed elsewhere.",
+      "Performance at an operating threshold, calibration, performance by segment or over time, and benchmarking against alternatives.",
+      "Monitoring arrangements, retraining schedule and change history.",
+      "Full environment (python and other library versions) and how the model is deployed for scoring."
+    ],
+    "rejected": [],
+    "llm": {
+      "model": "claude-sonnet-5-5",
+      "calls": 1,
+      "input_tokens": 3305,
+      "output_tokens": 6326,
+      "cost_usd": 0.104805,
+      "cached": false
+    },
+    "coverage": {
+      "available": true,
+      "model_terms": 30,
+      "documented": 30,
+      "missing": [],
+      "extra": [
+        "Amount",
+        "Time"
+      ]
+    },
+    "gaps": [
+      "Documented as inputs but not in the fitted model: Amount, Time."
+    ],
+    "generated_at": "2026-11-08T02:35:15.104189+00:00",
+    "sources": [
+      "models/fraud_gbm/train_fraud.py",
+      "artifacts/reference/fraud_gbm/metrics.json"
+    ],
+    "status": "pending Gate 2",
+    "doc_path": "/home/ubuntu/repos/EXL-Hackathon/docs/models/fraud_gbm.md",
+    "reviewer_feedback_used": null
   }
 }

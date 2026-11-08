@@ -160,3 +160,19 @@ unknowns. The other three models are waiting at Gate 1, so Stage 3 has not run f
 
 **Token cost Stage 3 to date:** 6 calls, $0.565. Session `stages-0-3`: 20 calls, 126,814 tokens, $0.711 of $7.00.
 
+**Review round 3 (reviewer `ap`, 2026-11-08 02:33-02:34 UTC)**
+- Gate 1 approved for `fraud_gbm` and `sas_behaviour_scorecard`; Gate 2 approved for `credit_scorecard` and
+  `pricing_glm` (no reasons given).
+- Document run for fraud (Sonnet, $0.1048) and SAS (Sonnet, $0.1321); both at Gate 2.
+  - Fraud: 30/30 fitted terms documented. Raw inputs `Amount` and `Time` are reported as not in the model
+    because the fitted terms are the derived `log_amount` and `hour` (same naming limitation as pricing).
+    Owner and risk tier remain gaps.
+  - SAS: no reference outputs, so no coverage check; documented from source only and flagged non-executable.
+- Stage 3 end state: all four models documented; scorecard and pricing approved at Gate 2; fraud and SAS
+  awaiting Gate 2. `make run` for approved models now stops at `redevelop` (not implemented until Stage 4).
+
+**Verification:** `make test` 55 passed; ruff clean.
+
+**Stage 3 total token cost:** 8 calls, $0.802 (incl. $0.138 wasted on one truncated reply). Session
+`stages-0-3`: 22 calls, 147,215 tokens, $0.948 of $7.00.
+

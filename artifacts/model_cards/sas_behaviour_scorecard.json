@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "sas_behaviour_scorecard",
-  "card_version": 3,
+  "card_version": 5,
   "name": "Credit Card Behavioural Score (BHV-CC-01)",
   "language": "SAS",
   "source_files": [
@@ -66,14 +66,14 @@
   ],
   "stages": {
     "discover": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-07T23:44:16.801264+00:00",
       "summary": "BHV-CC-01 Credit Card Behavioural Score (BHV-CC-01) | owner: Cards Risk Analytics | type: Behavioural PD scorecard (logistic regression with stepwise variable selection) | risk tier: medium\nLast validation: unknown | documentation: missing | 0 doc/code contradiction(s)\nScan: SAS, 35 LOC, libraries PROC EXPORT, PROC FORMAT, PROC LOGISTIC; 3 inputs, 3 outputs\nGaps (3):\n- Documentation missing: no documentation file is kept with the code (only code comments).\n- No validation record: last independent validation date is unknown.\n- Not executable here (no runtime for SAS): outputs cannot be reproduced; document only.\nLLM: claude-haiku-5-5, 3662 tokens, $0.0075"
     },
     "document": {
-      "status": "not_started",
-      "completed_at": null,
-      "summary": null
+      "status": "awaiting_review",
+      "completed_at": "2026-11-08T02:36:04.472944+00:00",
+      "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/sas_behaviour_scorecard.md\nSection confidence: Purpose and intended use high, Data high, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n17 variables, 9 transformations, 4 assumptions, 7 limitations, 12 unknowns\nCoverage vs fitted model: no reference outputs (model not executed)\nGaps (0):\nLLM: claude-sonnet-5-5, 10770 tokens, $0.1321"
     },
     "redevelop": {
       "status": "not_started",
@@ -101,6 +101,16 @@
       "card_version": 3,
       "timestamp": "2026-11-07T23:44:16.801286+00:00",
       "note": "discover: completed, awaiting review"
+    },
+    {
+      "card_version": 4,
+      "timestamp": "2026-11-08T02:35:17.507679+00:00",
+      "note": "discover: gate approved"
+    },
+    {
+      "card_version": 5,
+      "timestamp": "2026-11-08T02:36:04.472955+00:00",
+      "note": "document: completed, awaiting review"
     }
   ],
   "discovery": {
@@ -188,5 +198,433 @@
       "cached": false
     },
     "reviewer_feedback_used": "- reject by ap: For checking"
+  },
+  "documentation": {
+    "sections": {
+      "purpose_and_use": {
+        "text": "Monthly behavioural probability of default (PD) for existing credit card accounts, used for limit management and collections prioritisation (per the header comment). Scores are exported to a CSV for the limit-management engine. The code does not state how collections prioritisation consumes the score, nor any cut-offs or strategies. The PD is a 12-month bad probability only if the 'bad' definition and outcome window are applied as intended (see limitations).",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "Purpose : Monthly behavioural PD for existing credit card accounts, used for",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "/* 4. Export scores for the limit-management engine */",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          }
+        ],
+        "flag": null
+      },
+      "data": {
+        "text": "Three warehouse tables from library CRDW (/data/warehouse/cards) are merged by account_id: crdw.account_month (filtered to month_id = &perf_month., i.e. 202312, with 'if a' keeping only accounts present in that table), crdw.bureau_monthly (bureau_score, num_searches_6m) and crdw.delinquency_flags (worst_status_12m). Observation month is hard-coded as 202312. Target: bad_flag = 1 if worst_status_12m >= 3, else 0. The macro variable outcome_window = 12 is declared but not referenced anywhere in the code. There is NO train/test/validation split: the model is fitted and scored on the same dataset (work.base_binned). No sample size, bad rate or exclusion rules (e.g. closed or dormant accounts) are coded. The header notes the library and tables are synthetic and do not exist, so the program was never run.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "merge crdw.account_month (where=(month_id = &perf_month.) in=a)",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "if worst_status_12m >= 3 then bad_flag = 1; else bad_flag = 0;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "%let perf_month = 202312;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "%let outcome_window = 12;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "score data=work.base_binned out=model.bhv_cc_01_scored;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          }
+        ],
+        "flag": null
+      },
+      "methodology": {
+        "text": "Binary logistic regression (PROC LOGISTIC, descending so that bad_flag=1 is the modelled event) with stepwise variable selection at slentry=0.05 and slstay=0.05. Candidate predictors: util_band and mob_band (categorical, reference-cell parameterisation), payment_ratio, bureau_score and num_searches_6m (continuous, entered as-is). Utilisation and months on book are coarse-classed into 4 and 3 bands respectively via PROC FORMAT. The code does not derive points, a score scale (e.g. points-to-double-odds) or any PD calibration step; the output p_1 is the raw predicted probability from the fitted model, which is exported as the score. Which variables survive selection is determined at run time and is not recorded in the material.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "selection=stepwise slentry=0.05 slstay=0.05;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "class util_band mob_band / param=ref;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "proc logistic data=work.base_binned descending outmodel=model.bhv_cc_01_fit;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "proc export data=model.bhv_cc_01_scored (keep=account_id p_1)",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          }
+        ],
+        "flag": null
+      },
+      "implementation": {
+        "text": "Single SAS program using DATA steps, PROC FORMAT, PROC LOGISTIC and PROC EXPORT. Steps in order: (1) build base table by merging three CRDW tables and deriving features and target; (2) define formats and create binned variables; (3) fit stepwise logistic regression, saving the fitted model to model.bhv_cc_01_fit and scoring the same data to model.bhv_cc_01_scored; (4) export account_id and p_1 to /exports/bhv_cc_01_scores.csv. Inputs: crdw.account_month, crdw.bureau_monthly, crdw.delinquency_flags. Outputs: model.bhv_cc_01_fit, model.bhv_cc_01_scored, /exports/bhv_cc_01_scores.csv. No random seed is used (no stochastic step). Run by executing the program in a SAS session with the CRDW and MODEL libnames resolvable. The code has no scheduling or orchestration, so how the 'monthly' run is triggered is not shown. It was not executed in this review (no SAS runtime; tables are synthetic).",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "libname crdw  '/data/warehouse/cards';",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "libname model '/models/bhv_cc_01';",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "outfile='/exports/bhv_cc_01_scores.csv' dbms=csv replace;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "this program is inventoried and documented only, never run.",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          }
+        ],
+        "flag": null
+      },
+      "performance": {
+        "text": "No reference outputs, logs or performance statistics (Gini/AUC, KS, calibration, bad rate, coefficient estimates) are provided, and the program was never run. Performance cannot be stated. Because scoring is done on the development data with no holdout, any in-sample performance obtained from this code would be optimistic.",
+        "confidence": "high",
+        "evidence": [
+          {
+            "quote": "this program is inventoried and documented only, never run.",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          },
+          {
+            "quote": "score data=work.base_binned out=model.bhv_cc_01_scored;",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          }
+        ],
+        "flag": null
+      },
+      "monitoring_and_governance": {
+        "text": "Owner stated as Cards Risk Analytics (header comment). No documentation file exists beyond code comments. No independent validation date or record is available (inventory), and no monitoring code (population stability, performance tracking, back-testing, override tracking) is present. The model's risk tier (medium) comes from the inventory, not from the code. Change control, versioning and approvals are not evidenced.",
+        "confidence": "medium",
+        "evidence": [
+          {
+            "quote": "Owner   : Cards Risk Analytics",
+            "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+          }
+        ],
+        "flag": null
+      }
+    },
+    "variables": [
+      {
+        "name": "account_id",
+        "role": "identifier",
+        "description": "Account key used for merging the three source tables and exported with the score.",
+        "transformation": "Used as BY variable in merge; kept in export.",
+        "evidence": "by account_id;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "month_id",
+        "role": "identifier",
+        "description": "Observation month on account_month; filtered to &perf_month. (202312). Also kept from bureau_monthly.",
+        "transformation": "Filter month_id = &perf_month.",
+        "evidence": "crdw.account_month (where=(month_id = &perf_month.) in=a)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "balance",
+        "role": "input",
+        "description": "Account balance; numerator of utilisation. Raw variable not itself a model candidate.",
+        "transformation": "utilisation = min(balance / max(credit_limit, 1), 1.5)",
+        "evidence": "utilisation = min(balance / max(credit_limit, 1), 1.5);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "credit_limit",
+        "role": "input",
+        "description": "Credit limit; denominator of utilisation (floored at 1).",
+        "transformation": "max(credit_limit, 1)",
+        "evidence": "utilisation = min(balance / max(credit_limit, 1), 1.5);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "utilisation",
+        "role": "input",
+        "description": "Balance to limit ratio, capped at 1.5; source for util_band.",
+        "transformation": "min(balance/max(credit_limit,1), 1.5), then binned via util_fmt.",
+        "evidence": "util_band = put(utilisation, util_fmt.);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "util_band",
+        "role": "input",
+        "description": "Categorical utilisation band: <30%, 30-70%, 70-90%, 90%+. Candidate predictor (class variable, reference parameterisation).",
+        "transformation": "put(utilisation, util_fmt.)",
+        "evidence": "class util_band mob_band / param=ref;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "payment_amt",
+        "role": "input",
+        "description": "Payment amount made; numerator of payment_ratio.",
+        "transformation": "payment_amt / max(min_payment_due, 1), capped at 10",
+        "evidence": "payment_ratio = min(payment_amt / max(min_payment_due, 1), 10);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "min_payment_due",
+        "role": "input",
+        "description": "Minimum payment due; denominator of payment_ratio (floored at 1).",
+        "transformation": "max(min_payment_due, 1)",
+        "evidence": "payment_ratio = min(payment_amt / max(min_payment_due, 1), 10);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "payment_ratio",
+        "role": "input",
+        "description": "Payment to minimum-due ratio, capped at 10. Continuous candidate predictor.",
+        "transformation": "min(payment_amt/max(min_payment_due,1), 10)",
+        "evidence": "model bad_flag = util_band mob_band payment_ratio bureau_score num_searches_6m",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "open_date",
+        "role": "input",
+        "description": "Account opening date; used to derive months_on_book.",
+        "transformation": "intck('month', open_date, perf month as date)",
+        "evidence": "months_on_book = intck('month', open_date, input(put(&perf_month., 6.), yymmn6.));",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "months_on_book",
+        "role": "input",
+        "description": "Months between account opening and observation month; source for mob_band.",
+        "transformation": "intck month count, then binned via mob_fmt.",
+        "evidence": "mob_band  = put(months_on_book, mob_fmt.);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "mob_band",
+        "role": "input",
+        "description": "Categorical months-on-book band: <1y, 1-3y, 3y+. Candidate predictor (class variable).",
+        "transformation": "put(months_on_book, mob_fmt.)",
+        "evidence": "class util_band mob_band / param=ref;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "bureau_score",
+        "role": "input",
+        "description": "Bureau score from bureau_monthly. Continuous candidate predictor, entered untransformed.",
+        "transformation": "None",
+        "evidence": "crdw.bureau_monthly (keep=account_id month_id bureau_score num_searches_6m)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "num_searches_6m",
+        "role": "input",
+        "description": "Number of bureau searches in the last 6 months (name-implied). Continuous candidate predictor, untransformed.",
+        "transformation": "None",
+        "evidence": "crdw.bureau_monthly (keep=account_id month_id bureau_score num_searches_6m)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "worst_status_12m",
+        "role": "input",
+        "description": "Worst delinquency status over the 12 months from delinquency_flags; used only to derive the target, not a predictor.",
+        "transformation": "bad_flag = 1 if worst_status_12m >= 3",
+        "evidence": "if worst_status_12m >= 3 then bad_flag = 1; else bad_flag = 0;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "bad_flag",
+        "role": "target",
+        "description": "Default indicator: 1 if worst_status_12m >= 3, else 0. Modelled event is bad_flag=1 (descending option).",
+        "transformation": "Threshold on worst_status_12m",
+        "evidence": "proc logistic data=work.base_binned descending outmodel=model.bhv_cc_01_fit;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "name": "p_1",
+        "role": "identifier",
+        "description": "Predicted probability of bad_flag=1 produced by the SCORE statement (output field, not an input); exported as the score.",
+        "transformation": "Output of PROC LOGISTIC SCORE",
+        "evidence": "proc export data=model.bhv_cc_01_scored (keep=account_id p_1)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      }
+    ],
+    "transformations": [
+      {
+        "step": "Build base by merge",
+        "description": "Merge crdw.account_month (filtered to month_id = 202312, 'if a' keeps only accounts present there), crdw.bureau_monthly (account_id, month_id, bureau_score, num_searches_6m) and crdw.delinquency_flags (account_id, worst_status_12m) by account_id.",
+        "evidence": "merge crdw.account_month (where=(month_id = &perf_month.) in=a)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Utilisation",
+        "description": "balance / max(credit_limit,1), capped at 1.5.",
+        "evidence": "utilisation = min(balance / max(credit_limit, 1), 1.5);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Payment ratio",
+        "description": "payment_amt / max(min_payment_due,1), capped at 10.",
+        "evidence": "payment_ratio = min(payment_amt / max(min_payment_due, 1), 10);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Months on book",
+        "description": "Month count between open_date and the performance month (202312 converted to a date via yymmn6.).",
+        "evidence": "months_on_book = intck('month', open_date, input(put(&perf_month., 6.), yymmn6.));",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Target definition",
+        "description": "bad_flag = 1 if worst_status_12m >= 3, otherwise 0.",
+        "evidence": "if worst_status_12m >= 3 then bad_flag = 1; else bad_flag = 0;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Coarse classing of utilisation",
+        "description": "util_fmt bins: <0.3, 0.3-<0.7, 0.7-<0.9, 0.9+, labelled 1 to 4.",
+        "evidence": "0.7 -< 0.9 = '3: 70-90%' 0.9 - high = '4: 90%+';",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Coarse classing of months on book",
+        "description": "mob_fmt bins: <12, 12-<36, 36+ months, labelled 1 to 3.",
+        "evidence": "36 - high  = '3: 3y+';",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Stepwise logistic fit and scoring",
+        "description": "PROC LOGISTIC (descending) with stepwise selection at 0.05 entry and 0.05 stay; scores the same dataset to produce p_1.",
+        "evidence": "selection=stepwise slentry=0.05 slstay=0.05;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      },
+      {
+        "step": "Export",
+        "description": "Write account_id and p_1 to CSV for the limit-management engine.",
+        "evidence": "outfile='/exports/bhv_cc_01_scores.csv' dbms=csv replace;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas"
+      }
+    ],
+    "assumptions": [
+      {
+        "text": "A worst delinquency status of 3 or more in the 12 months is an appropriate 'bad' definition for behavioural PD. The status scale (what 3 represents, e.g. 90+ days past due) is not defined in the material.",
+        "confidence": "medium",
+        "evidence": "if worst_status_12m >= 3 then bad_flag = 1; else bad_flag = 0;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "Delinquency over the 12 months covered by worst_status_12m is treated as the outcome for accounts observed at 202312. Whether that window lies after the observation month (a true outcome) or before it (a lookback) is not established by the code.",
+        "confidence": "low",
+        "evidence": "%let outcome_window = 12;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "Caps (utilisation at 1.5, payment ratio at 10) and floors (denominators at 1) are assumed adequate treatment of outliers and zero denominators; no justification is documented.",
+        "confidence": "medium",
+        "evidence": "payment_ratio = min(payment_amt / max(min_payment_due, 1), 10);",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "Linear-in-logit effects are assumed for payment_ratio, bureau_score and num_searches_6m, which enter unbinned.",
+        "confidence": "medium",
+        "evidence": "model bad_flag = util_band mob_band payment_ratio bureau_score num_searches_6m",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      }
+    ],
+    "limitations": [
+      {
+        "text": "No holdout, out-of-time or cross-validation sample: the model is fitted and scored on the same data, so overfitting and in-sample bias cannot be assessed from this code, and stepwise selection exacerbates this risk.",
+        "confidence": "high",
+        "evidence": "score data=work.base_binned out=model.bhv_cc_01_scored;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "Single observation month (202312) hard-coded, so the development sample reflects one point in the cycle only; no through-the-cycle or seasonality treatment and no mechanism to roll the month forward is coded.",
+        "confidence": "high",
+        "evidence": "%let perf_month = 202312;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "outcome_window macro is declared but unused, so the stated 12-month outcome horizon is not enforced by the code; the bad definition relies entirely on the pre-built worst_status_12m field whose timing relative to the observation month is unclear.",
+        "confidence": "high",
+        "evidence": "%let outcome_window = 12;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "Possible look-ahead / leakage risk: worst_status_12m is merged by account_id only (no month_id alignment) with delinquency_flags and bureau_monthly, so merge timing alignment is not controlled; bureau_monthly month_id is kept but not used in the BY statement.",
+        "confidence": "medium",
+        "evidence": "by account_id;",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "The output p_1 is the raw model probability with no calibration to a central tendency, no scorecard scaling, and no PD floor or cap or segmentation; it is described as a PD but regulatory or IFRS 9 suitability is not demonstrated.",
+        "confidence": "medium",
+        "evidence": "proc export data=model.bhv_cc_01_scored (keep=account_id p_1)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "Missing-value handling is not coded: PROC LOGISTIC drops observations with missing predictors by default, and the base merge can produce missing bureau or delinquency fields for unmatched accounts, so excluded or unscored accounts may occur silently.",
+        "confidence": "medium",
+        "evidence": "merge crdw.account_month (where=(month_id = &perf_month.) in=a)",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      },
+      {
+        "text": "No documentation beyond code comments, no validation and no monitoring evidence exist; the program cannot be reproduced here as the data and SAS runtime are unavailable.",
+        "confidence": "high",
+        "evidence": "this program is inventoried and documented only, never run.",
+        "source": "models/sas_behaviour_scorecard/behaviour_score.sas",
+        "grounded": true
+      }
+    ],
+    "unknowns": [
+      "Development sample size, bad rate, date range and any account exclusions (closed, dormant, charged-off, in-collections).",
+      "Final selected variables, coefficient estimates and signs after stepwise selection.",
+      "Meaning of the worst_status_12m scale and whether status >= 3 aligns with the bank's default definition (e.g. 90 days past due).",
+      "Timing of worst_status_12m relative to the observation month (forward outcome vs lookback) and how the 12-month outcome window is enforced.",
+      "Discriminatory power (Gini/AUC/KS), calibration and stability results; no out-of-sample testing is shown.",
+      "Whether the PD is calibrated to a long-run or point-in-time average and how it feeds limit management and collections strategies, including cut-offs.",
+      "Treatment of missing values, bureau score unavailability and accounts without matching records.",
+      "Run schedule and operational control for the monthly refresh, and how the hard-coded perf_month is updated.",
+      "Date and outcome of any independent validation; model approval and change history; risk tier rationale.",
+      "Monitoring metrics, thresholds and frequency (PSI, back-testing, override tracking) and who reviews them.",
+      "Whether protected or fairness-relevant characteristics were considered; none appear in the code.",
+      "Contents and structure of crdw.account_month beyond fields referenced (balance, credit_limit, payment_amt, min_payment_due, open_date, month_id), including any multiple rows per account."
+    ],
+    "rejected": [],
+    "llm": {
+      "model": "claude-sonnet-5-5",
+      "calls": 1,
+      "input_tokens": 2457,
+      "output_tokens": 8313,
+      "cost_usd": 0.132066,
+      "cached": false
+    },
+    "coverage": {
+      "available": false,
+      "note": "no reference outputs (model not executed)"
+    },
+    "gaps": [],
+    "generated_at": "2026-11-08T02:36:04.465168+00:00",
+    "sources": [
+      "models/sas_behaviour_scorecard/behaviour_score.sas"
+    ],
+    "status": "pending Gate 2",
+    "doc_path": "/home/ubuntu/repos/EXL-Hackathon/docs/models/sas_behaviour_scorecard.md",
+    "reviewer_feedback_used": null
   }
 }

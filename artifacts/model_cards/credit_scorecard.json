@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "credit_scorecard",
-  "card_version": 5,
+  "card_version": 6,
   "name": "Retail Application Scorecard (RCS-APP-02)",
   "language": "R",
   "source_files": [
@@ -80,7 +80,7 @@
       "summary": "RCS-APP-02 Retail Application Scorecard (RCS-APP-02) | owner: Retail Credit Risk Modelling | type: Application PD scorecard: weight-of-evidence binning with logistic regression, scaled to points | risk tier: high\nLast validation: 2021-03-15 | documentation: outdated | 3 doc/code contradiction(s)\nScan: R, 102 LOC, libraries jsonlite; 2 inputs, 4 outputs\nGaps (5):\n- Documentation contradicts code: Methodology note describes four coarse-classed characteristics with 4 bins each (checking account, duration, credit history, savings); code uses all candidate variables with 5 quantile bins for numeric variables and IV >= 0.02 selection.\n- Documentation contradicts code: Methodology note states scores scaled to 500 points at odds 20:1 with 25 points to double odds; code uses base score 600 at odds 50:1 and PDO 20.\n- Documentation contradicts code: Methodology note says validation was March 2021 by internal team; header says last validated 2021-03-15 (consistent), but note says model uses coarse-classed dummy bins while code uses WoE-transformed variables in logistic regression, not dummy-coded bins.\n- Documentation last updated 2019-06 (89 months ago; limit 24).\n- Validation overdue: last validated 2021-03-15 (68 months ago; high tier requires every 12 months).\nLLM: claude-haiku-5-5, 6685 tokens, $0.0128"
     },
     "document": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-07T23:43:15.859352+00:00",
       "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/credit_scorecard.md\nSection confidence: Purpose and intended use high, Data medium, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n20 variables, 8 transformations, 5 assumptions, 7 limitations, 10 unknowns\nCoverage vs fitted model: 14/14 variables\nGaps (0):\nLLM: claude-sonnet-5-5, 15260 tokens, $0.1545"
     },
@@ -120,6 +120,11 @@
       "card_version": 5,
       "timestamp": "2026-11-07T23:43:15.859367+00:00",
       "note": "document: completed, awaiting review"
+    },
+    {
+      "card_version": 6,
+      "timestamp": "2026-11-08T02:36:11.601773+00:00",
+      "note": "document: gate approved"
     }
   ],
   "discovery": {

@@ -3,3 +3,7 @@
 {"timestamp": "2026-11-07T23:40:30.413215+00:00", "model_id": "pricing_glm", "stage": "discover", "decision": "approve", "reviewer": "ap", "reason": "For checking", "card_version": 2}
 {"timestamp": "2026-11-07T23:40:51.115987+00:00", "model_id": "sas_behaviour_scorecard", "stage": "discover", "decision": "reject", "reviewer": "ap", "reason": "For checking", "card_version": 2}
 {"timestamp": "2026-11-07T23:42:00.286383+00:00", "model_id": "credit_scorecard", "stage": "document", "decision": "reject", "reviewer": "ap", "reason": "For checking", "card_version": 4}
+{"timestamp": "2026-11-08T02:33:37.597857+00:00", "model_id": "fraud_gbm", "stage": "discover", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 3}
+{"timestamp": "2026-11-08T02:33:49.257239+00:00", "model_id": "pricing_glm", "stage": "document", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 4}
+{"timestamp": "2026-11-08T02:34:08.709414+00:00", "model_id": "sas_behaviour_scorecard", "stage": "discover", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 3}
+{"timestamp": "2026-11-08T02:34:22.070138+00:00", "model_id": "credit_scorecard", "stage": "document", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 5}

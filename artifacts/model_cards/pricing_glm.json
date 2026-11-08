@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "pricing_glm",
-  "card_version": 4,
+  "card_version": 5,
   "name": "Motor TPL claim frequency GLM",
   "language": "Python",
   "source_files": [
@@ -84,7 +84,7 @@
       "summary": "PRC-MTPL-03 Motor TPL claim frequency GLM | owner: Personal Lines Pricing | type: Poisson GLM with log link and log(exposure) offset (motor TPL claim frequency) | risk tier: high\nLast validation: 2024-11 | documentation: outdated | 2 doc/code contradiction(s)\nScan: Python, 64 LOC, libraries numpy, pandas, statsmodels; 2 inputs, 3 outputs\nGaps (4):\n- Documentation contradicts code: README states exposure is capped at one year and claim counts at four, but the code applies no such caps; it uses Exposure and ClaimNb as-is (only BonusMalus is clipped, at 150).\n- Documentation contradicts code: README says VehPower is a rating factor and the model uses it, but the README states no clipping; the code clips VehPower at 9, which the documentation does not mention.\n- Documentation last updated 2024-09 (26 months ago; limit 24).\n- Validation overdue: last validated 2024-11 (24 months ago; high tier requires every 12 months).\nLLM: claude-haiku-5-5, 5073 tokens, $0.0105"
     },
     "document": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-07T23:44:08.123391+00:00",
       "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/pricing_glm.md\nSection confidence: Purpose and intended use high, Data medium, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n12 variables, 8 transformations, 4 assumptions, 6 limitations, 8 unknowns\nCoverage vs fitted model: 8/9 variables\nGaps (2):\n- Model uses variables not documented: LogDensity.\n- Documented as inputs but not in the fitted model: Density.\nLLM: claude-sonnet-5-5, 12584 tokens, $0.1200"
     },
@@ -119,6 +119,11 @@
       "card_version": 4,
       "timestamp": "2026-11-07T23:44:08.123416+00:00",
       "note": "document: completed, awaiting review"
+    },
+    {
+      "card_version": 5,
+      "timestamp": "2026-11-08T02:36:13.207972+00:00",
+      "note": "document: gate approved"
     }
   ],
   "discovery": {
