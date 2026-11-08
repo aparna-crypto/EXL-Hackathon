@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "credit_scorecard",
-  "card_version": 6,
+  "card_version": 9,
   "name": "Retail Application Scorecard (RCS-APP-02)",
   "language": "R",
   "source_files": [
@@ -85,9 +85,9 @@
       "summary": "Draft documentation: /home/ubuntu/repos/EXL-Hackathon/docs/models/credit_scorecard.md\nSection confidence: Purpose and intended use high, Data medium, Methodology high, Implementation high, Performance high, Monitoring and governance medium\n20 variables, 8 transformations, 5 assumptions, 7 limitations, 10 unknowns\nCoverage vs fitted model: 14/14 variables\nGaps (0):\nLLM: claude-sonnet-5-5, 15260 tokens, $0.1545"
     },
     "redevelop": {
-      "status": "not_started",
-      "completed_at": null,
-      "summary": null
+      "status": "awaiting_review",
+      "completed_at": "2026-11-08T02:41:54.039762+00:00",
+      "summary": "Python rebuild: redeveloped/credit_scorecard/scorecard.py (from models/credit_scorecard/scorecard.R)\nAttempts: 2 (claude-sonnet-5-5 FAIL, claude-sonnet-5-5 PASS)\nTransformation unit tests: 18/18 cases passed across 8 transformations\nParity checks: 38/38 passed (original + resampled split)\nMax abs diff (original): coefficient estimates 3.4e-15, predicted PD 1.5e-15, score 6.8e-13, AUC (train, test) 4.4e-16\nParity report: docs/parity_report.md\nLLM: 0 tokens, $0.0000"
     },
     "validate": {
       "status": "not_started",
@@ -125,6 +125,21 @@
       "card_version": 6,
       "timestamp": "2026-11-08T02:36:11.601773+00:00",
       "note": "document: gate approved"
+    },
+    {
+      "card_version": 7,
+      "timestamp": "2026-11-08T02:41:54.039779+00:00",
+      "note": "redevelop: completed, awaiting review"
+    },
+    {
+      "card_version": 8,
+      "timestamp": "2026-11-08T02:42:42.065631+00:00",
+      "note": "redevelop: card paths made repo-relative (cached replies)"
+    },
+    {
+      "card_version": 9,
+      "timestamp": "2026-11-08T02:43:17.870637+00:00",
+      "note": "redevelop: card paths made repo-relative (cached replies)"
     }
   ],
   "discovery": {
@@ -720,5 +735,111 @@
     "status": "pending Gate 2",
     "doc_path": "/home/ubuntu/repos/EXL-Hackathon/docs/models/credit_scorecard.md",
     "reviewer_feedback_used": "- reject by ap: For checking"
+  },
+  "redevelopment": {
+    "source": "models/credit_scorecard/scorecard.R",
+    "target": "redeveloped/credit_scorecard/scorecard.py",
+    "passed": true,
+    "attempts": [
+      {
+        "n": 1,
+        "model": "claude-sonnet-5-5",
+        "escalated": false,
+        "passed": false,
+        "n_failures": 5,
+        "failures": [
+          "unit test assign_bin (assign_bin_7): args {\"x\": [4, 12, 13, 15, 24, 25, 30, 31, 72], \"breaks\": [\"-Inf\", 12, 15, 24, 30, \"Inf\"]} -> differs at [7] R (30, Inf] vs Python (30,Inf]; [8] R (30, Inf] vs Python (30,Inf]",
+          "unit test assign_bin (assign_bin_8): args {\"x\": [250, 1248.2, 1248.3, 1919, 2788.8, 4738, 18424], \"breaks\": [\"-Inf\", 1248.2, 1919, 2788.8, 4738, \"Inf\"]} -> differs at [6] R (4738, Inf] vs Python (4738,Inf]",
+          "unit test assign_bin (assign_bin_9): args {\"x\": [0.5, 15857.5, 2000000.5], \"breaks\": [\"-Inf\", 15857.5, 1000000, \"Inf\"]} -> differs at [2] R (1000000, Inf] vs Python (1000000,Inf]",
+          "parity [original] bin labels per variable: mismatched bins: age '(44, Inf]' (R only); age '(44,Inf]' (Python only); credit_amount '(4738, Inf]' (R only); credit_amount '(4738,Inf]' (Python only); duration '(30, Inf]' (R only); duration '(30,Inf]' (Python only)",
+          "parity [resampled] bin labels per variable: mismatched bins: age '(45, Inf]' (R only); age '(45,Inf]' (Python only); credit_amount '(4677.2, Inf]' (R only); credit_amount '(4677.2,Inf]' (Python only); duration '(30, Inf]' (R only); duration '(30,Inf]' (Python only)"
+        ],
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cost_usd": 0.0,
+        "cached": true
+      },
+      {
+        "n": 2,
+        "model": "claude-sonnet-5-5",
+        "escalated": false,
+        "passed": true,
+        "n_failures": 0,
+        "failures": [],
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cost_usd": 0.0,
+        "cached": true
+      }
+    ],
+    "resample_seed": 7,
+    "generated_at": "2026-11-08T02:43:17.858972+00:00",
+    "reviewer_feedback_used": null,
+    "report_path": "docs/parity_report.md",
+    "sha256": "dc0f6c4e40ed40d1c717ae1c34486a52ab2cbf9214af8c121a06a433820fd7ad",
+    "unit_tests": {
+      "passed": 18,
+      "total": 18,
+      "by_transformation": {
+        "is_binned_numeric": {
+          "transformation": "Numeric vs categorical rule (>10 distinct values)",
+          "passed": 4,
+          "total": 4
+        },
+        "numeric_breaks": {
+          "transformation": "Quantile break points (type 7, outer -Inf/Inf)",
+          "passed": 3,
+          "total": 3
+        },
+        "assign_bin": {
+          "transformation": "Bin assignment and R cut() labels",
+          "passed": 5,
+          "total": 5
+        },
+        "woe_table": {
+          "transformation": "WoE and IV per bin (0.5 smoothing)",
+          "passed": 2,
+          "total": 2
+        },
+        "apply_woe": {
+          "transformation": "WoE substitution (unseen level -> 0)",
+          "passed": 1,
+          "total": 1
+        },
+        "to_score": {
+          "transformation": "Score scaling (600 at 50:1, PDO 20)",
+          "passed": 1,
+          "total": 1
+        },
+        "auc": {
+          "transformation": "AUC (rank-based, ties)",
+          "passed": 1,
+          "total": 1
+        },
+        "ks": {
+          "transformation": "KS statistic (ties)",
+          "passed": 1,
+          "total": 1
+        }
+      }
+    },
+    "parity": {
+      "passed": 38,
+      "total": 38,
+      "max_abs_diff_original": {
+        "WoE per bin": 3.1086244689504383e-15,
+        "IV per variable": 4.0245584642661925e-16,
+        "coefficient estimates": 3.4416913763379853e-15,
+        "coefficient standard errors": 6.661338147750939e-16,
+        "predicted PD": 1.4988010832439613e-15,
+        "score": 6.821210263296962e-13,
+        "score distribution: deciles": 2.2737367544323206e-13,
+        "AUC (train, test)": 4.440892098500626e-16,
+        "GINI (train, test)": 2.220446049250313e-16,
+        "KS (train, test)": 3.3306690738754696e-16,
+        "BAD_RATE (train, test)": 0.0,
+        "N (train, test)": 0.0
+      }
+    }
   }
 }

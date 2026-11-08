@@ -84,8 +84,9 @@ def test_thinking_setting_is_passed_per_agent(cfg):
 
     c = LLMClient(cfg, backend=Recorder(), log_to_mlflow=False)
     c.complete("inventory", "a")
-    c.complete("translation", "a")
-    assert seen == ["disabled", None]
+    c.complete("report", "a")
+    c.complete("translation", "a", escalate=True)
+    assert seen == ["disabled", None, "adaptive/medium"]
 
 
 def test_provider_error_becomes_llm_error(cfg):

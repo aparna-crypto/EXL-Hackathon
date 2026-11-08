@@ -1,0 +1,590 @@
+{
+ "redevelopment": {
+  "source": "models/credit_scorecard/scorecard.R",
+  "target": "redeveloped/credit_scorecard/scorecard.py",
+  "passed": true,
+  "attempts": [
+   {
+    "n": 1,
+    "model": "claude-sonnet-5-5",
+    "escalated": false,
+    "passed": false,
+    "n_failures": 5,
+    "failures": [
+     "unit test assign_bin (assign_bin_7): args {\"x\": [4, 12, 13, 15, 24, 25, 30, 31, 72], \"breaks\": [\"-Inf\", 12, 15, 24, 30, \"Inf\"]} -> differs at [7] R (30, Inf] vs Python (30,Inf]; [8] R (30, Inf] vs Python (30,Inf]",
+     "unit test assign_bin (assign_bin_8): args {\"x\": [250, 1248.2, 1248.3, 1919, 2788.8, 4738, 18424], \"breaks\": [\"-Inf\", 1248.2, 1919, 2788.8, 4738, \"Inf\"]} -> differs at [6] R (4738, Inf] vs Python (4738,Inf]",
+     "unit test assign_bin (assign_bin_9): args {\"x\": [0.5, 15857.5, 2000000.5], \"breaks\": [\"-Inf\", 15857.5, 1000000, \"Inf\"]} -> differs at [2] R (1000000, Inf] vs Python (1000000,Inf]",
+     "parity [original] bin labels per variable: mismatched bins: age '(44, Inf]' (R only); age '(44,Inf]' (Python only); credit_amount '(4738, Inf]' (R only); credit_amount '(4738,Inf]' (Python only); duration '(30, Inf]' (R only); duration '(30,Inf]' (Python only)",
+     "parity [resampled] bin labels per variable: mismatched bins: age '(45, Inf]' (R only); age '(45,Inf]' (Python only); credit_amount '(4677.2, Inf]' (R only); credit_amount '(4677.2,Inf]' (Python only); duration '(30, Inf]' (R only); duration '(30,Inf]' (Python only)"
+    ],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "cached": true
+   },
+   {
+    "n": 2,
+    "model": "claude-sonnet-5-5",
+    "escalated": false,
+    "passed": true,
+    "n_failures": 0,
+    "failures": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0,
+    "cached": true
+   }
+  ],
+  "resample_seed": 7,
+  "generated_at": "2026-11-08T02:43:17.858972+00:00",
+  "reviewer_feedback_used": null,
+  "report_path": "docs/parity_report.md",
+  "sha256": "dc0f6c4e40ed40d1c717ae1c34486a52ab2cbf9214af8c121a06a433820fd7ad"
+ },
+ "unit": [
+  {
+   "id": "is_binned_numeric_0",
+   "fn": "is_binned_numeric",
+   "transformation": "Numeric vs categorical rule (>10 distinct values)",
+   "passed": true,
+   "args": "{\"x\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}",
+   "expected": "false",
+   "got": "false",
+   "diff": ""
+  },
+  {
+   "id": "is_binned_numeric_1",
+   "fn": "is_binned_numeric",
+   "transformation": "Numeric vs categorical rule (>10 distinct values)",
+   "passed": true,
+   "args": "{\"x\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}",
+   "expected": "true",
+   "got": "true",
+   "diff": ""
+  },
+  {
+   "id": "is_binned_numeric_2",
+   "fn": "is_binned_numeric",
+   "transformation": "Numeric vs categorical rule (>10 distinct values)",
+   "passed": true,
+   "args": "{\"x\": [\"A0\", \"A1\", \"A2\", \"A3\", \"A4\", \"A5\", \"A6\", \"A7\", \"A8\", \"A9\", \"A10\", \"A11\"]}",
+   "expected": "false",
+   "got": "false",
+   "diff": ""
+  },
+  {
+   "id": "is_binned_numeric_3",
+   "fn": "is_binned_numeric",
+   "transformation": "Numeric vs categorical rule (>10 distinct values)",
+   "passed": true,
+   "args": "{\"x\": [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5]}",
+   "expected": "true",
+   "got": "true",
+   "diff": ""
+  },
+  {
+   "id": "numeric_breaks_4",
+   "fn": "numeric_breaks",
+   "transformation": "Quantile break points (type 7, outer -Inf/Inf)",
+   "passed": true,
+   "args": "{\"x\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]}",
+   "expected": "[\"-Inf\", 4.8, 8.6, 12.4, 16.2, \"Inf\"]",
+   "got": "[\"-Inf\", 4.800000000000001, 8.600000000000001, 12.400000000000002, 16.200000000000003, \"Inf\"]",
+   "diff": ""
+  },
+  {
+   "id": "numeric_breaks_5",
+   "fn": "numeric_breaks",
+   "transformation": "Quantile break points (type 7, outer -Inf/Inf)",
+   "passed": true,
+   "args": "{\"x\": [1, 1, 1, 1, 1, 1, 1, 2, 3, 1248.2, 1000000]}",
+   "expected": "[\"-Inf\", 1, 3, \"Inf\"]",
+   "got": "[\"-Inf\", 1.0000000000000009, 3.0, \"Inf\"]",
+   "diff": ""
+  },
+  {
+   "id": "numeric_breaks_6",
+   "fn": "numeric_breaks",
+   "transformation": "Quantile break points (type 7, outer -Inf/Inf)",
+   "passed": true,
+   "args": "{\"x\": [3137.7, 4253.0, 2755.8, 2467.6, 4618.9, 2630.1, 3519.0, 3284.2, 4616.1, 2158.8, 5693.4, 1758.9, 3679.0, 3387.5, 1633.5, 3892.6, 2285.8, 1219.2, 4233.2, 8...",
+   "expected": "[\"-Inf\", 1209.4, 1878.86, 3028, 3938.68, \"Inf\"]",
+   "got": "[\"-Inf\", 1209.4, 1878.86, 3028.0000000000005, 3938.6800000000003, \"Inf\"]",
+   "diff": ""
+  },
+  {
+   "id": "assign_bin_7",
+   "fn": "assign_bin",
+   "transformation": "Bin assignment and R cut() labels",
+   "passed": true,
+   "args": "{\"x\": [4, 12, 13, 15, 24, 25, 30, 31, 72], \"breaks\": [\"-Inf\", 12, 15, 24, 30, \"Inf\"]}",
+   "expected": "[\"[-Inf,12]\", \"[-Inf,12]\", \"(12,15]\", \"(12,15]\", \"(15,24]\", \"(24,30]\", \"(24,30]\", \"(30, Inf]\", \"(30, Inf]\"]",
+   "got": "[\"[-Inf,12]\", \"[-Inf,12]\", \"(12,15]\", \"(12,15]\", \"(15,24]\", \"(24,30]\", \"(24,30]\", \"(30, Inf]\", \"(30, Inf]\"]",
+   "diff": ""
+  },
+  {
+   "id": "assign_bin_8",
+   "fn": "assign_bin",
+   "transformation": "Bin assignment and R cut() labels",
+   "passed": true,
+   "args": "{\"x\": [250, 1248.2, 1248.3, 1919, 2788.8, 4738, 18424], \"breaks\": [\"-Inf\", 1248.2, 1919, 2788.8, 4738, \"Inf\"]}",
+   "expected": "[\"[-Inf,1248.2]\", \"[-Inf,1248.2]\", \"(1248.2,1919]\", \"(1248.2,1919]\", \"(1919,2788.8]\", \"(2788.8,4738]\", \"(4738, Inf]\"]",
+   "got": "[\"[-Inf,1248.2]\", \"[-Inf,1248.2]\", \"(1248.2,1919]\", \"(1248.2,1919]\", \"(1919,2788.8]\", \"(2788.8,4738]\", \"(4738, Inf]\"]",
+   "diff": ""
+  },
+  {
+   "id": "assign_bin_9",
+   "fn": "assign_bin",
+   "transformation": "Bin assignment and R cut() labels",
+   "passed": true,
+   "args": "{\"x\": [0.5, 15857.5, 2000000.5], \"breaks\": [\"-Inf\", 15857.5, 1000000, \"Inf\"]}",
+   "expected": "[\"[-Inf,15857.5]\", \"[-Inf,15857.5]\", \"(1000000, Inf]\"]",
+   "got": "[\"[-Inf,15857.5]\", \"[-Inf,15857.5]\", \"(1000000, Inf]\"]",
+   "diff": ""
+  },
+  {
+   "id": "assign_bin_10",
+   "fn": "assign_bin",
+   "transformation": "Bin assignment and R cut() labels",
+   "passed": true,
+   "args": "{\"x\": [4, 2, 1, 4], \"breaks\": null}",
+   "expected": "[\"4\", \"2\", \"1\", \"4\"]",
+   "got": "[\"4\", \"2\", \"1\", \"4\"]",
+   "diff": ""
+  },
+  {
+   "id": "assign_bin_11",
+   "fn": "assign_bin",
+   "transformation": "Bin assignment and R cut() labels",
+   "passed": true,
+   "args": "{\"x\": [\"A11\", \"A14\", \"A11\"], \"breaks\": null}",
+   "expected": "[\"A11\", \"A14\", \"A11\"]",
+   "got": "[\"A11\", \"A14\", \"A11\"]",
+   "diff": ""
+  },
+  {
+   "id": "woe_table_12",
+   "fn": "woe_table",
+   "transformation": "WoE and IV per bin (0.5 smoothing)",
+   "passed": true,
+   "args": "{\"bin\": [\"b\", \"a\", \"a\", \"c\", \"b\", \"b\"], \"y\": [0, 1, 0, 0, 1, 0]}",
+   "expected": "[{\"bin\": \"a\", \"n_good\": 1, \"n_bad\": 1, \"woe\": -0.693147180559945, \"iv_part\": 0.259930192709979, \"_row\": \"a\"}, {\"bin\": \"b\", \"n_good\": 2, \"n_bad\": 1, \"woe\": -0.18...",
+   "got": "[{\"bin\": \"a\", \"n_good\": 1, \"n_bad\": 1, \"woe\": -0.6931471805599453, \"iv_part\": 0.25993019270997947}, {\"bin\": \"b\", \"n_good\": 2, \"n_bad\": 1, \"woe\": -0.182321556793...",
+   "diff": ""
+  },
+  {
+   "id": "woe_table_13",
+   "fn": "woe_table",
+   "transformation": "WoE and IV per bin (0.5 smoothing)",
+   "passed": true,
+   "args": "{\"bin\": [\"(12,15]\", \"[-Inf,12]\", \"(30, Inf]\", \"[-Inf,12]\"], \"y\": [1, 0, 0, 0]}",
+   "expected": "[{\"bin\": \"(12,15]\", \"n_good\": 0, \"n_bad\": 1, \"woe\": -2.19722457733622, \"iv_part\": 2.92963276978163, \"_row\": \"(12,15]\"}, {\"bin\": \"(30, Inf]\", \"n_good\": 1, \"n_bad...",
+   "got": "[{\"bin\": \"(12,15]\", \"n_good\": 0, \"n_bad\": 1, \"woe\": -2.1972245773362196, \"iv_part\": 2.929632769781626}, {\"bin\": \"(30, Inf]\", \"n_good\": 1, \"n_bad\": 0, \"woe\": 0.0...",
+   "diff": ""
+  },
+  {
+   "id": "apply_woe_14",
+   "fn": "apply_woe",
+   "transformation": "WoE substitution (unseen level -> 0)",
+   "passed": true,
+   "args": "{\"bin\": [\"A11\", \"A99\", \"A12\"], \"table\": [{\"bin\": \"A11\", \"n_good\": 3, \"n_bad\": 1, \"woe\": 0.25, \"iv_part\": 0.01}, {\"bin\": \"A12\", \"n_good\": 1, \"n_bad\": 2, \"woe\": -...",
+   "expected": "[0.25, 0, -0.5]",
+   "got": "[0.25, 0.0, -0.5]",
+   "diff": ""
+  },
+  {
+   "id": "to_score_15",
+   "fn": "to_score",
+   "transformation": "Score scaling (600 at 50:1, PDO 20)",
+   "passed": true,
+   "args": "{\"pd\": [0.0196078431372549, 0.5, 0.01, 0.99]}",
+   "expected": "[600, 487.122876204505, 619.710008606098, 354.535743802913]",
+   "got": "[600.0, 487.1228762045055, 619.7100086060976, 354.5357438029133]",
+   "diff": ""
+  },
+  {
+   "id": "auc_16",
+   "fn": "auc",
+   "transformation": "AUC (rank-based, ties)",
+   "passed": true,
+   "args": "{\"y\": [0, 0, 1, 1, 0, 1], \"p\": [0.1, 0.4, 0.35, 0.8, 0.4, 0.4]}",
+   "expected": "0.666666666666667",
+   "got": "0.6666666666666666",
+   "diff": ""
+  },
+  {
+   "id": "ks_17",
+   "fn": "ks",
+   "transformation": "KS statistic (ties)",
+   "passed": true,
+   "args": "{\"y\": [0, 0, 1, 1, 0, 1], \"p\": [0.1, 0.4, 0.35, 0.8, 0.4, 0.4]}",
+   "expected": "0.333333333333333",
+   "got": "0.33333333333333337",
+   "diff": ""
+  }
+ ],
+ "parity": [
+  {
+   "split": "original",
+   "check": "bin labels per variable",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "good/bad counts per bin",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "WoE per bin",
+   "passed": true,
+   "max_abs_diff": 3.1086244689504383e-15,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "IV per variable",
+   "passed": true,
+   "max_abs_diff": 4.0245584642661925e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "IV selection (selected variables, order)",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "numeric break points",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "coefficient terms (names, order)",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "coefficient estimates",
+   "passed": true,
+   "max_abs_diff": 3.4416913763379853e-15,
+   "tolerance": 1e-06,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "coefficient standard errors",
+   "passed": true,
+   "max_abs_diff": 6.661338147750939e-16,
+   "tolerance": 1e-05,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "prediction rows (id, bad, order)",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "predicted PD",
+   "passed": true,
+   "max_abs_diff": 1.4988010832439613e-15,
+   "tolerance": 1e-06,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "score",
+   "passed": true,
+   "max_abs_diff": 6.821210263296962e-13,
+   "tolerance": 0.0001,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "score distribution: deciles",
+   "passed": true,
+   "max_abs_diff": 2.2737367544323206e-13,
+   "tolerance": 0.0001,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "score distribution: 20-point band counts",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "AUC (train, test)",
+   "passed": true,
+   "max_abs_diff": 4.440892098500626e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "GINI (train, test)",
+   "passed": true,
+   "max_abs_diff": 2.220446049250313e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "KS (train, test)",
+   "passed": true,
+   "max_abs_diff": 3.3306690738754696e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "BAD_RATE (train, test)",
+   "passed": true,
+   "max_abs_diff": 0.0,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "original",
+   "check": "N (train, test)",
+   "passed": true,
+   "max_abs_diff": 0.0,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "bin labels per variable",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "good/bad counts per bin",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "WoE per bin",
+   "passed": true,
+   "max_abs_diff": 3.1086244689504383e-15,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "IV per variable",
+   "passed": true,
+   "max_abs_diff": 4.996003610813204e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "IV selection (selected variables, order)",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "numeric break points",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "coefficient terms (names, order)",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "coefficient estimates",
+   "passed": true,
+   "max_abs_diff": 5.995204332975845e-15,
+   "tolerance": 1e-06,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "coefficient standard errors",
+   "passed": true,
+   "max_abs_diff": 8.049116928532385e-16,
+   "tolerance": 1e-05,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "prediction rows (id, bad, order)",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "predicted PD",
+   "passed": true,
+   "max_abs_diff": 1.5543122344752192e-15,
+   "tolerance": 1e-06,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "score",
+   "passed": true,
+   "max_abs_diff": 6.821210263296962e-13,
+   "tolerance": 0.0001,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "score distribution: deciles",
+   "passed": true,
+   "max_abs_diff": 5.684341886080801e-13,
+   "tolerance": 0.0001,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "score distribution: 20-point band counts",
+   "passed": true,
+   "max_abs_diff": null,
+   "tolerance": null,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "AUC (train, test)",
+   "passed": true,
+   "max_abs_diff": 3.3306690738754696e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "GINI (train, test)",
+   "passed": true,
+   "max_abs_diff": 3.3306690738754696e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "KS (train, test)",
+   "passed": true,
+   "max_abs_diff": 3.3306690738754696e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "BAD_RATE (train, test)",
+   "passed": true,
+   "max_abs_diff": 3.885780586188048e-16,
+   "tolerance": 1e-09,
+   "detail": ""
+  },
+  {
+   "split": "resampled",
+   "check": "N (train, test)",
+   "passed": true,
+   "max_abs_diff": 0.0,
+   "tolerance": 1e-09,
+   "detail": ""
+  }
+ ],
+ "distribution": {
+  "r": {
+   "mean": 521.5958404652417,
+   "std": 40.473642488837534,
+   "deciles": [
+    469.1533950679811,
+    484.9262635204704,
+    499.0965384178005,
+    509.6092105734274,
+    521.8547811621845,
+    534.0909047663554,
+    546.6962874745165,
+    557.3973303837246,
+    575.405013392877
+   ],
+   "bands": {
+    "420-440": 6,
+    "440-460": 14,
+    "460-480": 28,
+    "480-500": 43,
+    "500-520": 55,
+    "520-540": 51,
+    "540-560": 48,
+    "560-580": 34,
+    "580-600": 14,
+    "600-620": 6,
+    "620-640": 1
+   }
+  },
+  "py": {
+   "mean": 521.5958404652417,
+   "std": 40.47364248883754,
+   "deciles": [
+    469.1533950679813,
+    484.92626352047023,
+    499.0965384178005,
+    509.60921057342716,
+    521.8547811621847,
+    534.0909047663552,
+    546.6962874745165,
+    557.3973303837246,
+    575.4050133928769
+   ],
+   "bands": {
+    "420-440": 6,
+    "440-460": 14,
+    "460-480": 28,
+    "480-500": 43,
+    "500-520": 55,
+    "520-540": 51,
+    "540-560": 48,
+    "560-580": 34,
+    "580-600": 14,
+    "600-620": 6,
+    "620-640": 1
+   }
+  }
+ }
+}

@@ -107,6 +107,28 @@ elif page == "Gate review":
                 if doc_file.exists():
                     with st.expander("Draft documentation", expanded=True):
                         st.markdown(doc_file.read_text())
+            if stage == "redevelop" and card.get("redevelopment"):
+                red = card["redevelopment"]
+                st.markdown("**Self-healing attempts**")
+                st.dataframe(pd.DataFrame([{k: a[k] for k in ("n", "model", "escalated", "passed",
+                                                              "n_failures", "cost_usd", "cached")}
+                                           for a in red["attempts"]]),
+                             use_container_width=True, hide_index=True)
+                st.markdown("**Transformation unit tests (R oracle vs Python)**")
+                st.dataframe(pd.DataFrame([{"function": k, **v} for k, v in
+                                           red["unit_tests"]["by_transformation"].items()]),
+                             use_container_width=True, hide_index=True)
+                st.caption(f"Parity checks passed: {red['parity']['passed']}/"
+                           f"{red['parity']['total']} (original + resampled split)")
+                for label, rel in (("Parity report", red["report_path"]),
+                                   ("Generated Python code", red["target"])):
+                    f = Path(rel) if Path(rel).is_absolute() else ROOT / rel
+                    if f.exists():
+                        with st.expander(label, expanded=label == "Parity report"):
+                            if f.suffix == ".py":
+                                st.code(f.read_text(), language="python")
+                            else:
+                                st.markdown(f.read_text())
             with st.expander("Model card JSON"):
                 st.json(card)
             with st.form("gate"):

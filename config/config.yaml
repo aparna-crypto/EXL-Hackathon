@@ -12,6 +12,9 @@ paths:
   llm_ledger: artifacts/audit/llm_ledger.jsonl
   inventory: artifacts/inventory      # Stage 2 inventory table + dependency map
   model_docs: docs/models             # Stage 3 generated documentation (<model>.md)
+  redeveloped: redeveloped            # Stage 4 Python rebuilds (<model>/<name>.py)
+  redevelop_artifacts: artifacts/redevelop  # Stage 4 attempts, test results, parity.json
+  parity_report: docs/parity_report.md
 
 llm:
   provider: anthropic                 # anthropic | fake   (env: LLM_PROVIDER)
@@ -36,8 +39,13 @@ llm:
     scanner: disabled
     inventory: disabled
     documentation: between_tools
+    translation: between_tools
     monitor: disabled
     healthcheck: disabled
+  # Thinking for escalation models. Opus rejects both `disabled` and `between_tools` and asks for
+  # `adaptive` with an effort level instead.
+  thinking_escalation:
+    translation: adaptive/medium
   # Used only after `max_retries_before_escalation` failed attempts on the agent's normal model.
   escalation:
     translation: claude-opus-5-5
@@ -52,11 +60,14 @@ llm:
     # A "run" is one CLI invocation (e.g. one `make run`). Hard caps, checked BEFORE each call
     # using a worst-case estimate (estimated input + full max_tokens).
     per_run_tokens: 300000
-    per_run_usd: 1.50
+    # Raised from $1.50 for Stage 4: worst case is 3 Sonnet + 2 Opus translation attempts at
+    # 12k output tokens each (~$2.80); the pre-call check blocks any attempt that would pass this.
+    per_run_usd: 3.00
     # A "session" is a named spending bucket summed across all runs from the ledger.
-    # Agreed with the team: about $7 for Stages 0-3. Start a new bucket only on purpose.
-    session_id: stages-0-3
-    session_usd: 7.00
+    # Agreed with the team: $7 for Stages 0-3 (bucket `stages-0-3`, closed at $0.948), $4 for
+    # Stage 4. Start a new bucket only on purpose.
+    session_id: stage-4
+    session_usd: 4.00
 
 tracking:
   backend: local                      # local | azureml   (env: TRACKING_BACKEND)
@@ -85,6 +96,25 @@ document:
   max_tokens: 16000
   # Saved outputs of the legacy run that the agent may quote (no row-level predictions).
   reference_files: [metrics.json, coefficients.csv]
+
+redevelop:
+  # Models whose source language is listed here are rebuilt in Python; others are not applicable
+  # (Python models are already Python; SAS has no runtime to prove parity against).
+  source_languages: [R]
+  max_tokens: 12000
+  max_attempts: 5                     # attempts 1-3 Sonnet, then Opus (llm.max_retries_before_escalation)
+  run_timeout_s: 300                  # generated code runs in a subprocess with this timeout
+  resample_seed: 7                    # second, resampled split: parity must hold on data the agent never saw
+  # Parity tolerances (absolute). Labels, counts, selected variables and row ids must match exactly.
+  tolerance:
+    woe: 1.0e-9
+    coefficient: 1.0e-6
+    std_error: 1.0e-5
+    pd: 1.0e-6
+    score: 1.0e-4
+    metric: 1.0e-9
+  allowed_imports: [numpy, pandas, scipy, statsmodels, sklearn, json, math, pathlib, sys, argparse,
+                    typing, dataclasses, __future__, warnings, collections, functools, itertools]
 
 gates:
   # Every pipeline stage ends in a human gate, in this order.

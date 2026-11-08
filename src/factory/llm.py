@@ -55,7 +55,11 @@ class AnthropicBackend:
         if temperature is not None:
             kwargs["temperature"] = temperature
         if thinking:
-            kwargs["thinking"] = {"type": thinking}
+            # "mode" or "mode/effort", e.g. "adaptive/medium" -> output_config.effort = medium
+            mode, _, effort = thinking.partition("/")
+            kwargs["thinking"] = {"type": mode}
+            if effort:
+                kwargs["extra_body"] = {"output_config": {"effort": effort}}
         msg = self._client.messages.create(
             model=model, max_tokens=max_tokens,
             messages=[{"role": "user", "content": prompt}], **kwargs,
@@ -150,8 +154,9 @@ class LLMClient:
                                  f"${worst_cost:.4f})")
 
     # cache
-    def thinking_for(self, agent: str) -> str | None:
-        return (self.cfg.get("thinking") or {}).get(agent)
+    def thinking_for(self, agent: str, escalate: bool = False) -> str | None:
+        key = "thinking_escalation" if escalate else "thinking"
+        return (self.cfg.get(key) or {}).get(agent)
 
     def _cache_file(self, model: str, system: str, prompt: str, max_tokens: int,
                     thinking: str | None = None) -> Path:
@@ -166,7 +171,7 @@ class LLMClient:
                  use_cache: bool = True) -> LLMResult:
         model = self.model_for(agent, escalate)
         max_tokens = max_tokens or self.cfg["default_max_tokens"]
-        thinking = self.thinking_for(agent)
+        thinking = self.thinking_for(agent, escalate)
         cache_file = self._cache_file(model, system, prompt, max_tokens, thinking)
 
         if use_cache and cache_file.exists():

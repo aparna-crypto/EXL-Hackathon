@@ -6,7 +6,7 @@ calls specialised agents (Discover, Document, Redevelop, Validate, Monitor) that
 **model card**. Every stage ends in a **human gate** (approve, reject or comment), and each decision is
 logged with a timestamp, the reviewer and the reason.
 
-> Status: **Stages 0-3 done** (setup; legacy models and data; Discover; Document, with all four models documented in `docs/models/`). Stages 4-7 build the remaining agents. See `docs/work_log.md`.
+> Status: **Stages 0-3 done, Stage 4 done and waiting at Gate 3** (R scorecard rebuilt in Python: `redeveloped/credit_scorecard/scorecard.py`, parity in `docs/parity_report.md`). Stages 5-7 build the remaining agents. See `docs/work_log.md`.
 
 ## Quickstart
 

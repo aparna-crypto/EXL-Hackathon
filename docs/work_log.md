@@ -176,3 +176,43 @@ unknowns. The other three models are waiting at Gate 1, so Stage 3 has not run f
 **Stage 3 total token cost:** 8 calls, $0.802 (incl. $0.138 wasted on one truncated reply). Session
 `stages-0-3`: 22 calls, 147,215 tokens, $0.948 of $7.00.
 
+## Stage 4 - Redevelop (R scorecard -> Python)
+
+**Budget:** new session bucket `stage-4`, $4.00 (user agreed by "go" on the proposed default). Per-run cap
+raised to $3.00 to fit the worst case of 3 Sonnet + 2 Opus attempts.
+
+**What was built**
+- `factory.agents.translation`: Sonnet writes a Python module with a fixed interface (one function per
+  transformation, plus `main()` that reproduces the R script's outputs). Prompt: R source, interface
+  contract, first lines of the R reference outputs, Gate 2-approved transformation steps, Gate 3 feedback.
+  No data rows. Static checks: syntax, import allow-list, required interface, no `eval`/`exec`.
+- `r/oracle.R`: loads the legacy script's functions and constants without its data steps, so the same
+  synthetic edge cases can be run through R and Python (18 cases, 8 transformations).
+- `factory.redevelop_harness`: runs the cases against the generated module in a subprocess (no API
+  keys in its environment, timeout).
+- `factory.redevelop`: end-to-end parity on the original split (vs committed R reference outputs) and a
+  resampled split (seed 7) the agent never saw, with R re-run; 19 checks per split. Self-healing loop:
+  failures are fed back; after `max_retries_before_escalation` (3) failed attempts the escalation model
+  (Opus) takes over, up to 5 attempts. Writes `redeveloped/credit_scorecard/scorecard.py`,
+  `docs/parity_report.md`, `artifacts/redevelop/credit_scorecard/{attempts,parity}.json`.
+- UI: Gate 3 shows attempts, unit tests per transformation, parity count, the report and the code.
+- Fraud, pricing (Python) and SAS (no runtime) are marked not applicable for this stage.
+
+**Live result:** attempt 1 (Sonnet) failed 5 checks, all the same bug: R's `cut()` labels the last bin
+`(30, Inf]` with a space (from `formatC`), Python wrote `(30,Inf]`. The failures went back to the agent
+and attempt 2 (Sonnet) passed everything: 18/18 unit cases, 38/38 parity checks. Max abs diff on the
+original split: coefficients 3.4e-15, PD 1.5e-15, score 6.8e-13, AUC 4.4e-16. Opus was not needed.
+
+**Failures and fixes**
+- Opus rejects `thinking: between_tools` and `disabled`; it needs `adaptive` plus an effort level. Found
+  with a tiny probe before any real Opus call. Added `thinking_escalation: {translation: adaptive/medium}`
+  (D31). Two direct probe calls (about $0.0006) bypassed the ledger and are not in `make spend`.
+- `itertuples()` renames `_merge`, which broke the bin-label comparison on the first evaluation; fixed
+  before any retry was spent (the cached attempt-1 reply was re-evaluated for free).
+
+**Verification:** `make test` all passing (new: `test_redevelop.py` with a fake LLM covering self-healing,
+Opus escalation, give-up after max attempts; `test_redeveloped_scorecard.py` re-checks the committed rebuild
+against R on every run). Ruff clean.
+
+**Token cost:** 2 live Sonnet calls, 22,671 tokens, $0.161 of the $4.00 `stage-4` bucket.
+

@@ -1,0 +1,32 @@
+[
+ {
+  "n": 1,
+  "model": "claude-sonnet-5-5",
+  "escalated": false,
+  "passed": false,
+  "n_failures": 5,
+  "failures": [
+   "unit test assign_bin (assign_bin_7): args {\"x\": [4, 12, 13, 15, 24, 25, 30, 31, 72], \"breaks\": [\"-Inf\", 12, 15, 24, 30, \"Inf\"]} -> differs at [7] R (30, Inf] vs Python (30,Inf]; [8] R (30, Inf] vs Python (30,Inf]",
+   "unit test assign_bin (assign_bin_8): args {\"x\": [250, 1248.2, 1248.3, 1919, 2788.8, 4738, 18424], \"breaks\": [\"-Inf\", 1248.2, 1919, 2788.8, 4738, \"Inf\"]} -> differs at [6] R (4738, Inf] vs Python (4738,Inf]",
+   "unit test assign_bin (assign_bin_9): args {\"x\": [0.5, 15857.5, 2000000.5], \"breaks\": [\"-Inf\", 15857.5, 1000000, \"Inf\"]} -> differs at [2] R (1000000, Inf] vs Python (1000000,Inf]",
+   "parity [original] bin labels per variable: mismatched bins: age '(44, Inf]' (R only); age '(44,Inf]' (Python only); credit_amount '(4738, Inf]' (R only); credit_amount '(4738,Inf]' (Python only); duration '(30, Inf]' (R only); duration '(30,Inf]' (Python only)",
+   "parity [resampled] bin labels per variable: mismatched bins: age '(45, Inf]' (R only); age '(45,Inf]' (Python only); credit_amount '(4677.2, Inf]' (R only); credit_amount '(4677.2,Inf]' (Python only); duration '(30, Inf]' (R only); duration '(30,Inf]' (Python only)"
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cost_usd": 0.0,
+  "cached": true
+ },
+ {
+  "n": 2,
+  "model": "claude-sonnet-5-5",
+  "escalated": false,
+  "passed": true,
+  "n_failures": 0,
+  "failures": [],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cost_usd": 0.0,
+  "cached": true
+ }
+]

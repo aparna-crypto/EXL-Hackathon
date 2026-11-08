@@ -32,3 +32,13 @@
   is likely to be cut off too; the budget is set with headroom instead (D28).
 - The Stage 3 coverage check matches variable names literally. A documented raw input whose fitted term is a
   derived column (pricing `Density` vs `LogDensity`) is reported as both missing and extra.
+
+## Stage 4
+- The interface contract, unit cases and parity checks are specific to WoE scorecards. Another R model
+  type would need its own contract and cases.
+- Parity is proven on German Credit, which has no missing values; R vs Python behaviour on NA inputs is
+  untested.
+- The subprocess is not a security sandbox: generated code can still read files the user can read. The
+  import allow-list and stripped environment reduce, not remove, that risk.
+- The Opus escalation path is tested with a fake LLM only; the live run passed on Sonnet's second attempt.
+
