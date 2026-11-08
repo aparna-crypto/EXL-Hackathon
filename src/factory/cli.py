@@ -9,9 +9,10 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from factory import discover, gates, model_card, orchestrator, tracking
+from factory import discover, gates, model_card, monitor, orchestrator, tracking
+from factory.agents import AgentError
 from factory.config import load_config
-from factory.llm import LLMClient
+from factory.llm import BudgetExceeded, LLMClient, LLMError
 
 
 def prompt_decision(card: dict, stage: str, summary: str):
@@ -53,6 +54,24 @@ def cmd_gate(args, cfg) -> int:
     tracking.configure(cfg)
     tracking.log_gate_decision(rec)
     print(json.dumps(rec, indent=2))
+    return 0
+
+
+def cmd_monitor(args, cfg) -> int:
+    import mlflow
+    card = model_card.load(cfg["paths"]["model_cards"], args.model)
+    tracking.configure(cfg)
+    with mlflow.start_run(run_name=f"monitor:{args.model}") as active:
+        mlflow.set_tags({"kind": "monitor", "model_id": args.model})
+        ctx = orchestrator.Context(cfg, orchestrator.MODELS_DIR / args.model, active.info.run_id)
+        try:
+            out = monitor.run(card, ctx)
+        except (AgentError, LLMError, BudgetExceeded) as e:
+            print(f"[error] {e}")
+            return 1
+    print(out["summary"])
+    if out["trigger"] and "re-opened" in out["action"]:
+        print("Gate 4 is open again: review the re-validation in the UI, then `make run`.")
     return 0
 
 
@@ -118,13 +137,15 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--reason", default="")
     s = sub.add_parser("status", help="show stage status for a model")
     s.add_argument("--model", required=True)
+    m = sub.add_parser("monitor", help="monthly drift monitoring; a breach re-opens Gate 4")
+    m.add_argument("--model", required=True)
     sub.add_parser("spend", help="LLM token and cost summary from the ledger")
     sub.add_parser("inventory", help="rebuild the inventory table and dependency map")
     c = sub.add_parser("llm-check", help="verify configured model IDs")
     c.add_argument("--ping", action="store_true", help="also make one tiny paid call")
     args = p.parse_args(argv)
     cfg = load_config()
-    handlers = {"run": cmd_run, "gate": cmd_gate, "status": cmd_status, "spend": cmd_spend, "inventory": cmd_inventory,
+    handlers = {"run": cmd_run, "gate": cmd_gate, "status": cmd_status, "spend": cmd_spend, "inventory": cmd_inventory, "monitor": cmd_monitor,
                 "llm-check": cmd_llm_check}
     return handlers[args.cmd](args, cfg)
 

@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 UV      ?= $(shell command -v uv || echo $$HOME/.local/bin/uv)
 MODEL   ?=
 
-.PHONY: help setup setup-r lock data legacy test lint run run-all inventory status ui mlflow-ui llm-check spend clean
+.PHONY: help setup setup-r lock data legacy test lint run run-all monitor inventory status ui mlflow-ui llm-check spend clean
 
 help:
 	@echo "make setup            create .venv (Python 3.11) and install pinned deps + R packages"
@@ -13,9 +13,10 @@ help:
 	@echo "make lint             ruff lint"
 	@echo "make run MODEL=<name> run the pipeline (with human gates) for models/<name>"
 	@echo "make run-all          run every model in models/ up to its next gate (no prompts)"
+	@echo "make monitor MODEL=<name>  drift monitoring; a breach triggers re-validation (Gate 4)"
 	@echo "make inventory        rebuild the inventory table + dependency map from model cards"
 	@echo "make status MODEL=<name>  stage/gate status for a model"
-	@echo "make ui               Streamlit UI (inventory, gates, audit log, spend)"
+	@echo "make ui               Streamlit UI (inventory, gates, reports, drift, audit, spend)"
 	@echo "make mlflow-ui        MLflow UI on the local tracking store"
 	@echo "make llm-check        verify configured Claude model IDs (free API call)"
 	@echo "make spend            LLM token/cost summary"
@@ -53,6 +54,10 @@ run:
 run-all:
 	@for d in models/*/; do m=$$(basename $$d); echo "== $$m"; \
 	  $(PY) -m factory.cli run --model $$m --no-prompt || true; done
+
+monitor:
+	@test -n "$(MODEL)" || (echo "usage: make monitor MODEL=<name>" && exit 2)
+	$(PY) -m factory.cli monitor --model $(MODEL)
 
 inventory:
 	$(PY) -m factory.cli inventory

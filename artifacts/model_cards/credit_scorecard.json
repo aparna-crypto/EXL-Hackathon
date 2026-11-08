@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "credit_scorecard",
-  "card_version": 11,
+  "card_version": 13,
   "name": "Retail Application Scorecard (RCS-APP-02)",
   "language": "R",
   "source_files": [
@@ -91,8 +91,8 @@
     },
     "validate": {
       "status": "awaiting_review",
-      "completed_at": "2026-11-08T21:43:37.144177+00:00",
-      "summary": "Validation report: docs/validation/credit_scorecard.html (+ PDF)\nModel under test: redeveloped/credit_scorecard/scorecard.py (Python rebuild, sha256 dc0f6c4e40ed, approved at Gate 3)\nOverall: AMBER - Fit for use with conditions: remediate the amber findings.\nBy area: performance GREEN, calibration GREEN, stability AMBER, fairness AMBER\n- [GREEN] Discrimination: test AUC: 0.801\n- [GREEN] Overfitting: train AUC - test AUC: 0.016\n- [GREEN] Calibration in the large: |mean predicted / observed - 1|: 0.013\n- [GREEN] Hosmer-Lemeshow goodness of fit (p-value): 0.900\n- [GREEN] Score PSI (train -> test): 0.011\n- [GREEN] Characteristic stability: largest CSI: 0.043\n- [AMBER] Synthetic out-of-time: worst tranche score PSI: 0.130\n- [GREEN] sex: adverse impact ratio of approval rates: 0.981\n- [GREEN] sex: equalized odds difference: 0.068\n- [GREEN] age_group: adverse impact ratio of approval rates: 0.923\n- [AMBER] age_group: equalized odds difference: 0.132\n- [AMBER] foreign_worker: group too small to rate: n/a\nFindings: 2; narrative sentences dropped by the number check: 0\nComputation 1.0s; LLM: claude-sonnet-5-5, 4609 tokens, $0.0364"
+      "completed_at": "2026-11-08T22:19:37.672346+00:00",
+      "summary": "RE-VALIDATION. Re-validation triggered by monitoring: month 9 rated AMBER (2 consecutive amber months): Largest characteristic CSI 0.134 (AMBER, limits [0.1, 0.25]); Calibration |mean PD / bad rate - 1| 0.154 (AMBER, limits [0.1, 0.2])\nValidation report: docs/validation/credit_scorecard_revalidation_m09.html (+ PDF)\nModel under test: redeveloped/credit_scorecard/scorecard.py (Python rebuild, sha256 dc0f6c4e40ed, approved at Gate 3)\nOverall: RED - Not fit for use until the red findings are remediated.\nBy area: performance GREEN, calibration RED, stability AMBER, fairness AMBER\n- [GREEN] Discrimination: test AUC: 0.810\n- [GREEN] Overfitting: train AUC - test AUC: 0.007\n- [AMBER] Calibration in the large: |mean predicted / observed - 1|: 0.154\n- [RED] Hosmer-Lemeshow goodness of fit (p-value): 2.65e-11\n- [GREEN] Score PSI (train -> test): 0.047\n- [AMBER] Characteristic stability: largest CSI: 0.134\n- [AMBER] Synthetic out-of-time: worst tranche score PSI: 0.189\n- [GREEN] sex: adverse impact ratio of approval rates: 0.960\n- [GREEN] sex: equalized odds difference: 0.095\n- [GREEN] age_group: adverse impact ratio of approval rates: 0.908\n- [AMBER] age_group: equalized odds difference: 0.154\n- [AMBER] foreign_worker: group too small to rate: n/a\nFindings: 4; narrative sentences dropped by the number check: 1\nComputation 1.1s; LLM: claude-sonnet-5-5, 5261 tokens, $0.0425"
     }
   },
   "history": [
@@ -150,6 +150,16 @@
       "card_version": 11,
       "timestamp": "2026-11-08T21:43:37.144195+00:00",
       "note": "validate: completed, awaiting review"
+    },
+    {
+      "card_version": 12,
+      "timestamp": "2026-11-08T22:19:07.008126+00:00",
+      "note": "validate: gate approved"
+    },
+    {
+      "card_version": 13,
+      "timestamp": "2026-11-08T22:19:37.673450+00:00",
+      "note": "monitor: re-validation run on month 9 batch: overall RED; Gate 4 re-opened for review"
     }
   ],
   "discovery": {
@@ -853,15 +863,16 @@
     }
   },
   "validation": {
-    "generated_at": "2026-11-08T21:43:36.727305+00:00",
+    "generated_at": "2026-11-08T22:19:36.866884+00:00",
     "status": "pending Gate 4",
+    "trigger": "Re-validation triggered by monitoring: month 9 rated AMBER (2 consecutive amber months): Largest characteristic CSI 0.134 (AMBER, limits [0.1, 0.25]); Calibration |mean PD / bad rate - 1| 0.154 (AMBER, limits [0.1, 0.2])",
     "model_under_test": "redeveloped/credit_scorecard/scorecard.py (Python rebuild, sha256 dc0f6c4e40ed, approved at Gate 3)",
-    "data": "German Credit (UCI), fixed split seed 42: 700 train / 300 test rows. Re-scoring with the rebuild's bins, WoE and coefficients reproduces its test predictions (max abs diff 2.2e-16).",
-    "overall_rag": "amber",
-    "outcome": "Fit for use with conditions: remediate the amber findings.",
+    "data": "German Credit (UCI), fixed split seed 42: 700 train / 300 test rows. Re-scoring with the rebuild's bins, WoE and coefficients reproduces its test predictions (max abs diff 2.2e-16). RE-VALIDATION: the evaluation sample is the monitoring batch batch_month_09.csv (1000 rows, synthetic drift injected by Stage 6), not the original test set.",
+    "overall_rag": "red",
+    "outcome": "Not fit for use until the red findings are remediated.",
     "section_rag": {
       "performance": "green",
-      "calibration": "green",
+      "calibration": "red",
       "stability": "amber",
       "fairness": "amber"
     },
@@ -870,16 +881,16 @@
         "section": "performance",
         "check": "Discrimination: test AUC",
         "metric": "performance.test_auc",
-        "value": 0.800952380952381,
+        "value": 0.8095616057517461,
         "rule": ">= 0.75 green, >= 0.65 amber",
         "rag": "green",
-        "note": "95% bootstrap CI 0.745-0.853"
+        "note": "95% bootstrap CI 0.782-0.835"
       },
       {
         "section": "performance",
         "check": "Overfitting: train AUC - test AUC",
         "metric": "performance.auc_drop",
-        "value": 0.016107871720116518,
+        "value": 0.007498646920751417,
         "rule": "<= 0.03 green, <= 0.07 amber",
         "rag": "green",
         "note": ""
@@ -888,25 +899,25 @@
         "section": "calibration",
         "check": "Calibration in the large: |mean predicted / observed - 1|",
         "metric": "calibration.calib_ratio_dev",
-        "value": 0.013190964635770297,
+        "value": 0.1544144088366658,
         "rule": "<= 0.1 green, <= 0.2 amber",
-        "rag": "green",
+        "rag": "amber",
         "note": ""
       },
       {
         "section": "calibration",
         "check": "Hosmer-Lemeshow goodness of fit (p-value)",
         "metric": "calibration.hl_pvalue",
-        "value": 0.8995522344128971,
+        "value": 2.6506010502066305e-11,
         "rule": ">= 0.05 green, >= 0.01 amber",
-        "rag": "green",
+        "rag": "red",
         "note": "10 equal-count groups, 8 d.f."
       },
       {
         "section": "stability",
         "check": "Score PSI (train -> test)",
         "metric": "stability.score_psi",
-        "value": 0.011223501395379833,
+        "value": 0.047479195623451674,
         "rule": "<= 0.1 green, <= 0.25 amber",
         "rag": "green",
         "note": ""
@@ -915,16 +926,16 @@
         "section": "stability",
         "check": "Characteristic stability: largest CSI",
         "metric": "stability.max_csi",
-        "value": 0.04342887507408934,
+        "value": 0.13395464685526445,
         "rule": "<= 0.1 green, <= 0.25 amber",
-        "rag": "green",
-        "note": "variable age"
+        "rag": "amber",
+        "note": "variable duration"
       },
       {
         "section": "stability",
         "check": "Synthetic out-of-time: worst tranche score PSI",
         "metric": "stability.tranche_max_psi",
-        "value": 0.13036601740070353,
+        "value": 0.18859305343016416,
         "rule": "<= 0.1 green, <= 0.25 amber",
         "rag": "amber",
         "note": "3 tranches of the test set in id order (synthetic time)"
@@ -933,7 +944,7 @@
         "section": "fairness",
         "check": "sex: adverse impact ratio of approval rates",
         "metric": "fairness.sex_adverse_impact_ratio",
-        "value": 0.980782289827516,
+        "value": 0.9598936549622279,
         "rule": ">= 0.8 green, >= 0.7 amber",
         "rag": "green",
         "note": ""
@@ -942,7 +953,7 @@
         "section": "fairness",
         "check": "sex: equalized odds difference",
         "metric": "fairness.sex_equalized_odds_difference",
-        "value": 0.06753246753246755,
+        "value": 0.09519965558066945,
         "rule": "<= 0.1 green, <= 0.2 amber",
         "rag": "green",
         "note": ""
@@ -951,7 +962,7 @@
         "section": "fairness",
         "check": "age_group: adverse impact ratio of approval rates",
         "metric": "fairness.age_group_adverse_impact_ratio",
-        "value": 0.9231063870535285,
+        "value": 0.9084040537200296,
         "rule": ">= 0.8 green, >= 0.7 amber",
         "rag": "green",
         "note": ""
@@ -960,7 +971,7 @@
         "section": "fairness",
         "check": "age_group: equalized odds difference",
         "metric": "fairness.age_group_equalized_odds_difference",
-        "value": 0.13248847926267282,
+        "value": 0.1535650022492127,
         "rule": "<= 0.1 green, <= 0.2 amber",
         "rag": "amber",
         "note": ""
@@ -972,37 +983,324 @@
         "value": null,
         "rule": "n >= 30 per group",
         "rag": "amber",
-        "note": "A202 n=9"
+        "note": "A202 n=29"
       }
     ],
     "not_assessed": {},
     "findings": [
       {
+        "severity": "high",
+        "section": "calibration",
+        "finding": "Predicted PDs are materially mis-calibrated on the monitoring batch: the Hosmer-Lemeshow p-value of 2.65e-11 is a red result, and mean predicted PD (0.331) is below the observed rate (0.391), with a deviation of 0.154 that is amber.",
+        "recommendation": "Recalibrate the score-to-PD mapping (for example intercept or slope adjustment) on recent data, and restrict use of absolute PD outputs in pricing and provisioning until the recalibrated model is re-validated. Investigate whether the miscalibration reflects population drift or a model deficiency."
+      },
+      {
         "severity": "medium",
         "section": "stability",
-        "finding": "The worst synthetic out-of-time tranche shows a score PSI of 0.130, above the green threshold, while train-to-test PSI is green. The tranches are an id-ordered split rather than true time periods, so the drift signal cannot be attributed to genuine temporal change.",
-        "recommendation": "Run a true out-of-time back-test on dated application data before or shortly after deployment, and set up periodic score PSI and CSI monitoring with escalation triggers in the ongoing monitoring plan."
+        "finding": "Characteristic drift is above the green limit (largest CSI 0.134) and the worst synthetic tranche score PSI is 0.189, both amber, though overall score PSI is 0.047.",
+        "recommendation": "Identify the characteristic with the highest CSI, establish the cause of the drift (population change versus data or process issue), and assess its contribution to the calibration shortfall. Keep monthly CSI monitoring in place and consider redevelopment if drift persists after recalibration."
       },
       {
         "severity": "medium",
         "section": "fairness",
-        "finding": "The age-group equalized odds difference is 0.132, above the green limit, and age is a direct model input. The foreign worker comparison could not be rated because one group has only 9 records.",
-        "recommendation": "Model Development should investigate which age bands drive the gap, assess whether the age bins are justified by risk evidence, and test alternatives such as coarser banding or constraints. Fairness testing for foreign worker status should be repeated on a larger sample or with pooled data, and the age result should be tracked in ongoing monitoring."
+        "finding": "The age-group equalized odds difference of 0.154 is amber, indicating differing approval rates across age groups among applicants with the same true outcome. Age is a direct model input.",
+        "recommendation": "Review the contribution of age-related characteristics to the score and document the business and statistical justification for their use. Assess the effect of removing or constraining them on both discrimination and the equalized odds gap, and continue monitoring."
+      },
+      {
+        "severity": "medium",
+        "section": "fairness",
+        "finding": "The foreign worker attribute could not be tested reliably because one group has only 29 records, below the minimum of 30.",
+        "recommendation": "Obtain a larger sample, or pool several months of data, so that the foreign worker group meets the minimum size and the test can be completed at the next validation or monitoring cycle."
       }
     ],
-    "narrative_dropped": [],
+    "narrative_dropped": [
+      "Discrimination is strong on the monitoring batch, with a test AUC of [[performance.test_auc]] (95% bootstrap interval [[performance.test_auc_ci_low]] to [[performance.test_auc_ci_high]]), a Gini of [[performance.test_gini]] and a KS of [[performance.test_ks]]."
+    ],
     "llm": {
       "model": "claude-sonnet-5-5",
       "calls": 1,
-      "input_tokens": 2730,
-      "output_tokens": 1879,
-      "cost_usd": 0.036375,
+      "input_tokens": 3035,
+      "output_tokens": 2226,
+      "cost_usd": 0.042495,
       "cached": false
     },
-    "report_html": "docs/validation/credit_scorecard.html",
-    "report_pdf": "docs/validation/credit_scorecard.pdf",
-    "evidence_path": "artifacts/validation/credit_scorecard/evidence.json",
-    "elapsed_s": 1.02,
+    "report_html": "docs/validation/credit_scorecard_revalidation_m09.html",
+    "report_pdf": "docs/validation/credit_scorecard_revalidation_m09.pdf",
+    "evidence_path": "artifacts/validation/credit_scorecard_revalidation_m09/evidence.json",
+    "elapsed_s": 1.09,
     "reviewer_feedback_used": null
+  },
+  "monitoring": {
+    "generated_at": "2026-11-08T22:19:14.343740+00:00",
+    "baseline": "development (train) scores of the Gate 3/4-approved rebuild redeveloped/credit_scorecard/scorecard.py, 700 rows",
+    "simulation": "12 monthly batches of 1000 rows resampled from the test set (seed 42 + month). SYNTHETIC drift from month 7: credit_amount x(1 + 0.04k), a share 0.08k of loans 12 months longer, riskier intake (weight exp(0.15k*bad)). Outcomes are assumed observed at batch time (no maturity lag).",
+    "thresholds": {
+      "psi_max": [
+        0.1,
+        0.25
+      ],
+      "calib_ratio_dev_max": [
+        0.1,
+        0.2
+      ],
+      "auc_min": [
+        0.75,
+        0.65
+      ]
+    },
+    "months": [
+      {
+        "month": 1,
+        "drift_k": 0,
+        "n": 1000,
+        "bad_rate": 0.308,
+        "mean_pd": 0.3033940692,
+        "score_psi": 0.0264649569,
+        "max_csi": 0.061811206,
+        "max_csi_var": "savings",
+        "calib_dev": 0.0149543206,
+        "auc": 0.8051666542,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "green",
+        "rag_auc": "green",
+        "rag": "green"
+      },
+      {
+        "month": 2,
+        "drift_k": 0,
+        "n": 1000,
+        "bad_rate": 0.284,
+        "mean_pd": 0.2822610785,
+        "score_psi": 0.0158479992,
+        "max_csi": 0.0419703988,
+        "max_csi_var": "age",
+        "calib_dev": 0.006122963,
+        "auc": 0.7921994256,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "green",
+        "rag_auc": "green",
+        "rag": "green"
+      },
+      {
+        "month": 3,
+        "drift_k": 0,
+        "n": 1000,
+        "bad_rate": 0.318,
+        "mean_pd": 0.2917131621,
+        "score_psi": 0.0196287873,
+        "max_csi": 0.0711502919,
+        "max_csi_var": "age",
+        "calib_dev": 0.0826630124,
+        "auc": 0.7902810823,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "green",
+        "rag_auc": "green",
+        "rag": "green"
+      },
+      {
+        "month": 4,
+        "drift_k": 0,
+        "n": 1000,
+        "bad_rate": 0.294,
+        "mean_pd": 0.2951884561,
+        "score_psi": 0.0258322718,
+        "max_csi": 0.0654020248,
+        "max_csi_var": "age",
+        "calib_dev": 0.0040423678,
+        "auc": 0.7892264555,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "green",
+        "rag_auc": "green",
+        "rag": "green"
+      },
+      {
+        "month": 5,
+        "drift_k": 0,
+        "n": 1000,
+        "bad_rate": 0.304,
+        "mean_pd": 0.2928769547,
+        "score_psi": 0.0219410471,
+        "max_csi": 0.049867498,
+        "max_csi_var": "age",
+        "calib_dev": 0.0365889649,
+        "auc": 0.7964023745,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "green",
+        "rag_auc": "green",
+        "rag": "green"
+      },
+      {
+        "month": 6,
+        "drift_k": 0,
+        "n": 1000,
+        "bad_rate": 0.307,
+        "mean_pd": 0.2973357457,
+        "score_psi": 0.0076669587,
+        "max_csi": 0.0478433854,
+        "max_csi_var": "purpose",
+        "calib_dev": 0.0314796557,
+        "auc": 0.79630178,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "green",
+        "rag_auc": "green",
+        "rag": "green"
+      },
+      {
+        "month": 7,
+        "drift_k": 1,
+        "n": 1000,
+        "bad_rate": 0.309,
+        "mean_pd": 0.3041342098,
+        "score_psi": 0.0237373555,
+        "max_csi": 0.0550641278,
+        "max_csi_var": "age",
+        "calib_dev": 0.0157468937,
+        "auc": 0.7695568076,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "green",
+        "rag_auc": "green",
+        "rag": "green"
+      },
+      {
+        "month": 8,
+        "drift_k": 2,
+        "n": 1000,
+        "bad_rate": 0.383,
+        "mean_pd": 0.3221988746,
+        "score_psi": 0.0423217601,
+        "max_csi": 0.0750695277,
+        "max_csi_var": "savings",
+        "calib_dev": 0.1587496747,
+        "auc": 0.7765994812,
+        "rag_score_psi": "green",
+        "rag_max_csi": "green",
+        "rag_calib_dev": "amber",
+        "rag_auc": "green",
+        "rag": "amber"
+      },
+      {
+        "month": 9,
+        "drift_k": 3,
+        "n": 1000,
+        "bad_rate": 0.391,
+        "mean_pd": 0.3306239661,
+        "score_psi": 0.0474791956,
+        "max_csi": 0.1339546469,
+        "max_csi_var": "duration",
+        "calib_dev": 0.1544144088,
+        "auc": 0.8095616058,
+        "rag_score_psi": "green",
+        "rag_max_csi": "amber",
+        "rag_calib_dev": "amber",
+        "rag_auc": "green",
+        "rag": "amber"
+      },
+      {
+        "month": 10,
+        "drift_k": 4,
+        "n": 1000,
+        "bad_rate": 0.459,
+        "mean_pd": 0.3497082324,
+        "score_psi": 0.0818926392,
+        "max_csi": 0.1825912701,
+        "max_csi_var": "duration",
+        "calib_dev": 0.2381084261,
+        "auc": 0.7897905517,
+        "rag_score_psi": "green",
+        "rag_max_csi": "amber",
+        "rag_calib_dev": "red",
+        "rag_auc": "green",
+        "rag": "red"
+      },
+      {
+        "month": 11,
+        "drift_k": 5,
+        "n": 1000,
+        "bad_rate": 0.493,
+        "mean_pd": 0.3684964756,
+        "score_psi": 0.1062153981,
+        "max_csi": 0.3469002645,
+        "max_csi_var": "duration",
+        "calib_dev": 0.2525426459,
+        "auc": 0.7817732276,
+        "rag_score_psi": "amber",
+        "rag_max_csi": "red",
+        "rag_calib_dev": "red",
+        "rag_auc": "green",
+        "rag": "red"
+      },
+      {
+        "month": 12,
+        "drift_k": 6,
+        "n": 1000,
+        "bad_rate": 0.514,
+        "mean_pd": 0.3724595104,
+        "score_psi": 0.1163674192,
+        "max_csi": 0.4066131422,
+        "max_csi_var": "duration",
+        "calib_dev": 0.2753706023,
+        "auc": 0.7754199292,
+        "rag_score_psi": "amber",
+        "rag_max_csi": "red",
+        "rag_calib_dev": "red",
+        "rag_auc": "green",
+        "rag": "red"
+      }
+    ],
+    "trigger": {
+      "month": 9,
+      "rag": "amber",
+      "rule": "2 consecutive amber months",
+      "reason": "month 9 rated AMBER (2 consecutive amber months): Largest characteristic CSI 0.134 (AMBER, limits [0.1, 0.25]); Calibration |mean PD / bad rate - 1| 0.154 (AMBER, limits [0.1, 0.2])"
+    },
+    "dashboard": "artifacts/monitoring/credit_scorecard/drift_dashboard.png",
+    "metrics_csv": "artifacts/monitoring/credit_scorecard/monthly_metrics.csv",
+    "report": "docs/monitoring/credit_scorecard.md",
+    "alert": {
+      "alert": "The Retail Application Scorecard (RCS-APP-02) triggered re-validation in month 9 under the two-consecutive-amber rule, following amber ratings in months 8 and 9. The month 9 breach was driven by the largest characteristic CSI of 0.134 (duration, amber band 0.1 to 0.25 range) and calibration deviation of 0.154 against the amber limit of 0.2. Calibration deviation first rose to amber in month 8 and worsened to red by months 10 to 12, while max CSI moved to red from month 11, and score PSI reached amber in months 11 and 12. Discrimination remained within green limits throughout, with AUC at 0.810 in month 9, so the deterioration is in population stability and calibration rather than ranking power. The simulated drift began in month 7, and the model should be treated as no longer reliably calibrated to the current application population.",
+      "likely_drivers": [
+        "Duration CSI of 0.134 is the largest contributor in month 9, consistent with a shift in the mix of loan term requested, which is the characteristic that drives the CSI breach.",
+        "Credit amount CSI of 0.092 and age CSI of 0.081 are also elevated relative to the other characteristics, suggesting a broader intake shift toward larger, longer loans and a different age profile.",
+        "Calibration deviation rising while AUC stayed green is consistent with a change in the bad-rate level of the population rather than a loss of rank ordering; mean PD of 0.331 against an observed bad rate of 0.391 indicates under-prediction of risk. This is suggestive only, as the input does not establish the root cause of the intake change.",
+        "The input describes the drift as synthetic from month 7 with riskier intake and longer durations, so the driver attribution reflects the simulation design and should not be presented as an observed business event."
+      ],
+      "recommended_actions": [
+        "Commission full re-validation of RCS-APP-02 focused on the duration, credit amount and age characteristics and on calibration to the current population.",
+        "Investigate the root cause of the duration and credit amount shift in application data, including whether a product, channel or pricing change is responsible, and document the finding.",
+        "Assess the impact of the calibration deviation on expected loss and capital and determine whether interim recalibration or an overlay is needed while re-validation is in progress.",
+        "Confirm that outcome data is observed at batch time as the simulation assumes; if real loans mature with a lag, the performance monitoring basis must be reviewed before drawing final conclusions.",
+        "Escalate to the model owner and model risk committee given red ratings on CSI and calibration in months 10 to 12, and track the monthly monitoring results until the model is re-validated or remediated."
+      ],
+      "dropped_sentences": [],
+      "llm": {
+        "model": "claude-haiku-5-5",
+        "input_tokens": 2444,
+        "output_tokens": 973,
+        "cost_usd": 0.007309,
+        "cached": false,
+        "calls": 1
+      }
+    },
+    "revalidation": {
+      "status": "pending",
+      "month": 9,
+      "reason": "month 9 rated AMBER (2 consecutive amber months): Largest characteristic CSI 0.134 (AMBER, limits [0.1, 0.25]); Calibration |mean PD / bad rate - 1| 0.154 (AMBER, limits [0.1, 0.2])",
+      "data_path": "artifacts/monitoring/credit_scorecard/batch_month_09.csv",
+      "triggered_at": "2026-11-08T22:19:20.212984+00:00",
+      "previous_validation": {
+        "generated_at": "2026-11-08T21:43:36.727305+00:00",
+        "overall_rag": "amber",
+        "report_html": "docs/validation/credit_scorecard.html"
+      },
+      "report_html": "docs/validation/credit_scorecard_revalidation_m09.html",
+      "overall_rag": "red"
+    }
   }
 }

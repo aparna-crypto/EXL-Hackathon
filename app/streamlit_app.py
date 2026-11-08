@@ -1,6 +1,6 @@
 """Streamlit UI: inventory, gate approvals, audit log, LLM spend.
 
-Run with `make ui`. The drift dashboard (Stage 6) is added later.
+Run with `make ui`. Drift results come from `make monitor MODEL=<name>`.
 """
 
 from __future__ import annotations
@@ -192,4 +192,44 @@ elif page == "Validation reports":
         show_validation(card, height=1400)
 
 else:
-    st.info("Added in a later stage (Drift monitoring: Stage 6).")
+    monitored = [c for c in cards if c.get("monitoring")]
+    if not monitored:
+        st.info("No monitoring results yet: run `make monitor MODEL=<name>` for a model whose "
+                "Gate 4 is approved.")
+    else:
+        model_id = st.selectbox("Model", [c["model_id"] for c in monitored])
+        card = next(c for c in monitored if c["model_id"] == model_id)
+        mon = card["monitoring"]
+        st.caption(f"Generated {mon['generated_at']}. Baseline: {mon['baseline']}")
+        st.caption(f"Simulation: {mon['simulation']}")
+        t, rv = mon.get("trigger"), mon.get("revalidation") or {}
+        if t:
+            st.error(f"Re-validation trigger: {t['reason']}")
+        else:
+            st.success("No trigger: every month is within the re-validation rule.")
+        dash = ROOT / mon["dashboard"]
+        if dash.exists():
+            st.image(str(dash), use_container_width=True)
+        st.dataframe(pd.DataFrame(mon["months"]), use_container_width=True, hide_index=True)
+        alert = mon.get("alert")
+        if t and alert:
+            st.subheader("Alert (monitor agent; numbers filled in from evidence)")
+            st.write(alert["alert"])
+            st.markdown("**Likely drivers**\n" + "\n".join(f"- {x}" for x in alert["likely_drivers"]))
+            st.markdown("**Recommended actions**\n"
+                        + "\n".join(f"- {x}" for x in alert["recommended_actions"]))
+        if rv:
+            st.subheader("Re-validation")
+            st.write(f"Triggered {rv['triggered_at']} on month {rv['month']}. Report: "
+                     f"`{rv.get('report_html')}` (overall {str(rv.get('overall_rag')).upper()}). "
+                     f"Gate 4 now: **{stage_status(card, 'validate')}**. Previous validation: "
+                     f"{rv.get('previous_validation')}")
+            if stage_status(card, "validate") == "awaiting_review":
+                st.info("Review it on the Gate review page.")
+        ev_path = Path(AUDIT) / "monitoring_events.jsonl"
+        if ev_path.exists():
+            events = [json.loads(x) for x in ev_path.read_text().splitlines()]
+            events = [e for e in events if e["model_id"] == model_id]
+            if events:
+                st.subheader("Monitoring events (append-only)")
+                st.dataframe(pd.DataFrame(events), use_container_width=True, hide_index=True)

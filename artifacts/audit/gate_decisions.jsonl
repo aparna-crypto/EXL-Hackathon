@@ -8,3 +8,5 @@
 {"timestamp": "2026-11-08T02:34:08.709414+00:00", "model_id": "sas_behaviour_scorecard", "stage": "discover", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 3}
 {"timestamp": "2026-11-08T02:34:22.070138+00:00", "model_id": "credit_scorecard", "stage": "document", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 5}
 {"timestamp": "2026-11-08T21:39:02.462777+00:00", "model_id": "credit_scorecard", "stage": "redevelop", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 9}
+{"timestamp": "2026-11-08T22:15:41.811734+00:00", "model_id": "credit_scorecard", "stage": "validate", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 11}
+{"timestamp": "2026-11-08T22:15:56.180640+00:00", "model_id": "pricing_glm", "stage": "validate", "decision": "approve", "reviewer": "ap", "reason": "", "card_version": 7}

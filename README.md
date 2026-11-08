@@ -6,7 +6,7 @@ calls specialised agents (Discover, Document, Redevelop, Validate, Monitor) that
 **model card**. Every stage ends in a **human gate** (approve, reject or comment), and each decision is
 logged with a timestamp, the reviewer and the reason.
 
-> Status: **Stages 0-4 done, Stage 5 done and waiting at Gate 4** (validation reports in `docs/validation/`: HTML + PDF with RAG ratings for performance, calibration, stability and fairness). Stages 6-7 add monitoring and the benchmark. See `docs/work_log.md`.
+> Status: **Stages 0-6 done.** Stage 5 validation reports are in `docs/validation/` (HTML + PDF, RAG ratings for performance, calibration, stability and fairness). Stage 6 monitoring (`make monitor MODEL=credit_scorecard`) detected injected drift in month 9 and re-opened Gate 4 with a re-validation report (`docs/monitoring/`). Stage 7 adds the benchmark and demo. See `docs/work_log.md`.
 
 ## Quickstart
 
@@ -39,6 +39,7 @@ Press Enter to defer the decision to the UI instead (`make ui` → *Gate review*
 | `make ui` | Streamlit: inventory, gate review, audit log, LLM spend, validation reports |
 | `make mlflow-ui` | MLflow UI on the local tracking store (`artifacts/mlruns`) |
 | `make status MODEL=<name>` | stage and gate status for one model |
+| `make monitor MODEL=<name>` | monthly drift monitoring for a Gate 4-approved model; a breach re-runs validation and re-opens Gate 4 |
 | `make run-all` | runs every model under `models/` to its next gate |
 | `make inventory` | rebuilds `artifacts/inventory/` (table, gaps, dependency map) from the model cards |
 | `make spend` | LLM tokens and cost per budget bucket |

@@ -313,7 +313,8 @@ def _binary_calibration(ev: Evidence, y, p, bins: int, hl_rated: bool) -> pd.Dat
     return t
 
 
-def scorecard_rebuild(card: dict, root: Path, ev: Evidence, vcfg: dict, seed: int) -> None:
+def scorecard_rebuild(card: dict, root: Path, ev: Evidence, vcfg: dict, seed: int,
+                      test_path: Path | None = None) -> None:
     red = card.get("redevelopment") or {}
     if not red.get("passed"):
         raise AgentError("validation needs an approved Stage 4 rebuild with proven parity")
@@ -335,6 +336,12 @@ def scorecard_rebuild(card: dict, root: Path, ev: Evidence, vcfg: dict, seed: in
     ev.data = (f"German Credit (UCI), fixed split seed 42: {len(train)} train / {len(test)} test "
                "rows. Re-scoring with the rebuild's bins, WoE and coefficients reproduces its "
                f"test predictions (max abs diff {repro:.1e}).")
+    if test_path is not None:
+        test = pd.read_csv(test_path)
+        p_te, s_te, b_te = _score_scorecard(mod, test, out)
+        ev.data += (f" RE-VALIDATION: the evaluation sample is the monitoring batch "
+                    f"{Path(test_path).name} ({len(test)} rows, synthetic drift injected by "
+                    "Stage 6), not the original test set.")
     y_tr, y_te = train["bad"].to_numpy(), test["bad"].to_numpy()
 
     _binary_performance(ev, y_te, p_te, auc(y_tr, p_tr), vcfg, seed)
@@ -609,6 +616,7 @@ def render_html(card: dict, ev: Evidence, val: dict, narrative: dict) -> str:
     return env.get_template("validation_report.html.j2").render(
         name=card["name"], model_under_test=ev.model_under_test, generated_at=val["generated_at"],
         status=val["status"], overall=val["overall_rag"], outcome=val["outcome"],
+        trigger=val.get("trigger"),
         section_rag=val["section_rag"], checks=checks, sections=SECTIONS,
         narrative=narrative, notes_by_section=notes, llm=narrative["llm"],
         metrics={s: {k: fmt(v) for k, v in ev.metrics[s].items()} for s in SECTIONS},
@@ -624,7 +632,7 @@ def render_pdf(path: Path, card: dict, ev: Evidence, val: dict, narrative: dict)
         fig = plt.figure(figsize=(8.27, 11.69))
         lines = [f"Independent validation report: {card['name']}", "",
                  f"Model under test: {ev.model_under_test}", f"Generated: {val['generated_at']}",
-                 f"Status: {val['status']}", "",
+                 f"Status: {val['status']}", *([val["trigger"]] if val.get("trigger") else []), "",
                  f"OVERALL RATING: {val['overall_rag'].upper()} - {val['outcome']}", "",
                  "Ratings by area: " + ", ".join(f"{s} {r.upper()}"
                                                  for s, r in val["section_rag"].items()), "",
@@ -669,24 +677,30 @@ def run_stage(card: dict, ctx) -> dict:
                            f"({card['language']}; SAS has no runtime here)."}
     root = ctx.model_dir.parent.parent
     t0 = time.perf_counter()
-    out_dir = Path(cfg["paths"]["validation_artifacts"]) / mid
+    reval = (card.get("monitoring") or {}).get("revalidation") or {}
+    reval = reval if reval.get("status") == "pending" else {}
+    suffix = f"_revalidation_m{reval['month']:02d}" if reval else ""
+    out_dir = Path(cfg["paths"]["validation_artifacts"]) / f"{mid}{suffix}"
     ev = Evidence(vcfg["thresholds"], out_dir)
+    extra = {"test_path": root / reval["data_path"]} if reval else {}
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", "invalid value encountered in cast", RuntimeWarning)
-        BUILDERS[kind](card, root, ev, vcfg, cfg["seed"])
+        BUILDERS[kind](card, root, ev, vcfg, cfg["seed"], **extra)
     elapsed = time.perf_counter() - t0
 
     section_rag = {s: "n/a" if s in ev.na else worst(c["rag"] for c in ev.checks
                                                        if c["section"] == s) for s in SECTIONS}
     overall = worst(section_rag.values())
     facts = {f"{s}.{k}": fmt(v) for s in SECTIONS for k, v in ev.metrics[s].items()}
-    notes = [ev.data] + [n for s in SECTIONS for n in ([ev.na[s]] if s in ev.na else [])
+    trigger = (f"Re-validation triggered by monitoring: {reval['reason']}" if reval else None)
+    notes = ([trigger] if trigger else []) + [ev.data] + [n for s in SECTIONS for n in ([ev.na[s]] if s in ev.na else [])
                          + ev.notes[s]]
     inv = card.get("inventory", {})
     context = {"name": card["name"], "model_id": mid, "model_under_test": ev.model_under_test,
                **{k: inv.get(k) for k in ("purpose", "model_type", "risk_tier", "owner")},
                "documentation_gaps": (card.get("documentation") or {}).get("gaps", []),
-               "overall_rating": overall, "section_ratings": section_rag}
+               "overall_rating": overall, "section_ratings": section_rag,
+               "revalidation_trigger": trigger}
     checks_for_llm = [{k: c[k] for k in ("section", "check", "metric", "rule", "rag", "note")}
                       for c in ev.checks]
     feedback = discover.reviewer_feedback(cfg["paths"]["audit"], mid,
@@ -696,9 +710,9 @@ def run_stage(card: dict, ctx) -> dict:
 
     rep_dir = Path(cfg["paths"]["validation_reports"])
     rep_dir.mkdir(parents=True, exist_ok=True)
-    html_path, pdf_path = rep_dir / f"{mid}.html", rep_dir / f"{mid}.pdf"
+    html_path, pdf_path = rep_dir / f"{mid}{suffix}.html", rep_dir / f"{mid}{suffix}.pdf"
     evidence_path = out_dir / "evidence.json"
-    val = {"generated_at": model_card.now_iso(), "status": "pending Gate 4",
+    val = {"generated_at": model_card.now_iso(), "status": "pending Gate 4", "trigger": trigger,
            "model_under_test": ev.model_under_test, "data": ev.data, "overall_rag": overall,
            "outcome": OUTCOME.get(overall, ""), "section_rag": section_rag,
            "checks": [{**c, "value": c["value"]} for c in ev.checks],
@@ -721,6 +735,7 @@ def run_stage(card: dict, ctx) -> dict:
 
     llm = narrative["llm"]
     summary = "\n".join([
+        *([f"RE-VALIDATION. {trigger}"] if trigger else []),
         f"Validation report: {val['report_html']} (+ PDF)",
         f"Model under test: {ev.model_under_test}",
         f"Overall: {overall.upper()} - {val['outcome']}",

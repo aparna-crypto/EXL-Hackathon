@@ -45,4 +45,9 @@
 | D41 | 2026-11-08 | PDF via Matplotlib `PdfPages` (summary page + charts); the HTML is the full report | WeasyPrint / headless Chrome | No new dependency and no system libraries; works in CI. The PDF is a summary, not a pixel copy of the HTML. |
 | D42 | 2026-11-08 | Hosmer-Lemeshow is rated for the scorecard but only reported for fraud (n=57k) | Rate everywhere | With very large n the test rejects negligible miscalibration; calibration-in-the-large is rated instead. |
 | D43 | 2026-11-08 | Budget bucket `stage-5` $2, per run $1; tests set their own caps | Keep the Stage 4 caps | User-approved default; tests must not depend on live budget settings. |
-
+| D44 | 2026-11-08 | Monitoring is a post-approval command (`make monitor`), not a fifth pipeline stage; its human gate is the re-opened Gate 4 | Add a `monitor` gate after Gate 4 | Monitoring repeats every month; a gate only makes sense when it changes something. A breach re-runs Validate and asks a human to re-approve. |
+| D45 | 2026-11-08 | Simulated monthly batches resampled from the test set with injected, configurable drift | Wait for real production data / use train rows | No production stream exists. Test rows keep the model out-of-sample; drift parameters live in config and the report labels them SYNTHETIC. |
+| D46 | 2026-11-08 | Reuse the Stage 5 thresholds; trigger on a red month or 2 consecutive ambers | Separate monitoring thresholds / any amber | One policy across validation and monitoring; the consecutive rule absorbs one-off sampling noise. |
+| D47 | 2026-11-08 | Re-validation writes `_revalidation_mXX` reports and keeps the original; repeat runs on the same breach do not re-trigger | Overwrite the Stage 5 report | Keeps the approved evidence and stops a deterministic simulation from re-opening the gate forever. |
+| D48 | 2026-11-08 | Monitor agent (Haiku) writes only the alert, with the same [[fact]] grounding as the report agent | LLM decides whether to trigger | The trigger is a deterministic rule; the LLM only explains it. |
+| D49 | 2026-11-08 | Budget bucket `stage-6` $1 | - | User-approved default. |

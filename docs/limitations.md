@@ -59,3 +59,13 @@
 - **The PDF is a summary** (ratings, checks, findings, charts); the full report with tables and
   narrative is the HTML.
 
+## Stage 6 (monitoring)
+
+- **Simulated data.** Monthly batches are bootstrap resamples of the 300-row test set with
+  synthetic drift; they demonstrate the loop, not real drift behaviour. Resampling repeats rows.
+- **Outcomes assumed known at batch time.** Real credit outcomes mature over 12+ months, so
+  calibration/AUC monitoring would lag; PSI/CSI do not need outcomes.
+- **Only the credit scorecard is monitored.** Pricing and fraud would need their own simulators.
+- **The re-validation reuses the Stage 5 builder** on the breaching batch, including the
+  synthetic "tranches" by id order, which are not meaningful on a resampled batch.
+- **Thresholds and drift parameters are illustrative.**

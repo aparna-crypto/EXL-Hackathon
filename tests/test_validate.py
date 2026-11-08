@@ -76,6 +76,7 @@ def fake_report(model, system, prompt):
 @pytest.mark.skipif(not (DATA / "german_credit_test.csv").exists(), reason="needs make data")
 def test_scorecard_validation_end_to_end(cfg):
     card = json.loads((REPO_ROOT / "artifacts/model_cards/credit_scorecard.json").read_text())
+    card.pop("monitoring", None)  # validate the original test set, not a monitoring batch
     calls = []
 
     def responder(model, system, prompt):

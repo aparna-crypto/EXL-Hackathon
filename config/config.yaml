@@ -17,6 +17,8 @@ paths:
   parity_report: docs/parity_report.md
   validation_reports: docs/validation          # Stage 5 reports (<model>.html / .pdf)
   validation_artifacts: artifacts/validation   # Stage 5 evidence.json + charts
+  monitoring_reports: docs/monitoring           # Stage 6 monitoring report (<model>.md)
+  monitoring_artifacts: artifacts/monitoring   # Stage 6 batches, metrics, charts, events
 
 llm:
   provider: anthropic                 # anthropic | fake   (env: LLM_PROVIDER)
@@ -68,9 +70,9 @@ llm:
     per_run_usd: 1.00
     # A "session" is a named spending bucket summed across all runs from the ledger.
     # Agreed with the team: $7 for Stages 0-3 (bucket `stages-0-3`, closed at $0.948), $4 for
-    # Stage 4. Start a new bucket only on purpose.
-    session_id: stage-5
-    session_usd: 2.00
+    # Stage 4, $2 for Stage 5 (closed at $0.069), $1 for Stage 6. Start a new bucket only on purpose.
+    session_id: stage-6
+    session_usd: 1.00
 
 tracking:
   backend: local                      # local | azureml   (env: TRACKING_BACKEND)
@@ -145,6 +147,24 @@ validate:
   pricing:
     segments: [Area, VehGas]
     min_segment_exposure: 1000
+
+monitor:
+  # Post-approval monitoring (Stage 6). Runs only for models whose Gate 4 is approved.
+  models: {credit_scorecard: scorecard}
+  months: 12                          # simulated monthly production batches
+  batch_size: 1000                    # rows per batch, resampled from the test set (seed + month)
+  # Drift injected from start_month; k = months since drift began (1, 2, ...).
+  drift:
+    start_month: 7
+    amount_inflation_per_month: 0.04  # credit_amount *= 1 + rate * k
+    long_term_share_per_month: 0.08   # share k * this of loans gets a longer term (product change)
+    long_term_extra_months: 12        # ... of this many extra months, capped at duration_cap
+    duration_cap: 72
+    risk_tilt_per_month: 0.15         # resampling weight exp(tilt * k * bad): riskier intake
+  # Monitored metrics reuse validate.thresholds: psi_max, calib_ratio_dev_max, auc_min.
+  trigger:
+    consecutive_amber: 2              # re-validate after N amber months in a row, or any red month
+  max_tokens: 1500                    # monitor agent (alert narrative)
 
 gates:
   # Every pipeline stage ends in a human gate, in this order.

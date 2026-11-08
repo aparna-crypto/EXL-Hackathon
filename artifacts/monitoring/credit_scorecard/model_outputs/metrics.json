@@ -1,0 +1,68 @@
+{
+ "model": "credit_scorecard",
+ "language": "python",
+ "seed": 42,
+ "n_bins": 5,
+ "iv_min": 0.02,
+ "pdo": 20,
+ "base_score": 600,
+ "base_odds": 50,
+ "selected_variables": [
+  "checking_status",
+  "duration",
+  "credit_history",
+  "purpose",
+  "credit_amount",
+  "savings",
+  "employment_since",
+  "installment_rate",
+  "other_debtors",
+  "property",
+  "age",
+  "other_installment_plans",
+  "housing",
+  "job"
+ ],
+ "breaks": {
+  "duration": [
+   "-Inf",
+   12,
+   15,
+   24,
+   30,
+   "Inf"
+  ],
+  "credit_amount": [
+   "-Inf",
+   1248.2,
+   1919,
+   2788.8000000000006,
+   4738,
+   "Inf"
+  ],
+  "age": [
+   "-Inf",
+   26,
+   30.600000000000023,
+   36,
+   44,
+   "Inf"
+  ]
+ },
+ "metrics": {
+  "train": {
+   "n": 700,
+   "bad_rate": 0.3,
+   "auc": 0.8170602526724976,
+   "gini": 0.6341205053449952,
+   "ks": 0.49523809523809526
+  },
+  "test": {
+   "n": 300,
+   "bad_rate": 0.3,
+   "auc": 0.800952380952381,
+   "gini": 0.6019047619047619,
+   "ks": 0.5063492063492063
+  }
+ }
+}

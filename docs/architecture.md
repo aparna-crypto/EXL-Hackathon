@@ -6,7 +6,7 @@
                 ┌──────────────────────── make run MODEL=x ────────────────────────┐
                 │                         Orchestrator                              │
 models/x/ ──►   │  Discover ─► Gate1 ─► Document ─► Gate2 ─► Redevelop ─► Gate3 ─►  │
- (R/Py/SAS)     │  Validate ─► Gate4            (Monitor: stretch, triggers Validate)│
+ (R/Py/SAS)     │  Validate ─► Gate4            (Monitor ─► re-Validate ─► Gate4)  │
                 └───────┬──────────────┬───────────────┬───────────────┬────────────┘
                         │              │               │               │
                  model card (JSON) LLM interface    gate audit log   MLflow tracking

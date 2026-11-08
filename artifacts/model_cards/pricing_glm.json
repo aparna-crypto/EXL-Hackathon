@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "model_id": "pricing_glm",
-  "card_version": 7,
+  "card_version": 8,
   "name": "Motor TPL claim frequency GLM",
   "language": "Python",
   "source_files": [
@@ -94,7 +94,7 @@
       "summary": "Not applicable: only R models are rebuilt in Python; this model is Python."
     },
     "validate": {
-      "status": "awaiting_review",
+      "status": "approved",
       "completed_at": "2026-11-08T21:43:54.485452+00:00",
       "summary": "Validation report: docs/validation/pricing_glm.html (+ PDF)\nModel under test: legacy Python model pricing_glm: committed reference test predictions (artifacts/reference/pricing_glm, statsmodels 0.14.4)\nOverall: AMBER - Fit for use with conditions: remediate the amber findings.\nBy area: performance GREEN, calibration AMBER, stability GREEN, fairness AMBER\n- [GREEN] Overall actual / expected claims: |A/E - 1|: 0.014\n- [AMBER] Worst predicted-frequency decile: |A/E - 1|: 0.159\n- [GREEN] Worst Area segment: |A/E - 1|: 0.054\n- [GREEN] Worst VehGas segment: |A/E - 1|: 0.019\n- [GREEN] Input stability: largest feature PSI (train -> test): 1.14e-04\n- [AMBER] Driver age bands: worst |A/E - 1|: 0.125\nFindings: 3; narrative sentences dropped by the number check: 0\nComputation 1.5s; LLM: claude-sonnet-5-5, 3785 tokens, $0.0329"
     }
@@ -134,6 +134,11 @@
       "card_version": 7,
       "timestamp": "2026-11-08T21:43:54.485470+00:00",
       "note": "validate: completed, awaiting review"
+    },
+    {
+      "card_version": 8,
+      "timestamp": "2026-11-08T22:19:09.991366+00:00",
+      "note": "validate: gate approved"
     }
   ],
   "discovery": {

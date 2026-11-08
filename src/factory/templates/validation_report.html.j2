@@ -13,6 +13,7 @@
  .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 </style></head><body>
 <h1>Independent validation report: {{ name }}</h1>
+{% if trigger %}<div class="outcome amber"><b>{{ trigger }}</b></div>{% endif %}
 <div class="meta">Model under test: {{ model_under_test }}<br>
 Generated {{ generated_at }} by the Agentic Model Risk Factory (Stage 5). Metrics, thresholds and RAG
 ratings are computed deterministically; the narrative is drafted by the report agent ({{ llm.model }}) with every

@@ -274,3 +274,44 @@ headless browser.
 
 **Token cost:** 2 live Sonnet calls, 8,394 tokens, $0.069 of the $2.00 `stage-5` bucket.
 
+
+## Stage 6 - Monitor (2026-11-08)
+
+**Start state.** Gate 4 approved (audit log, reviewer "ap") for `credit_scorecard` and
+`pricing_glm`; `make run --no-prompt` recorded both as complete. `fraud_gbm` still waits at Gate 2.
+
+**Built**
+- `src/factory/monitor.py`: 12 simulated monthly batches of 1,000 rows, resampled from the test
+  set (seed 42 + month). From month 7 synthetic drift is injected: credit amounts inflate 4% per
+  month, a growing share of loans (8% per month) gets 12 months longer terms, and intake tilts
+  towards bad accounts. Per month: score PSI vs the development (train) scores of the approved
+  rebuild, CSI per selected variable, calibration (|mean PD / bad rate - 1|) and AUC, rated with
+  the Stage 5 thresholds. Rule: a red month or 2 amber months in a row triggers re-validation.
+- On trigger: the breaching batch is saved, the monitor agent (Haiku, placeholders only) writes
+  the alert, an event goes to `artifacts/audit/monitoring_events.jsonl`, Stage 5 is re-run on the
+  batch (reports suffixed `_revalidation_mXX`, original report kept) and Gate 4 re-opens.
+  A second run on the same breach does not re-trigger; when Gate 4 approves, the next monitor run
+  closes the re-validation and logs `revalidation_approved`.
+- `make monitor MODEL=<name>` / `factory monitor`; monthly metrics are logged to MLflow (step = month).
+- Streamlit "Drift monitoring" page: trigger, dashboard, monthly table, alert, re-validation status,
+  events. Gate review shows the re-validation report as the Gate 4 item.
+- `tests/test_monitor.py` (5 tests): trigger rule, batch determinism and drift, end-to-end trigger
+  with grounding and idempotence, no drift -> no trigger, Gate 4 prerequisite.
+
+**Calibrating the simulation (honest record).** First attempt (300-row batches, duration +2 months
+per month for every loan) was unusable: sampling noise alone made months 1-3 amber and triggered
+at month 2, and the uniform duration shift jumped straight to red because German Credit durations
+sit on the bin breaks. Fixed by 1,000-row batches and a "share of longer loans" drift. Months 1-7
+are now all green.
+
+**Live result (credit_scorecard).** Months 1-7 GREEN, 8-9 AMBER, 10-12 RED. Trigger at month 9
+(2 consecutive amber): largest CSI 0.134 (duration) and calibration deviation 0.154. AUC stayed
+green (0.77-0.81), so the drift shows in stability and calibration, not ranking. Re-validation on
+the month-9 batch: overall **RED** (Hosmer-Lemeshow p < 0.001; calibration, stability, fairness
+amber; performance green). The report agent dropped one sentence ("95%" typed).
+
+**Verification.** 76 tests + ruff pass; Streamlit AppTest renders Drift monitoring, Gate review and
+Validation reports pages without exceptions.
+
+**Spend.** Bucket `stage-6` ($1 cap): 2 live calls (Haiku alert + Sonnet re-validation report),
+8,678 tokens, $0.0498.
