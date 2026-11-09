@@ -353,3 +353,14 @@ models is bit-identical across two rebuilds and equal to the stored Stage 5 evid
 Inventory pages without exceptions.
 
 **Spend.** Bucket `stage-7` ($1 cap): 0 LLM calls, $0.
+
+### Stage 7 follow-up: manual baseline (2026-11-08)
+
+The user replied "create the manual baseline yourself". This overrides the brief's "never invent
+it", so `config/manual_baseline.yaml` now holds **illustrative estimates by Devin, not measured**:
+discover 6 h, document 40 h, redevelop 80 h, validate 150 h per model, 30 review minutes per gate
+decision. Only validate is anchored to the brief (8-12 weeks elapsed -> 8 weeks x 37.5 h x 50% =
+150 h, the low end). Each figure has a written basis that is printed in `docs/benchmark.md`; the
+test now requires a source and a basis for every figure. Result under these assumptions: 83-99.7%
+time saved per stage, driven mostly by the assumed figures and the assumed review time, not by the
+measured machine time (14-138 s per stage).

@@ -1,11 +1,18 @@
-# Manual baseline for the Stage 7 benchmark. SUPPLIED BY THE USER - the factory never invents it.
-# Hours of analyst effort for the manual process, per activity. Leave null where unknown;
-# `make benchmark` only reports a time saving where a figure is given.
-source: null                    # who supplied these figures and how they were measured
-review_minutes_per_gate: null   # human review effort per gate decision in the automated flow
-activities:                     # default hours per model
-  discover: null                # build the inventory record + gap analysis
-  document: null                # write the model documentation
-  redevelop: null               # rebuild in Python + prove parity (only rebuilt models)
-  validate: null                # independent validation report
-models: {}                      # optional per-model overrides, e.g. {credit_scorecard: {validate: 120}}
+# Manual baseline for the Stage 7 benchmark.
+# These figures are ILLUSTRATIVE ESTIMATES written by Devin (AI) at the user's request
+# ("create the manual baseline yourself", 2026-11-08). They are NOT measured. Replace them with
+# timesheet data from the model risk team before using the comparison for any decision.
+source: "Illustrative estimates by Devin (AI) at the user's request, 2026-11-08 - not measured; only the validation figure is anchored to the challenge brief (8-12 weeks)"
+review_minutes_per_gate: 30     # assumed: a reviewer reads the draft and its evidence per decision
+activities:                     # analyst hours per model for the manual process
+  discover: 6                   # read code + old docs, fill the inventory record, list gaps
+  document: 40                  # about one working week to write SS1/23-style documentation
+  redevelop: 80                 # about two weeks to re-implement in Python and build parity tests
+  validate: 150                 # brief: 8-12 weeks elapsed; assume a validator at ~50% for 8 weeks
+models: {}
+basis:
+  discover: "Assumption: one analyst-day less a couple of hours for a model with existing code headers."
+  document: "Assumption: one working week (37.5 h, rounded) per model."
+  redevelop: "Assumption: two working weeks per model, including writing parity tests."
+  validate: "Brief: independent validation takes 8-12 weeks elapsed. Assumed 8 weeks x 37.5 h x 50% allocation = 150 h (low end of the brief)."
+  review_minutes_per_gate: "Assumption."

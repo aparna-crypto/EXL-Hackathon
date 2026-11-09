@@ -43,12 +43,15 @@ def test_speedup_uses_supplied_baseline_and_review_time():
     assert c["time_saved_pct"] == 90.0
 
 
-def test_committed_baseline_file_is_empty_template():
-    """The manual baseline is user-supplied: the repo must not ship invented figures."""
+def test_committed_baseline_states_its_source():
+    """Manual figures are never silently invented: empty, or sourced with a basis per activity."""
     from factory.config import REPO_ROOT, load_config
     b = yaml.safe_load((REPO_ROOT / load_config()["benchmark"]["manual_baseline"]).read_text())
     if b.get("source") is None:
         assert all(v is None for v in b["activities"].values()) and not b.get("models")
+    else:  # figures present: they must say where they came from and how each was derived
+        assert b["source"].strip()
+        assert set(b.get("basis") or {}) >= {k for k, v in b["activities"].items() if v is not None}
 
 
 def test_benchmark_end_to_end_without_baseline(cfg, tmp_path):

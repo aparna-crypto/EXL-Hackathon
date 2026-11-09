@@ -228,7 +228,9 @@ def _md(result: dict) -> str:
               "activity, the source of the figures and review minutes per gate) and re-run "
               "`make benchmark`. No speed-up is reported until then.", ""]
     else:
-        L += [f"Source of manual figures: {result['baseline_source'] or 'not stated'}", "",
+        L += [f"**Source of manual figures: {result['baseline_source'] or 'not stated'}**", ""]
+        L += [f"- {k}: {v}" for k, v in result.get("baseline_basis", {}).items()] + [""]
+        L += [
               "| Model | Stage | Machine (s) | Review (h) | Automated (h) | Manual (h) | Time saved |",
               "|---|---|---|---|---|---|---|"]
         for c in result["comparison"]:
@@ -311,6 +313,7 @@ def run(cfg: dict, root: Path = REPO_ROOT) -> dict:
     baseline = load_baseline(root / cfg["benchmark"]["manual_baseline"])
     result = {"generated_at": model_card.now_iso(), "models": rows, "consistency": consistency,
               "baseline_source": baseline.get("source"),
+              "baseline_basis": baseline.get("basis") or {},
               "comparison": compare(rows, baseline)}
     out = Path(paths["benchmark_artifacts"])
     out.mkdir(parents=True, exist_ok=True)

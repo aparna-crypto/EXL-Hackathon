@@ -72,8 +72,9 @@
 
 ## Stage 7 (benchmark)
 
-- **No manual comparison until the user supplies the baseline.** `config/manual_baseline.yaml`
-  is empty, so no time saving is claimed.
+- **The manual baseline is an estimate, not a measurement.** At the user's request Devin wrote
+  illustrative figures (only validation is anchored to the brief's 8-12 weeks). The time-saved
+  percentages depend almost entirely on them; replace with timesheet data before relying on them.
 - **Human review time is not measured.** Gate timestamps show when a decision was made, not how
   long the reviewer spent; `review_minutes_per_gate` in the baseline file adds it when supplied.
 - **LLM latency is historical** (from the ledger, this VM, these model IDs) and includes failed

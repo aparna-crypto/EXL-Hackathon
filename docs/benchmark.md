@@ -1,21 +1,41 @@
 # Benchmark (Stage 7)
 
-Generated 2026-11-08T23:56:06.238913+00:00 by `make benchmark`. Machine time = deterministic work re-executed and timed in this run + live LLM latency recorded in the ledger (all live calls for that model and stage, including failed attempts and reruns triggered by gate rejections). Human review time is not measured.
+Generated 2026-11-09T00:02:13.313781+00:00 by `make benchmark`. Machine time = deterministic work re-executed and timed in this run + live LLM latency recorded in the ledger (all live calls for that model and stage, including failed attempts and reruns triggered by gate rejections). Human review time is not measured.
 
 ## Machine time per model (seconds)
 
 | Model | discover | document | redevelop | validate | Total | LLM calls | LLM cost |
 |---|---|---|---|---|---|---|---|
-| credit_scorecard | 23.1 (0.0 code + 23.1 LLM) | 137.7 (0.0 code + 137.7 LLM) | 41.5 (2.9 code + 38.6 LLM) | 30.2 (1.2 code + 29.0 LLM) | 232.5 | 10 | $0.714 |
+| credit_scorecard | 23.1 (0.0 code + 23.1 LLM) | 137.7 (0.0 code + 137.7 LLM) | 41.6 (3.1 code + 38.6 LLM) | 30.4 (1.4 code + 29.0 LLM) | 232.9 | 10 | $0.714 |
 | fraud_gbm | 23.5 (0.0 code + 23.5 LLM) | 37.5 (0.0 code + 37.5 LLM) | - | - | 61.0 | 5 | $0.143 |
-| pricing_glm | 21.6 (0.0 code + 21.6 LLM) | 37.4 (0.0 code + 37.4 LLM) | - | 14.4 (1.6 code + 12.8 LLM) | 73.3 | 5 | $0.191 |
+| pricing_glm | 21.6 (0.0 code + 21.6 LLM) | 37.4 (0.0 code + 37.4 LLM) | - | 14.5 (1.7 code + 12.8 LLM) | 73.4 | 5 | $0.191 |
 | sas_behaviour_scorecard | 25.4 (0.0 code + 25.4 LLM) | 46.5 (0.0 code + 46.5 LLM) | - | - | 71.9 | 5 | $0.173 |
 
 ![machine time](../artifacts/benchmark/machine_time.png)
 
 ## Manual comparison
 
-**Manual baseline not supplied.** Fill in `config/manual_baseline.yaml` (hours per activity, the source of the figures and review minutes per gate) and re-run `make benchmark`. No speed-up is reported until then.
+**Source of manual figures: Illustrative estimates by Devin (AI) at the user's request, 2026-11-08 - not measured; only the validation figure is anchored to the challenge brief (8-12 weeks)**
+
+- discover: Assumption: one analyst-day less a couple of hours for a model with existing code headers.
+- document: Assumption: one working week (37.5 h, rounded) per model.
+- redevelop: Assumption: two working weeks per model, including writing parity tests.
+- validate: Brief: independent validation takes 8-12 weeks elapsed. Assumed 8 weeks x 37.5 h x 50% allocation = 150 h (low end of the brief).
+- review_minutes_per_gate: Assumption.
+
+| Model | Stage | Machine (s) | Review (h) | Automated (h) | Manual (h) | Time saved |
+|---|---|---|---|---|---|---|
+| credit_scorecard | discover | 23.1 | 0.5 | 0.506 | 6.0 | 91.6% |
+| credit_scorecard | document | 137.7 | 1.0 | 1.038 | 40.0 | 97.4% |
+| credit_scorecard | redevelop | 41.6 | 0.5 | 0.512 | 80.0 | 99.4% |
+| credit_scorecard | validate | 30.4 | 1.0 | 1.008 | 150.0 | 99.3% |
+| fraud_gbm | discover | 23.5 | 1.0 | 1.007 | 6.0 | 83.2% |
+| fraud_gbm | document | 37.5 | 0.5 | 0.51 | 40.0 | 98.7% |
+| pricing_glm | discover | 21.6 | 0.5 | 0.506 | 6.0 | 91.6% |
+| pricing_glm | document | 37.4 | 0.5 | 0.51 | 40.0 | 98.7% |
+| pricing_glm | validate | 14.5 | 0.5 | 0.504 | 150.0 | 99.7% |
+| sas_behaviour_scorecard | discover | 25.4 | 1.0 | 1.007 | 6.0 | 83.2% |
+| sas_behaviour_scorecard | document | 46.5 | 0.5 | 0.513 | 40.0 | 98.7% |
 
 ## Consistency across models
 
