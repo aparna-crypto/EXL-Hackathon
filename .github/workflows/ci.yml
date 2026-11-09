@@ -31,7 +31,7 @@ jobs:
         run: pytest
       - name: Infra checks (offline; nothing is sent to Azure)
         run: |
-          curl -fsSL -o /usr/local/bin/bicep https://github.com/Azure/bicep/releases/download/v0.49.2/bicep-linux-x64
-          chmod +x /usr/local/bin/bicep
-          bicep build infra/main.bicep --stdout > /dev/null
+          curl -fsSL -o "$RUNNER_TEMP/bicep" https://github.com/Azure/bicep/releases/download/v0.49.2/bicep-linux-x64
+          chmod +x "$RUNNER_TEMP/bicep"
+          "$RUNNER_TEMP/bicep" build infra/main.bicep --stdout > /dev/null
           shellcheck infra/deploy.sh infra/teardown.sh
