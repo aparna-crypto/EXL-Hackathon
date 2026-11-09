@@ -364,3 +364,30 @@ decision. Only validate is anchored to the brief (8-12 weeks elapsed -> 8 weeks 
 test now requires a source and a basis for every figure. Result under these assumptions: 83-99.7%
 time saved per stage, driven mostly by the assumed figures and the assumed review time, not by the
 measured machine time (14-138 s per stage).
+
+## Stage 8 - Azure (2026-11-09)
+
+**Start state.** The user replied "go" after being told Devin would write the files but not deploy,
+and that the budget alert would default to 10 (their Azure for Students credit is about $20). No
+Azure credentials were requested or used.
+
+**Built**
+- `infra/main.bicep`: one resource group with Log Analytics (1 GB/day cap), App Insights, storage,
+  Key Vault (RBAC), ACR Basic, Azure ML workspace (no compute), user-assigned identity with AcrPull,
+  Container Apps environment, the Streamlit Container App (0..1 replicas, IP allowlist) and a
+  monthly budget with four alerts.
+- `Dockerfile` + `.dockerignore`: Python 3.11 slim, pinned requirements, non-root, health check,
+  no `.env`/data in the image.
+- `infra/deploy.sh` (two-pass deploy, provider registration, local or ACR build, IP detection) and
+  `infra/teardown.sh` (confirmation, ML workspace and Key Vault purge, group delete).
+- `docs/azure_deployment.md`: prerequisites for student subscriptions, deploy, cost, shutdown.
+- `make docker-build | docker-run | infra-check`; CI now runs `bicep build` (pinned 0.49.2) and
+  shellcheck; `tests/test_infra.py`.
+- Small fixes from Stage 7: config comment on the manual baseline; Benchmark page caption now says
+  "Manual baseline source" (the warning there was already conditional on the data).
+
+**Checks.** Bicep build + lint clean after fixing one nullable-output warning (BCP318) with `app!`.
+Shellcheck clean. Image built (1.65 GB), ran, health endpoint OK, all seven pages render without
+exceptions inside the container, `pip check` clean, no `.env` in the image.
+
+**Cost.** 0 LLM calls, $0.

@@ -253,7 +253,7 @@ elif page == "Benchmark":
         st.subheader("Manual comparison")
         cmp = [c for c in res["comparison"] if c["manual_h"] is not None]
         if cmp:
-            st.caption(f"Manual figures supplied by: {res['baseline_source'] or 'not stated'}")
+            st.caption(f"Manual baseline source: {res['baseline_source'] or 'not stated'}")
             st.dataframe(pd.DataFrame(cmp), use_container_width=True, hide_index=True)
         else:
             st.warning("Manual baseline not supplied: fill `config/manual_baseline.yaml` and re-run "

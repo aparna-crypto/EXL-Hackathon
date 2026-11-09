@@ -83,3 +83,18 @@
   no runtime, so their totals are not comparable with the scorecard's.
 - **Four models is a small sample** for a "consistency" claim; the table shows the same process
   ran, not that quality is equal.
+
+## Stage 8 (Azure)
+
+- **Not deployed by Devin.** Everything is checked offline only (Bicep build/lint, shellcheck,
+  local Docker run). ARM validation, region/offer policies, role propagation and budget support on
+  Azure for Students are untested until the user runs `infra/deploy.sh`.
+- **Cloud UI state is ephemeral.** Gate decisions made in the deployed UI are written to the
+  container filesystem and lost when it scales to zero or restarts. Record real decisions locally,
+  or add an Azure Files mount for `artifacts/` before relying on the cloud UI.
+- **Access control is an IP allowlist, not sign-in.** Fine for a demo; production needs Entra ID.
+- **The ML workspace receives no runs automatically.** Pipeline runs log to it only when run with
+  `TRACKING_BACKEND=azureml` from a machine that is logged in to Azure.
+- **Cost figures are list-price estimates**, not read from the subscription.
+- **Image size is about 1.65 GB** because it installs the full pinned requirements (incl. MLflow,
+  statsmodels, Azure ML SDK); a UI-only requirements set would shrink it.

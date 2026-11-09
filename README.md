@@ -46,6 +46,14 @@ Press Enter to defer the decision to the UI instead (`make ui` → *Gate review*
 | `make spend` | LLM tokens and cost per budget bucket |
 | `make lint` | ruff |
 
+## Azure (Stage 8)
+
+`infra/main.bicep`, `Dockerfile`, `infra/deploy.sh` and `infra/teardown.sh` deploy the Streamlit UI
+to Azure Container Apps alongside an Azure ML workspace, with a budget alert. You run them; see
+[docs/azure_deployment.md](docs/azure_deployment.md) for prerequisites, cost (~$5-8/month, mostly
+ACR Basic) and teardown. `make docker-run` serves the same image locally; `make infra-check` checks
+the files offline.
+
 ## Layout
 
 ```

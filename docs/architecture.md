@@ -114,3 +114,9 @@ reviewer feedback from a Gate 2 reject/comment ───────────
 | `src/factory/document.py` | Stage function, reference model terms, coverage check, gap list, Markdown rendering. |
 
 Stage 3 runs for a model only after its Gate 1 is approved (the orchestrator runs stages in order).
+
+## Azure footprint (Stage 8)
+
+The same Streamlit UI runs as an Azure Container App (0..1 replicas) pulling its image from ACR
+Basic via a managed identity, next to an Azure ML workspace that serves as the MLflow tracking
+target. Details, cost and teardown: [azure_deployment.md](azure_deployment.md).

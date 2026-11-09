@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 UV      ?= $(shell command -v uv || echo $$HOME/.local/bin/uv)
 MODEL   ?=
 
-.PHONY: help setup setup-r lock data legacy test lint run run-all monitor benchmark inventory status ui mlflow-ui llm-check spend clean
+.PHONY: help setup setup-r lock data legacy test lint run run-all monitor benchmark inventory status ui mlflow-ui llm-check spend docker-build docker-run infra-check clean
 
 help:
 	@echo "make setup            create .venv (Python 3.11) and install pinned deps + R packages"
@@ -18,6 +18,8 @@ help:
 	@echo "make inventory        rebuild the inventory table + dependency map from model cards"
 	@echo "make status MODEL=<name>  stage/gate status for a model"
 	@echo "make ui               Streamlit UI (inventory, gates, reports, drift, audit, spend)"
+	@echo "make docker-run       build the UI image and serve it on :8501 (Stage 8)"
+	@echo "make infra-check      offline Bicep build + shellcheck of infra/ scripts"
 	@echo "make mlflow-ui        MLflow UI on the local tracking store"
 	@echo "make llm-check        verify configured Claude model IDs (free API call)"
 	@echo "make spend            LLM token/cost summary"
@@ -80,6 +82,16 @@ llm-check:
 
 spend:
 	$(PY) -m factory.cli spend
+
+docker-build:
+	docker build -t model-risk-factory:local .
+
+docker-run: docker-build
+	docker run --rm -p 8501:8501 model-risk-factory:local
+
+infra-check:
+	bicep build infra/main.bicep --stdout > /dev/null
+	shellcheck infra/deploy.sh infra/teardown.sh
 
 clean:
 	rm -rf .pytest_cache .ruff_cache

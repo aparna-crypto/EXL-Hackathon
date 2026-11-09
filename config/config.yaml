@@ -73,7 +73,7 @@ llm:
     # A "session" is a named spending bucket summed across all runs from the ledger.
     # Agreed with the team: $7 for Stages 0-3 (bucket `stages-0-3`, closed at $0.948), $4 for
     # Stage 4, $2 for Stage 5 (closed at $0.069), $1 for Stage 6. Start a new bucket only on purpose.
-    session_id: stage-7
+    session_id: stage-8
     session_usd: 1.00
 
 tracking:
@@ -175,5 +175,5 @@ gates:
   reason_required_for: [reject, comment]
 
 benchmark:
-  # Stage 7. The manual baseline is supplied by the user; empty -> no speed-up is reported.
+  # Stage 7. Manual baseline (currently Devin's labelled estimates at the user's request); empty -> no speed-up.
   manual_baseline: config/manual_baseline.yaml
