@@ -6,7 +6,34 @@ calls specialised agents (Discover, Document, Redevelop, Validate, Monitor) that
 **model card**. Every stage ends in a **human gate** (approve, reject or comment), and each decision is
 logged with a timestamp, the reviewer and the reason.
 
-> Status: **Stages 0-7 done.** Stage 7: `make benchmark` -> `docs/benchmark.md` (machine time per model, consistency, reproducibility; manual comparison once `config/manual_baseline.yaml` is filled in), `docs/demo_script.md`, `docs/slides_outline.md`. Stage 5 validation reports are in `docs/validation/` (HTML + PDF, RAG ratings for performance, calibration, stability and fairness). Stage 6 monitoring (`make monitor MODEL=credit_scorecard`) detected injected drift in month 9 and re-opened Gate 4 with a re-validation report (`docs/monitoring/`). See `docs/work_log.md`.
+## Status
+
+Stages 0-8 are built. The full history is in [docs/work_log.md](docs/work_log.md).
+
+| Stage | What it does | Output |
+|---|---|---|
+| 0 Setup | Model card schema, human gates, LLM interface with budgets, MLflow, orchestrator, UI, CI | [docs/architecture.md](docs/architecture.md) |
+| 1 Legacy models | Public datasets and the four synthetic legacy models with reference outputs | [models/](models/README.md), `artifacts/reference/` |
+| 2 Discover (Gate 1) | Inventory, documentation gaps and dependency map | `artifacts/inventory/` |
+| 3 Document (Gate 2) | Model documentation with a coverage check | [docs/models/](docs/models/README.md) |
+| 4 Redevelop (Gate 3) | R credit scorecard rewritten in Python, parity checked against the R original | [docs/parity_report.md](docs/parity_report.md), `redeveloped/` |
+| 5 Validate (Gate 4) | Performance, calibration, stability and fairness checks with RAG ratings (HTML + PDF) | [docs/validation/](docs/validation/README.md) |
+| 6 Monitor | Monthly drift monitoring; injected drift in month 9 re-opened Gate 4 with a re-validation report | [docs/monitoring/](docs/monitoring/README.md) |
+| 7 Evidence | Benchmark (machine time, consistency, reproducibility, manual comparison), demo script, slides outline | [docs/benchmark.md](docs/benchmark.md), [docs/demo_script.md](docs/demo_script.md), [docs/slides_outline.md](docs/slides_outline.md) |
+| 8 Azure | Bicep, Dockerfile and deploy/teardown scripts (you run the deploy yourself) | [docs/azure_deployment.md](docs/azure_deployment.md) |
+
+## Model inventory
+
+The legacy models are **synthetic examples** written for the hackathon. Their owners, IDs and dates are
+invented, and some documentation is missing or out of date on purpose so the Discover stage has gaps to
+find. All data is public. Details are in [models/README.md](models/README.md).
+
+| Model | Language | Data | Runs here? |
+|---|---|---|---|
+| `credit_scorecard` | R | UCI German Credit | yes |
+| `fraud_gbm` | Python | ULB credit-card fraud | yes |
+| `pricing_glm` | Python | freMTPL2 claim frequency | yes |
+| `sas_behaviour_scorecard` | SAS | hypothetical warehouse tables | no (no SAS runtime) |
 
 ## Quickstart
 
@@ -58,14 +85,20 @@ the files offline.
 
 ```
 config/config.yaml        models per agent, prices, budgets, tracking backend, gate stages
+config/manual_baseline.yaml  manual effort figures used by `make benchmark`
 schemas/                  model card JSON Schema (versioned)
 src/factory/              orchestrator, gates, LLM interface, tracking, model card, CLI
 app/streamlit_app.py      reviewer UI
 models/<name>/            source code of each inventoried model (Stage 1)
-r/                        R package list, installer, smoke test
+redeveloped/<name>/       Python rebuilds of legacy models (Stage 4)
+r/                        R package list, installer, R oracle for parity tests, smoke test
 tests/                    pytest suite (run in CI on every push)
-artifacts/                model cards, gate audit log, LLM ledger and cache, MLflow store
-docs/                     design and evidence documentation (start at docs/architecture.md)
+artifacts/                model cards, gate audit log, LLM ledger and cache, MLflow store, inventory,
+                          validation evidence, monitoring and benchmark outputs
+docs/                     design and evidence documentation (start at docs/architecture.md);
+                          models/, validation/ and monitoring/ hold the per-model outputs
+infra/                    Azure Bicep template, deploy and teardown scripts (Stage 8)
+Dockerfile                image for the Streamlit UI (local or Azure Container Apps)
 ```
 
 ## Key rules

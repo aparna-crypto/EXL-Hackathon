@@ -391,3 +391,14 @@ Shellcheck clean. Image built (1.65 GB), ran, health endpoint OK, all seven page
 exceptions inside the container, `pip check` clean, no `.env` in the image.
 
 **Cost.** 0 LLM calls, $0.
+
+## README refresh (2026-11-15)
+
+**Done** (user picked suggestions 1-3)
+- Replaced the one-line status with a stage table (0-8) linking each stage to its output; it previously
+  said "Stages 0-7 done" although Stage 8 was committed.
+- Added a model inventory table (from `models/README.md`) so readers can see what is being processed.
+- Layout now lists `redeveloped/`, `infra/`, `Dockerfile`, `config/manual_baseline.yaml` and the
+  per-model `docs/` subfolders.
+
+**Cost.** 0 LLM calls, $0.
